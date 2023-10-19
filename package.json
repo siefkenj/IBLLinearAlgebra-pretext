@@ -1,0 +1,60 @@
+{
+    "name": "ibllinearalgebra-pretext",
+    "version": "1.0.0",
+    "description": "Pretext conversion for IBLLinearAlgebra",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/siefkenj/IBLLinearAlgebra-pretext.git"
+    },
+    "author": "",
+    "license": "GPL-3.0-or-later",
+    "bugs": {
+        "url": "https://github.com/siefkenj/IBLLinearAlgebra-pretext/issues"
+    },
+    "homepage": "https://github.com/siefkenj/IBLLinearAlgebra-pretext#readme",
+    "dependencies": {
+        "@unified-latex/unified-latex": "^1.5.0",
+        "@unified-latex/unified-latex-builder": "^1.4.2",
+        "@unified-latex/unified-latex-cli": "^1.5.0",
+        "@unified-latex/unified-latex-ctan": "^1.4.2",
+        "@unified-latex/unified-latex-lint": "^1.5.0",
+        "@unified-latex/unified-latex-prettier": "^2.4.2",
+        "@unified-latex/unified-latex-to-hast": "^1.5.0",
+        "@unified-latex/unified-latex-to-mdast": "^1.5.0",
+        "@unified-latex/unified-latex-types": "^1.4.2",
+        "@unified-latex/unified-latex-util-align": "^1.4.2",
+        "@unified-latex/unified-latex-util-argspec": "^1.4.2",
+        "@unified-latex/unified-latex-util-arguments": "^1.4.2",
+        "@unified-latex/unified-latex-util-catcode": "^1.4.2",
+        "@unified-latex/unified-latex-util-comments": "^1.4.2",
+        "@unified-latex/unified-latex-util-environments": "^1.4.2",
+        "@unified-latex/unified-latex-util-glue": "^1.4.2",
+        "@unified-latex/unified-latex-util-html-like": "^1.4.2",
+        "@unified-latex/unified-latex-util-ligatures": "^1.4.2",
+        "@unified-latex/unified-latex-util-macros": "^1.4.2",
+        "@unified-latex/unified-latex-util-match": "^1.4.2",
+        "@unified-latex/unified-latex-util-packages": "^1.4.2",
+        "@unified-latex/unified-latex-util-parse": "^1.4.2",
+        "@unified-latex/unified-latex-util-pegjs": "^1.4.2",
+        "@unified-latex/unified-latex-util-pgfkeys": "^1.4.2",
+        "@unified-latex/unified-latex-util-print-raw": "^1.4.2",
+        "@unified-latex/unified-latex-util-render-info": "^1.4.2",
+        "@unified-latex/unified-latex-util-replace": "^1.4.2",
+        "@unified-latex/unified-latex-util-scan": "^1.4.2",
+        "@unified-latex/unified-latex-util-split": "^1.4.2",
+        "@unified-latex/unified-latex-util-to-string": "^1.4.2",
+        "@unified-latex/unified-latex-util-trim": "^1.4.2",
+        "@unified-latex/unified-latex-util-visit": "^1.4.2",
+        "prettier": "^3.0.3",
+        "typescript": "^5.2.2",
+        "vite-node": "^0.34.6"
+    },
+    "prettier": {
+        "tabWidth": 4
+    }
+}

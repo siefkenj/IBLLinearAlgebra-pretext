@@ -1,0 +1,124 @@
+
+In life, we encounter situations where we do one thing after another. For example, you
+put on your socks and then your shoes. We might call this whole operation (of first putting on your socks
+and then your shoes) ``getting dressed'', and it is an example of \emph{function composition}. 
+
+\SavedDefinitionRender{CompositionofFunctions}
+
+We can formalize the shoes-socks example 
+with mathematical notation.
+\[
+	\text{getting dressed} = (\text{putting on shoes})\circ (\text{putting on socks})
+\]
+Or, if $X$ represented putting on socks, $S$ represented putting on shoes, and $D$ represented getting dressed,
+$D=S\circ X$.
+
+This real-life example has utility when talking to children. Getting dressed is a complicated operation, but by breaking
+it up into simpler operations, even a young child can understand the process. In this vein, we can understand
+complicated linear transformations by breaking them up into the composition of simpler ones.
+
+For example, define
+\[
+	\mathcal T:\R^2\to\R^2\qquad\text{by}\qquad \mathcal T(\vec x)=\matc{\sqrt{2}&-\sqrt{2}\\{\sqrt{2}}/{2} & {\sqrt{2}}/{2}}\vec x.
+\]
+It's hard to understand what $\mathcal T$ does just by looking at inputs and outputs. However, if we were keen enough to notice that
+\[
+	\mathcal T=\mathcal S\circ \mathcal R
+\]
+where $\mathcal R$ was rotation counter-clockwise by $45^\circ$ and $\mathcal S$ was a stretch in the $\xhat$ direction by a factor of $2$,
+suddenly $\mathcal T$ wouldn't be such a mystery.
+
+\medskip
+How does one figure out the ``simple transformations'' that when composed give the full transformation?
+In truth, there are many, many methods and there are whole books written about how to find these decompositions efficiently.
+We will encounter two algorithms for this\footnote{ Phrased in terms of matrices instead of linear transformations, the decompositions we
+will study are called: (i) decomposition into \emph{elementary} matrices, and (ii) \emph{diagonalization}.}, but for now
+our methods will be ad hoc.
+
+\begin{example}
+	Let $\mathcal U:\R^2\to\R^2$ be the transformation given by $M=\matc{\sqrt{2}/2&-\sqrt{2}/2\\0&0}$,
+	let $\mathcal R:\R^2\to\R^2$ be rotation counter clockwise by $45^\circ$, and let $\mathcal P:\R^2\to\R^2$
+	be projection onto the $x$-axis.
+	Write $\mathcal U$ as the composition (in some order) of $\mathcal R$ and $\mathcal P$.
+
+	We will use $\xhat$ and $\yhat$ to determine whether $\mathcal U$ is $\mathcal R\circ\mathcal P$ or
+	$\mathcal P\circ \mathcal R$.
+	
+	Computing,
+	\[
+	    \mathcal U(\xhat)=\matc{\frac{\sqrt{2}}{2}\\0}\\\qquad\text{and}\qquad \mathcal U(\yhat)=\mat{-\frac{\sqrt{2}}{2}\\0}.
+	\]
+	
+	For $\mathcal R\circ \mathcal P$:
+	\begin{align*}
+	    \mathcal R\circ \mathcal P(\xhat)=\mathcal R(\mathcal P(\xhat))&=\mathcal R\mat{1\\0}=\mat{\frac{\sqrt{2}}{2}\\\frac{\sqrt{2}}{2}}\\
+	    \mathcal R\circ \mathcal P(\yhat)=\mathcal R(\mathcal P(\yhat))&=\mathcal R\mat{0\\0}=\mat{0\\0}.
+	\end{align*}
+	For $\mathcal P\circ \mathcal R$:
+	\begin{align*}
+	    \mathcal P\circ \mathcal R(\xhat)=\mathcal P(\mathcal R(\xhat))&=\mathcal P\mat{\frac{\sqrt{2}}{2}\\\frac{\sqrt{2}}{2}}=\matc{\frac{\sqrt{2}}{2}\\0}\\
+	    \mathcal P\circ \mathcal R(\yhat)=\mathcal P(\mathcal R(\yhat))&=\mathcal P\mat{-\frac{\sqrt{2}}{2}\\\frac{\sqrt{2}}{2}}=\mat{-\frac{\sqrt{2}}{2}\\0}.
+	\end{align*}
+	Since $\mathcal P\circ \mathcal R$ agrees with $\mathcal U$ on the standard basis (i.e., 
+	$\mathcal P\circ\mathcal R$ and $\mathcal U$ output
+	the same vectors when $\xhat$ and $\yhat$ are input), they must agree for all vectors. Therefore $\mathcal U=\mathcal P\circ \mathcal R$.
+\end{example}
+
+\Heading{Compositions and Matrix Products}
+
+Let $\mathcal A:\R^2\to\R^2$ and $\mathcal B:\R^2\to\R^2$ be matrix transformations with matrices
+\[
+	M_A=\mat{1&2\\0&2}\qquad\text{and}\qquad M_B=\mat{-1&-1\\-2&0}.
+\]
+(Make sure you understand why $\mathcal A\neq M_A$ before continuing!)
+
+
+Define $\mathcal T=\mathcal A\circ \mathcal B$. Since $\mathcal T:\R^2\to\R^2$ is a linear transformation, 
+we know $\mathcal T$ has a matrix $M_T$ which is $2\times 2$. We can
+find $M_T$ by the usual methods. First, compute some input-output pairs for $\mathcal T$.
+\[
+	\mathcal T\mat{1\\0} = \mathcal A\left( \mathcal B\mat{1\\0}\right) = \mathcal A\mat{-1\\-2}=\mat{-5\\-4}
+	\qquad\text{and}\qquad
+	\mathcal T\mat{0\\1} = \mathcal A\left( \mathcal B\mat{0\\1}\right) = \mathcal A\mat{-1\\0}=\mat{-1\\0}
+\]
+Letting $M_T=\mat{a&b\\c&d}$, we use the input-output pairs to see
+\[
+	\mat{a\\c}=M_T\mat{1\\0}=\mat{-5\\-4}\qquad \text{and}\qquad \mat{b\\d}=M_T\mat{0\\1}=\mat{-1\\0},
+\]
+and so
+\[
+	M_T=\mat{-5&-1\\-4&0}.
+\]
+
+We found $M_T$, the matrix for $\mathcal T$, using traditional techniques, but could we have used $M_A$ and $M_B$ to somehow find $M_T$?
+As it turns out, yes, we could have!
+
+By definition,
+\[
+	\mathcal A\vec x=M_A\vec x\qquad\text{and}\qquad \mathcal B\vec x=M_B\vec x,
+\]
+since $\mathcal A$ and $\mathcal B$ are matrix transformations. Therefore,
+\[
+	\mathcal A(\mathcal B\vec x) = M_A(M_B\vec x).
+\]
+But, matrix multiplication is \emph{associative}\footnote{ If an operation is associative, it means
+that where you put the parenthesis doesn't matter.}, and so
+\[
+	M_A(M_B\vec x)=(M_AM_B)\vec x.
+\]
+Thus $M_AM_B$ must be a matrix for $\mathcal A\circ \mathcal B=\mathcal T$. Indeed, computing the matrix product, we see
+\[
+	M_AM_B=\mat{1&2\\0&2}\mat{-1&-1\\-2&0}=\mat{-5&-1\\-4&0}=M_T.
+\]
+The fact that matrix multiplication\index{Matrix!matrix multiplication} corresponds to function composition is no coincidence. It is the very
+reason matrix multiplication is defined the way it is. This is reiterated in the following theorem.
+
+\begin{theorem}
+	If $\mathcal P:\R^a\to\R^b$ and $\mathcal Q:\R^c\to \R^a$ are matrix transformations with matrices 
+	$M_P$ and $M_Q$, then $\mathcal P\circ \mathcal Q$ is a matrix transformation whose matrix is given
+	by the matrix product $M_PM_Q$.
+\end{theorem}
+
+It should now be clear why the order of matrix multiplication matters. The order of function composition
+matters (you must put on your socks before your shoes!), and since matrix multiplication corresponds
+to function composition, the order of matrix multiplication must matter.

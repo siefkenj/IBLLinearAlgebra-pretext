@@ -1,0 +1,454 @@
+A \emph{matrix}\index{Matrix!definition} is a box (rectangular array) of numbers, usually surrounded
+by brackets\footnote{ The word \emph{matrix} comes from the Latin word for womb; you can think of a matrix as
+``holding numbers together''.}. For example, 
+\[
+	\mat{1&2&3\\4&5&6} \qquad \mat{x\\y\\z}\qquad \begin{pmatrix}7.5&-2\\-3&0\end{pmatrix}\qquad \begin{matrix}1&2\\3&4\\5&6\end{matrix}
+\]
+are matrices. In this book, we always write matrices with square brackets ``$\,[\,\cdots\,]\,$''.
+We have already used matrices in two ways: to keep track of the coefficients when solving a system of linear equations
+and to describe vectors (as a column of numbers). In both of these cases, matrices were a notational tool used to keep related numbers together.
+But, as we will soon see, matrices are also mathematical objects that you can do arithmetic with.
+
+\Heading{Matrix Notation}
+
+A matrix can be described by its \emph{shape}\footnote{ Other terms for the \emph{shape} of a matrix
+include the ``\emph{size} of a matrix'' and the ``\emph{dimensions} of a matrix''. But, be careful not to confuse this
+usage of ``dimension'' with the term ``dimension'' in the context of subspaces.} 
+(the number of rows and columns in the matrix) and its \emph{entries} (the numbers
+inside the matrix). Traditionally, matrices are labeled with capital letters and their entries are labeled with lower-case letters.
+
+Consider the matrix $A$ with $m$ rows and $n$ columns:
+\NiceMatrixOptions{nullify-dots}
+\[
+	A = \ \ \begin{bNiceMatrix}[first-row,first-col]
+&
+		& \Ldots[line-style={solid,<->,color=mypink},shorten=0pt]^{\color{mypink}n \text{ columns}} \\
+		& a_{11} & a_{12} & a_{13} & \cdots & a_{1n} \\
+		& a_{21} & a_{22} & a_{23} & \cdots & a_{2n} \\
+		\Vdots[line-style={solid,<->,mygreen}]_{\color{mygreen}m \text{ rows}} & \vdots & \vdots & \vdots &\ddots & \vdots \\
+		& a_{m1} & a_{m2} & a_{m3} & \cdots & a_{mn}
+	\end{bNiceMatrix}
+\]
+We call $A$ an ``\emph{$m$ by $n$} matrix'', or in notation, an ``$m\times n$ matrix''\footnote{ In this context, ``$\,\times\,$'' is read as ``by''}.
+The entries of $A$ are indexed by their $(\text{\emph{row}},\text{\emph{column}})$ coordinates. So, the $(1,1)$ entry of $A$ is $a_{11}$,
+the $(2,1)$ entry of $A$ is $a_{21}$, etc..  When subscripting a matrix entry, it is tradition to omit a separator between the row and column
+index. That is, we write $a_{ij}$ instead of $a_{i,j}$ or $a_{(i,j)}$\footnote{ There's nothing wrong
+with including a separator. It's just not common practice.}.
+
+\begin{example}Let $A=\mat{1&2&3\\4&5&6}$. Find the shape of $A$ as well as the $(1,3)$ entry of $A$.
+
+	$A$ has two rows and three columns, so $A$ is a $2\times 3$ matrix. The $(1,3)$ entry of $A$
+	is the number in the first row and third column of $A$, which is $3$.
+\end{example}
+
+Since a matrix is completely determined by its shape and entries, we can define a matrix via a formal. For example,
+define $B$ to be the $2\times 3$ matrix whose $(i,j)$ entry, $b_{ij}$, satisfies the formula $b_{ij}=i+j$. In this case
+\[
+	B=\mat{b_{11}&b_{12}&b_{13}\\b_{21}&b_{22}&b_{23}}=\mat{2&3&4\\3&4&5}.
+\]
+The shorthand $B=[b_{ij}]$ means that ``$B$ is a matrix whose $(i,j)$ entry is $b_{ij}$''. Using this shorthand, we could
+alternatively say $B=[b_{ij}]$ is a $2\times 3$ matrix satisfying $b_{ij}=i+j$.
+
+\begin{example}
+	Let $C=[c_{ij}]$ be a $3\times 3$ matrix satisfying $c_{ij}=i-j$. Write down $C$.
+
+	\[
+		C=\mat{c_{11}&c_{12}&c_{13}\\c_{21}&c_{22}&c_{23}\\c_{31}&c_{32}&c_{33}}=\mat{0&-1&-2\\1&0&-1\\2&1&0}.
+	\]
+\end{example}
+
+\Heading{Basic Terms}
+A matrix has three special parts: the diagonal, the upper triangle, and the lower triangle.
+
+\[
+	\underbrace{
+			\begin{bNiceArray}{
+				CCCCC
+			}[code-before={\cellcolor{LimeGreen!72}{1-1,2-2,3-3,4-4}}]
+				a_{11} & a_{12} & a_{13} & a_{14} & a_{15} \\
+				a_{21} & a_{22} & a_{23} & a_{24} & a_{25} \\
+				a_{31} & a_{32} & a_{33} & a_{34} & a_{35} \\
+				a_{41} & a_{42} & a_{43} & a_{44} & a_{45} \\
+			\end{bNiceArray}
+		}_{\text{\color{LimeGreen!50!black}Diagonal}}
+			\qquad
+		\underbrace{
+			\begin{bNiceArray}{
+				CCCCC
+			}[code-before={\cellcolor{NavyBlue!52}{1-1,2-2,3-3,4-4,1-2,1-3,1-4,1-5,2-3,2-4,2-5,3-4,3-5,4-5}}]
+				a_{11} & a_{12} & a_{13} & a_{14} & a_{15} \\
+				a_{21} & a_{22} & a_{23} & a_{24} & a_{25} \\
+				a_{31} & a_{32} & a_{33} & a_{34} & a_{35} \\
+				a_{41} & a_{42} & a_{43} & a_{44} & a_{45} \\
+			\end{bNiceArray}
+		}_{\text{\color{NavyBlue!80}Upper Triangle}}
+			\qquad
+		\underbrace{
+			\begin{bNiceArray}{
+				CCCCC
+			}[code-before={\cellcolor{CornflowerBlue!72}{1-1,2-2,3-3,4-4,2-1,3-1,4-1,3-2,4-2,4-3}}]
+				a_{11} & a_{12} & a_{13} & a_{14} & a_{15} \\
+				a_{21} & a_{22} & a_{23} & a_{24} & a_{25} \\
+				a_{31} & a_{32} & a_{33} & a_{34} & a_{35} \\
+				a_{41} & a_{42} & a_{43} & a_{44} & a_{45} \\
+			\end{bNiceArray}
+		}_{\text{\color{CornflowerBlue!50!black}Lower Triangle}}
+\]
+
+Formally, we define the diagonal and upper/lower triangle of a matrix in terms of the row and column coordinates.
+\SavedDefinitionRender{Diagonal}
+\SavedDefinitionRender{TriangleOf}
+
+\Heading{Special Matrices}
+There are several special matrices that come up often.
+\SavedDefinitionRender{TriangularMatrix}
+\SavedDefinitionRender{SquareMatrix}
+\SavedDefinitionRender{DiagonalMatrix}
+\SavedDefinitionRender{SymmetricMatrix}
+\SavedDefinitionRender{ZeroMatrix}
+\SavedDefinitionRender{IdentityMatrix}
+
+\begin{example}Identify the diagonal of $A=\mat{-2&3\\5&6\\7&7}$.
+
+	The diagonal of $A$ consists of the entries in $A$ whose row coordinate is equal to the column coordinate.
+	So, the diagonal of $A$ consists of $-2$ and $6$.
+\end{example}
+
+\begin{example}Apply a single row operation to $B=\mat{-2&3\\0&6\\0&12}$
+ to make it an upper triangular matrix.
+
+	To make $B$ an upper triangular matrix, we need all entries below the diagonal to be zero.
+	More specifically, we need to get rid of the $12$ in the lower-right corner of $B$. By applying the row
+	operation $\text{row}_3\mapsto \text{row}_3-2\,\text{row}_2$ to $B$, we get the upper triangular matrix
+	\[
+		B'=\mat{-2&3\\0&6\\0&0}
+	\]
+\end{example}
+
+\begin{example}If possible, produce a matrix that is both upper and lower triangular.
+
+	For a matrix to be upper triangular, all entries below the diagonal must be zero. For a matrix
+	to be lower triangular, all entries above the diagonal need to be zero. Therefore, if a matrix
+	is both upper and lower triangular, the only non-zero entries of the matrix must be on the diagonal.
+	It follows that
+	\[\mat{1&0&0\\0&2&0\\0&0&3}\qquad\text{and}\qquad \mat{0&0&0\\0&0&0}\qquad\text{etc.}\]
+	are valid examples.
+\end{example}
+
+
+
+
+\Heading{Matrix Arithmetic}
+
+In Module \ref{module1}, we saw that vectors were an extension of numbers that allowed us to describe directions.
+Similarly, we can view matrices as a more general type of ``number''. Matrices can do everything numbers can,
+everything vectors can, and more!
+
+\subsubsection*{Basic Operations}
+
+The rules for addition and scalar multiplication of matrices are what you expect: to add two matrices, add the corresponding entries,
+and to scalar multiply a matrix, distribute the scalar to each entry.
+
+For example,
+\[
+	2\mat{1&2&3\\4&5&6} = \mat{2&4&6\\8&10&12}\qquad\text{and}\qquad
+	\mat{1&2&3\\4&5&6}+\mat{-1&2&0\\3&0&1} = 
+	\mat{1-1&2+2&3+0\\4+3&5+0&6+1}
+	=\mat{0 & 4 & 3\\7&5&7}.
+\]
+
+While any matrix can be scalar multiplied by any scalar, matrix addition only makes sense for \emph{compatible} matrices.
+That is, you can only add together two matrices of the same shape.
+
+\begin{emphbox}[Takeaway]
+	If two matrices are of the same shape, you can add them by adding entries ``straight across''; you
+	can multiply a matrix by a scalar by distributing the scalar to each entry of the matrix.
+\end{emphbox}
+
+\begin{example}
+	Let $A=\mat{1&2&3\\4&5&6}$, let $B=\mat{1&1\\2&2}$, and let $C=\mat{-1&0&-1\\2&1&2}$.
+	Compute $2A+B$ and $A+3C$, if possible.
+
+	First, note that $A$ is a $2\times 3$ matrix and so it can only be added to another $2\times 3$ matrix.
+	Since $B$ is a $2\times 2$ matrix, $2A+B$ is not defined. But, $C$ is a $2\times 3$ matrix, so $A+3C$ is defined.
+	Computing,
+	\[
+		A+3C=\mat{1&2&3\\4&5&6} + 3\mat{-1&0&-1\\2&1&2} = \mat{1&2&3\\4&5&6} + \mat{-3&0&-3\\6&3&6}
+	\]\[
+		= \mat{-2&2&0\\10&8&12}.
+	\]
+\end{example}
+
+\Heading{Matrix-Vector Multiplication}
+Matrices and vectors interact via \emph{matrix-vector} multiplication. There are two equivalent ways to think about
+matrix-vector multiplication: in terms of columns 
+(the \emph{column picture}) and in terms of rows (the \emph{row picture}).
+
+\subsubsection*{Column Picture}
+Let 
+\[
+	A=
+	\matc{
+				{a_{11}} & {a_{12}} & {\cdots} & {a_{1n}}\\
+				{a_{21}} & {a_{22}} & {\cdots} & {a_{2n}}\\
+				{\vdots} & {\vdots} & {\ddots} & {\vdots}\\
+				{a_{m1}} & {a_{m2}} & {\cdots} & {a_{mn}}
+				}=
+			\matc{\big|&\big|&&\big|\\[3pt]
+			\vec c_1&\vec c_2&\cdots&\vec c_n\\[2pt]
+			\big|&\big|&&\big|}
+\]
+be an $m\times n$ matrix and let 
+\[
+	\vec c_1=\matc{a_{11}\\a_{21}\\\vdots\\a_{m1}}\qquad
+	\vec c_2=\matc{a_{12}\\a_{22}\\\vdots\\a_{m2}}\qquad\cdots\qquad
+	\vec c_n=\matc{a_{1n}\\a_{2n}\\\vdots\\a_{mn}}.
+\]
+be the vectors corresponding to the columns of $A$. Further, let $\vec x=\matc{x_1\\x_2\\\vdots\\x_n}$ be a vector.
+
+We define the matrix-vector product $A\vec x$ to be the linear combination of $\vec c_1$, $\vec c_2$, \ldots, $\vec c_n$ with coefficients
+$x_1$, $x_2$, etc.. That is,
+\[
+	A\vec x =
+			\matc{\big|&\big|&&\big|\\[3pt]
+			\vec c_1&\vec c_2&\cdots&\vec c_n\\[2pt]
+			\big|&\big|&&\big|}\matc{x_1\\x_2\\\vdots\\x_n}
+	=x_1\vec c_1+x_2\vec c_2+\cdots+x_n\vec c_n.
+\]
+
+\begin{example}Let $B=\mat{1&2\\-2&3}$ and let $\vec v=\mat{4\\3}$. Compute $B\vec v$ using the column picture.
+
+	The column vectors of $B$ are $\mat{1\\-2}$ and $\mat{2\\3}$, so
+	\[
+		B\vec v=\mat{1&2\\-2&3}\mat{4\\3} = 4\mat{1\\-2} + 3\mat{2\\3}=\mat{10\\1}.
+	\]
+\end{example}
+
+The column picture of matrix-vector multiplication hints that matrix-vector multiplication can be used
+to encode sophisticated problems involving linear combinations (see Module \ref{moduleMatRep} for details).
+
+\subsubsection*{Row Picture}
+
+\newcommand{\hdash}{\text{\-------}}
+Alternatively, let
+\[
+	A=
+	\matc{
+				{a_{11}} & {a_{12}} & {\cdots} & {a_{1n}}\\
+				{a_{21}} & {a_{22}} & {\cdots} & {a_{2n}}\\
+				{\vdots} & {\vdots} & {\ddots} & {\vdots}\\
+				{a_{m1}} & {a_{m2}} & {\cdots} & {a_{mn}}
+				}=
+			\matc{\hdash&\hspace{-4pt}\vec r_1&\hspace{-6pt}\hdash\\
+				\hdash&\hspace{-4pt}\vec r_2&\hspace{-6pt}\hdash\\
+				&\vdots&\\
+				\hdash&\hspace{-4pt}\vec r_m&\hspace{-6pt}\hdash}
+\]
+be an $m\times n$ matrix and let 
+\[
+	\vec r_1=\matc{a_{11}\\a_{12}\\\vdots\\a_{1n}}\qquad
+	\vec r_2=\matc{a_{21}\\a_{22}\\\vdots\\a_{2n}}\qquad\cdots\qquad
+	\vec r_m=\matc{a_{m1}\\a_{m2}\\\vdots\\a_{mn}}.
+\]
+be vectors corresponding to the rows of $A$. Note that we are writing the \emph{row vectors of $A$ in column vector form}. 
+Further, let $\vec x=\matc{x_1\\x_2\\\vdots\\x_n}$ be a vector.
+
+We alternatively define the matrix-vector product $A\vec x$ as the vector whose coordinates are the dot products of the
+rows of $A$ and the vector $\vec x$. That is,
+\[
+	A\vec x =
+			\matc{\hdash&\hspace{-4pt}\vec r_1&\hspace{-6pt}\hdash\\
+				\hdash&\hspace{-4pt}\vec r_2&\hspace{-6pt}\hdash\\
+				&\vdots&\\
+				\hdash&\hspace{-4pt}\vec r_m&\hspace{-6pt}\hdash}
+			\vec x
+		=
+	\matc{\vec r_1\cdot \vec x\\\vec r_2\cdot\vec x\\\vdots\\\vec r_m\cdot \vec x}.
+\]
+
+\begin{example}Let $B=\mat{1&2\\-2&3}$ and let $\vec v=\mat{4\\3}$. Compute $B\vec v$ using the row picture.
+	Verify that the result matches with what you get from the column picture.
+
+	The row vectors of $B$ are $\mat{1\\2}$ and $\mat{-2\\3}$, so
+	\[
+		B\vec v=
+		\begin{bNiceArray}{
+				RR
+			}[code-before={\cellcolor{LimeGreen!72}{1-1,1-2}\cellcolor{CornflowerBlue!72}{2-1,2-2}}]
+				1&2\\-2&3
+		\end{bNiceArray}
+		\mat{4\\3} = \mat{
+		\begin{bNiceArray}{
+				RR
+			}[code-before={\cellcolor{LimeGreen!72}{1-1,2-1}}]
+				1\\2
+		\end{bNiceArray}
+			\cdot\mat{4\\3}\\[8pt] 
+		\begin{bNiceArray}{
+				RR
+			}[code-before={\cellcolor{CornflowerBlue!72}{1-1,2-1}}]
+				-2\\3
+		\end{bNiceArray}
+			\cdot\mat{4\\3}}
+		=\mat{(1)(4)+(2)(3)\\(-2)(4)+(3)(3)}=\mat{10\\1}.
+	\]
+	This is the same vector we got in the previous example using the column picture!
+\end{example}
+
+Since the row picture of matrix-vector multiplication involves dot products, which in turn relate to angles and geometry,
+the row picture hints that matrix-vector multiplication can be used to encode sophisticated problems involving the angles between
+multiple vectors (see Module \ref{moduleMatRep} for more).
+
+\subsubsection*{Compatibility}
+
+Matrix-vector multiplication is only possible when the shape of the matrix is compatible with the size of the vector. That is
+the number of \emph{columns} of the matrix must match the number of \emph{coordinates} in the vector. (Try some examples using
+the row an column picture to make sure you agree.)
+
+The result of a matrix-vector product is always a vector, but the number of coordinates in the output vector
+can change. For example, if $M$ is a $2\times 3$ matrix, the product $M\vec v$ is only defined if $\vec v\in \R^3$.
+However, the resulting vector $\vec w=M\vec v$ is in $\R^2$ (try an example and verify for yourself).
+This means matrix-vector multiplication can be used to move vectors between different spaces!
+
+\begin{emphbox}[Takeaway] Let $A$ be an $m\times n$ matrix and $\vec x$ be a vector.
+The matrix-vector product $A\vec x$ is only defined if $\vec x$ has $n$ coordinates. In that case,
+the result is a vector with $m$ coordinates.
+\end{emphbox}
+
+\Heading{Matrix-Matrix Multiplication}
+
+In many circumstances, we can also multiply two matrices with each other. To do so, we repeatedly apply matrix-vector
+multiplication. Let $C$ and $A$ be matrices and let $\vec a_1$, $\vec a_2$, $\ldots$, $\vec a_k$ be the columns of $A$.
+Then,
+\[
+	CA=C
+			\matc{\big|&\big|&&\big|\\[3pt]
+			\vec a_1&\vec a_2&\cdots&\vec a_k\\[2pt]
+			\big|&\big|&&\big|}
+	=
+			\matc{\big|&\big|&&\big|\\[3pt]
+			C\vec a_1&C\vec a_2&\cdots&C\vec a_k\\[2pt]
+			\big|&\big|&&\big|}.
+\]
+Here, we ``distributed'' $C$ into the matrix $A$, creating a new matrix whose columns are $C\vec a_1$, $C\vec a_2$, \ldots.
+Using the row picture to expand each $C\vec a_i$, we arrive at an explicit formula. Let $\vec r_1$,
+$\vec r_2$, $\ldots$, $\vec r_m$ be the rows of $C$. Then,
+\[
+	CA = 
+			\matc{\hdash&\hspace{-4pt}\vec r_1&\hspace{-6pt}\hdash\\
+				\hdash&\hspace{-4pt}\vec r_2&\hspace{-6pt}\hdash\\
+				&\vdots&\\
+				\hdash&\hspace{-4pt}\vec r_m&\hspace{-6pt}\hdash}
+			\matc{\big|&\big|&&\big|\\[3pt]
+			\vec a_1&\vec a_2&\cdots&\vec a_k\\[2pt]
+			\big|&\big|&&\big|}
+			=\matc{
+				\vec r_1\cdot \vec a_1 &\vec r_1\cdot \vec a_2&\cdots&\vec r_1\cdot \vec a_k\\
+				\vec r_2\cdot \vec a_1 &\vec r_2\cdot \vec a_2&\cdots&\vec r_2\cdot \vec a_k\\
+				\vdots&\vdots&\ddots&\vdots\\
+				\vec r_m\cdot \vec a_1 &\vec r_m\cdot \vec a_2&\cdots&\vec r_m\cdot \vec a_k\\
+			}.
+\]
+
+\begin{example}Let $X=\mat{1&2&3\\0&-1&0}$ and $Y=\mat{2&3\\1&1\\1&0}$. Compute $XY$ and $YX$.
+
+	Computing $XY$ entry by entry, we get the $(1,1)$ entry is $\mat{1\\2\\3}\cdot\mat{2\\1\\1}=7$, the $(2,1)$
+	entry is $\mat{0\\-1\\0}\cdot\mat{2\\1\\1}=-1$, and so on. Computing all the entries we get
+	\[
+		XY=\mat{1&2&3\\0&-1&0}\mat{2&3\\1&1\\1&0}=\mat{7&5\\-1&-1}.
+	\]
+
+	Computing $YX$ entry by entry, we get the $(1,1)$ entry is $\mat{2\\3}\cdot\mat{1\\0}=2$, the $(2,1)$
+	entry is $\mat{1\\1}\cdot\mat{1\\0}=1$, and so on. Computing all the entries we get
+	\[
+		YX=\mat{2&3\\1&1\\1&0}\mat{1&2&3\\0&-1&0}=\mat{2&1&6\\1&1&3\\1&2&3}.
+	\]
+\end{example}
+
+From the previous example, we see that multiplying matrices in different orders can produce
+different results. Formally we say that matrix multiplication is not \emph{commutative} (in contrast,
+scalars can be multiplied in any order). This non-commutativity holds even for square matrices\footnote{ Of course, it is \emph{possible}
+that $AB=BA$ for matrices $A$ and $B$. It just doesn't happen very often.}. For example,
+\[
+	 \mat{1&1\\2&2}\quad =\quad \mat{1&0\\0&2}\mat{1&1\\1&1}\quad \neq\quad \mat{1&1\\1&1}\mat{1&0\\0&2} \quad=\quad \mat{1&2\\1&2}.
+\]
+
+Further, for a matrix-matrix multiplication to be possible, the shapes of each matrix must be compatible. Using our knowledge
+of matrix-vector multiplication, we can deduce that if the matrix-matrix product $CA$ makes sense, then the number of \emph{columns}
+of $C$ must match the number of \emph{rows} of $A$.
+
+Writing the shape of two matrices side-by-side allows for a quick compatibility check.
+\[
+	\text{rows of $C$}\times\underbrace{\color{mypink}\text{columns of $C$}\qquad
+	\text{rows of $A$}}_{\text{must be equal for $CA$ to exist}}\times \text{columns of $A$}
+\]
+A successful matrix-matrix multiplication will always result in a matrix with the number of rows of the first and the number of columns of the second.
+
+\[
+	\underbrace{	\text{\color{mygreen}rows of $C$}\times\text{columns of $C$}\qquad
+	\text{rows of $A$}\times \text{\color{mygreen}columns of $A$}}_{
+		\text{successful product will be a $\text{\color{mygreen}rows of $C$}\!\times \text{\color{mygreen}columns of $A$}$ matrix}
+		}
+\]
+
+\begin{example}Let $A$ be a $2\times 3$ matrix, let $B$ be a $3\times 4$ matrix, and let $C$ be a $1\times 3$ matrix. Determine
+	the shape of the matrices resulting from all possible products of $A$, $B$, and $C$.
+
+	For the product of two matrices to exist, the number of columns of the first matrix must equal the number of rows in the second.
+	Therefore, the only matrix products that are possible are $AB$ and $CB$.
+
+	$AB$ is the product of a $2\times 3$ matrix with a $3\times 4$ matrix, and so will be a $2\times 4$ matrix.
+
+	$CB$ is the product of a $1\times 3$ matrix with a $3\times 4$ matrix, and so will be a $1\times 4$ matrix. 
+\end{example}
+
+\Heading{Matrix Algebra}
+
+Let $A$, $B$, and $C$ be $n\times n$ matrices and let $\alpha$ be a scalar. We can now write algebraic expressions like
+\[
+	A(B+\alpha C).
+\]
+Since the matrices are all $n\times n$, such expressions are always defined and the results
+are again $n\times n$ matrices. We can \emph{almost} treat arithmetic with $n\times n$ matrices like arithmetic with numbers, save the fact
+that changing the order of multiplication might change the result. Many familiar properties
+of arithmetic carry over to matrices. For example, matrix multiplication is both \emph{associative} and \emph{distributive}.
+That is,
+\[
+	(AB)C=A(BC)\qquad\text{and}\qquad A(B+C) = AB+AC\qquad\text{and}\qquad (A+B)C=AC+BC.
+\]
+
+We're already familiar with the special matrices $I$, the identity matrix, and $\mathbf 0$, the zero matrix.
+In terms of matrix algebra, these behave like the numbers $1$ and $0$. That is,
+\[
+	IA=AI=A\qquad \text{and}\qquad \mathbf 0 A = A\mathbf 0=\mathbf 0
+\]
+for any compatible square matrix $A$.
+
+To kick it up a level, when working with square matrices, we can define \emph{polynomials} of matrices. Using familiar exponent
+notation, $A^2=AA$, we can formulate questions like
+\begin{quote}
+	Does the equation $A^2=-I$ have a $2\times 2$ matrix solution?
+\end{quote}
+Famously, the equation $x^2=-1$ has no real solutions, but $A^2=-I$ actually does have real $2\times 2$ matrix solutions (see if you can
+find one)! In this text we will only scratch the surface of what can be done with matrix algebra, but it's powerful stuff\footnote{ Galois
+theory and representation theory both heavily rely on matrix algebra.}.
+
+\begin{emphbox}Matrix algebra behaves a lot like regular algebra except that the order of multiplication
+	matters and matrices must always have compatible sizes.
+\end{emphbox}
+
+\Heading{More Notation}
+Linear algebra has many different products: scalar multiplication, dot products,
+matrix-vector products, and matrix-matrix products, to name a few.
+To distinguish between these different products, we use different notations.
+
+For matrix-vector and matrix-matrix products, we use \emph{adjacency} to represent multiplication. That is,
+we write
+\[
+	A\vec v\qquad\text{and}\qquad AB
+\]
+to indicate a product.
+Specifically, we do \emph{not} use the symbols ``$\,\cdot\,$'' or ``$\,\times\,$'' to represent matrix-vector
+or matrix-matrix products (these symbols are reserved for the dot product and cross product, respectively).
+
+
