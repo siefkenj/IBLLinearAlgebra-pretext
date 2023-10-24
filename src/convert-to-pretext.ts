@@ -14,9 +14,45 @@ const CWD = dirname(new URL(import.meta.url).pathname);
 
 const convert = (value: string) =>
     unified()
-        .use(unifiedLatexFromString)
+        .use(unifiedLatexFromString, {
+            macros: {
+                Heading: {
+                    signature: "m"
+                },
+                footnote: {
+                    signature: "m"
+                },
+                index: {
+                    signature: "m"
+                }
+            }
+        })
         .use(unifiedLatexToHast, {
             macroReplacements: {
+                Heading: (node) => {
+                    const args = getArgsContent(node);
+                    return htmlLike({
+                        tag: "title",
+                        content: args[0] || [],
+                    });
+                },
+                footnote: (node) => {
+                    const args = getArgsContent(node);
+                    return htmlLike({
+                        tag: "fn",
+                        content: args[0] || [],
+                    });
+                },
+                index: (node) => {
+                    const args = getArgsContent(node);
+                    return htmlLike({
+                        tag: "idx",
+                        content: htmlLike({
+                            tag: "h",
+                            content: args[0] || [],
+                        }),
+                    });
+                },
                 includegraphics: (node) => {
                     const args = getArgsContent(node);
                     const path = printRaw(args[args.length - 1] || []).replace(
@@ -34,7 +70,7 @@ const convert = (value: string) =>
         .processSync(value).value;
 
 function testConvert() {
-    const source = `\\includegraphics{foo.pdf}`;
+    const source = `\\includegraphics{foo.pdf}\\Heading{Sets}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
@@ -50,7 +86,8 @@ function testConvert() {
 
 async function testConvertFile() {
     const source = await readFile(
-        path.join(CWD, "../book/modules/module1.tex"),
+        // path.join(CWD, "../book/modules/module1.tex"),
+        path.join(CWD, "../sample-files/small-tex.tex"),
         "utf-8"
     );
     const converted = convert(source);
