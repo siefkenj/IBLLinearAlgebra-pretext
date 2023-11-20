@@ -9,18 +9,14 @@ import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { unifiedLatexToHast } from "@unified-latex/unified-latex-to-hast";
 import { unifiedLatexFromString } from "@unified-latex/unified-latex-util-parse";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
-import rehypeRemark from "rehype-remark";
-import { toString as hastToString } from "hast-util-to-string";
-import remarkStringify from "remark-stringify";
-// import { visit } from "@unified-latex/unified-latex-util-visit";
+
 import { visit } from 'unist-util-visit';
 import * as Hast from "hast";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { toString } from "@unified-latex/unified-latex-util-to-string";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
-function convert(value: string) {
+export function convert(value: string) {
     const addedMacros = unified().use(unifiedLatexFromString, {
         macros: {
             Heading: {
@@ -89,7 +85,7 @@ function convert(value: string) {
     const output = afterReplacements
         .use(replaceMath)
         .use(rehypeStringify)
-        .processSync(value).value;
+        .processSync(value).value as string;
 
     return output;
 }
@@ -103,7 +99,7 @@ function replaceMath() {
         }
         
         if (node.tagName === 'div') {
-            node.tagName = 'em'
+            node.tagName = 'me'
         }
       })
     }
@@ -169,3 +165,17 @@ if (command === "-h" || command === "--help" || !hasExecuted) {
 }
 
 // npx vite-node src/convert-to-pretext.ts -f
+
+// macros:
+// hspace
+// square brackets on index tag
+
+// environments:
+// emph box
+// align
+
+// Other:
+// wrap <me> tags with <p> tags
+// preserve & in the align environment (and other places) since the & converts into different characters in html
+// p tags
+// preserved definition render
