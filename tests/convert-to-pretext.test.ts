@@ -25,7 +25,7 @@ describe("convert-to-pretext", () => {
         
      });
      it.todo("replace hspace works", () => {
-        
+        // rarely used in the textbook, and can be difficult due to variety of unit options; skip for now
      });
      it("replace example environment works", () => {
         pretext = convert("\\begin{example}foo\\end{example}") 
@@ -36,8 +36,11 @@ describe("convert-to-pretext", () => {
      it.todo("replace align* environment works", () => {
         
      });
-     it.todo("replace emph box environment works", () => {
-        
+     it("replace emph box environment works", () => {
+        pretext = convert("\\begin{emphbox}[Takeaway]\nA vector is not the same as a line segment.\n\\end{emphbox}")
+        expect(pretext).toEqual(
+          '<remark><p>[Takeaway] A vector is not the same as a line segment.</p></remark>'
+        )
      });
      it("replace inline math works", () => {
         pretext = convert("$x+y$") 
@@ -50,8 +53,5 @@ describe("convert-to-pretext", () => {
         expect(pretext).toEqual(
              '<p><me>x+y</me></p>'
         );
-     });
-     it.todo("paragraph splitting works", () => {
-
      });
 })

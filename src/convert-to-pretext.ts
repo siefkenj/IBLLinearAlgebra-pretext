@@ -79,6 +79,15 @@ export function convert(value: string) {
                     }),
                 });
             },
+            emphbox: (node) => {
+                return htmlLike({
+                    tag: "remark",
+                    content: htmlLike({
+                        tag: "p",
+                        content: node.content,
+                    })
+                })
+            }
         },
     });
 
