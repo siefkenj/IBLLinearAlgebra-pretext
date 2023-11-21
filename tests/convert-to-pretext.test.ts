@@ -48,7 +48,7 @@ describe("convert-to-pretext", () => {
      it("replace display math works", () => {
         pretext = convert("\\[x+y\\]") 
         expect(pretext).toEqual(
-             '<me class=\"display-math\">x+y</me>'
+             '<p><me>x+y</me></p>'
         );
      });
      it.todo("paragraph splitting works", () => {
