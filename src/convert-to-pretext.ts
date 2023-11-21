@@ -93,20 +93,27 @@ export function convert(value: string) {
 function replaceMath() {
 
     return function (tree) {
-      visit(tree, 'element', function (node) {
-        if (node.tagName === 'span') {
+      visit(tree, node => node.type === "element", function (node) {
+        if (node.tagName === 'span' && node.properties.className.includes("inline-math")) {
           node.tagName = 'm'
         }
         
-        if (node.tagName === 'div') {
-            node.tagName = 'me'
+        if (node.tagName === 'div' && node.properties.className.includes("display-math")) {
+            node.tagName = "p";
+            node.properties.className = undefined;
+            const me: Hast.Element = {
+                type: "element",
+                tagName: "me",
+                children: node.children,
+            }
+            node.children = [me]
         }
       })
     }
   }
 
 function testConvert() {
-    const source = `\\includegraphics{foo.pdf}\\Heading{Sets}`;
+    const source = `\\[\\Set{1,2,3}.\\]`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
