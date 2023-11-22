@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { convert } from "../src/convert-to-pretext.ts";
+import { convert } from "../convert-to-pretext"
 
 describe("convert-to-pretext", () => {
     let pretext: string;

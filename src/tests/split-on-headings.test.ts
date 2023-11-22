@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { convert } from "./split-on-headings";
+import { convert } from "../split-on-headings";
 
 describe("split-on-headings", () => {
     it("can replace latex heading macros with title tag inside section tag", () => {
