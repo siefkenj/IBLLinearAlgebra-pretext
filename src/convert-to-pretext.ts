@@ -16,11 +16,10 @@ import remarkStringify from "remark-stringify";
 import { visit } from "unist-util-visit";
 import * as Hast from "hast";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { toString } from "@unified-latex/unified-latex-util-to-string";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
-function convert(value: string) {
+export function convert(value: string) {
     const addedMacros = unified().use(unifiedLatexFromString, {
         macros: {
             Heading: {
@@ -90,13 +89,22 @@ function convert(value: string) {
                     }),
                 });
             },
+            emphbox: (node) => {
+                return htmlLike({
+                    tag: "remark",
+                    content: htmlLike({
+                        tag: "p",
+                        content: node.content,
+                    })
+                })
+            }
         },
     });
 
     const output = afterReplacements
         .use(replaceMath)
         .use(rehypeStringify)
-        .processSync(value).value;
+        .processSync(value).value as string;
 
     return output;
 }
@@ -197,3 +205,17 @@ if (command === "-h" || command === "--help" || !hasExecuted) {
 }
 
 // npx vite-node src/convert-to-pretext.ts -f
+
+// macros:
+// hspace
+// square brackets on index tag
+
+// environments:
+// emph box
+// align
+
+// Other:
+// wrap <me> tags with <p> tags
+// preserve & in the align environment (and other places) since the & converts into different characters in html
+// p tags
+// preserved definition render

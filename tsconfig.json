@@ -1,6 +1,6 @@
 {
     "exclude": ["node_modules", "dist", "old-example-code"],
-    "include": ["src"],
+    "include": ["src/**/*.ts"],
     "compilerOptions": {
         "rootDir": "./src" /* Specify the root folder within your source files. */,
         "outDir": "./dist",
