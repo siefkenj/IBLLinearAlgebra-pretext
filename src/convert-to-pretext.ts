@@ -80,7 +80,7 @@ export function convert(value: string) {
                 });
             },
             emphbox: (node) => {
-                return htmlLike({
+                 return htmlLike({
                     tag: "remark",
                     content: htmlLike({
                         tag: "p",
@@ -182,16 +182,3 @@ if (command === "-h" || command === "--help" || !hasExecuted) {
 
 // npx vite-node src/convert-to-pretext.ts -f
 
-// macros:
-// hspace
-// square brackets on index tag
-
-// environments:
-// emph box
-// align
-
-// Other:
-// wrap <me> tags with <p> tags
-// preserve & in the align environment (and other places) since the & converts into different characters in html
-// p tags
-// preserved definition render
