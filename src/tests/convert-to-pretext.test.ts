@@ -45,7 +45,7 @@ describe("convert-to-pretext", () => {
      it("replace inline math works", () => {
         pretext = convert("$x+y$") 
         expect(pretext).toEqual(
-             '<m class=\"inline-math\">x+y</m>'
+             '<m>x+y</m>'
         );
      });
      it("replace display math works", () => {
