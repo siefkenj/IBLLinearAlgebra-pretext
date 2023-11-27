@@ -72,6 +72,13 @@ export function convert(value: string) {
                     attributes: { src: path },
                 });
             },
+            emph: (node) => {
+                const args = getArgsContent(node);
+                return htmlLike({
+                    tag: "em",
+                    content: args[0] || [],
+                });
+            },
         },
         environmentReplacements: {
             example: (node) => {
