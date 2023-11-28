@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { convert } from "../split-on-headings";
+import { convert } from "../convert-to-pretext";
 
 describe("split-on-headings", () => {
     it("can replace latex heading macros with title tag inside section tag", () => {
@@ -28,7 +28,7 @@ describe("split-on-headings", () => {
     });
     it("can replace other macros after headings", () => {
         expect(convert("\\Heading{Sets}  \n \\[\\Set{1,2,3}.\\]")).toEqual(
-            '<section><title>Sets</title><div class="display-math">\\Set{1,2,3}.</div></section>'
+            "<section><title>Sets</title><p><me>\\Set{1,2,3}.</me></p></section>"
         );
     });
 });

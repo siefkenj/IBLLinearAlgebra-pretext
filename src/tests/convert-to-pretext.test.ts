@@ -3,10 +3,6 @@ import { convert } from "../convert-to-pretext";
 
 describe("convert-to-pretext", () => {
     let pretext: string;
-    it("replace Heading works", () => {
-        pretext = convert("\\Heading{Sets}");
-        expect(pretext).toEqual("<title>Sets</title>");
-    });
     it("replace footnote works", () => {
         pretext = convert("\\footnote{foo}");
         expect(pretext).toEqual("<fn>foo</fn>");
