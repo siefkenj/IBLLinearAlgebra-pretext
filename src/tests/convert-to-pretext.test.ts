@@ -3,39 +3,58 @@ import { convert } from "../convert-to-pretext";
 
 describe("convert-to-pretext", () => {
     let pretext: string;
-    it("replace footnote works", () => {
+    it("replaces emph", () => {
+        pretext = convert("\\emph{foo}");
+        expect(pretext).toEqual("<em>foo</em>");
+    });
+    it("replaces footnote", () => {
         pretext = convert("\\footnote{foo}");
         expect(pretext).toEqual("<fn>foo</fn>");
     });
-    it("replace index works", () => {
+    it("replaces index", () => {
         pretext = convert("\\index{foo}");
         expect(pretext).toEqual("<idx><h>foo</h></idx>");
     });
-    it.todo("replace index with square brackets works", () => {});
-    it.todo("replace hspace works", () => {
-        // rarely used in the textbook, and can be difficult due to variety of unit options; skip for now
-    });
-    it("replace example environment works", () => {
-        pretext = convert("\\begin{example}foo\\end{example}");
+    it("replaces index with optional square brackets", () => {
+        pretext = convert("The symbol\\index[symbols]{foo}is used");
         expect(pretext).toEqual(
-            "<example><statement>foo</statement></example>"
+            "The symbol<idx><h>symbols</h><h>foo</h></idx>is used"
         );
     });
-    it.todo("replace align* environment works", () => {});
-    it("replace emph box environment works", () => {
+    it.skip("replaces the example environment", () => {
+        pretext = convert(
+            "\\begin{example}\nfoo\n\nbar1\n\nbar2\\end{example}"
+        );
+        expect(pretext).toEqual(
+            "<example><statement><p>foo</p></statement><solution><p>bar1</p><p>bar2</p></solution></example>"
+        );
+    });
+    it.skip("replaces the align* environment", () => {
+        pretext = convert(
+            "Thus \\begin{align*}x=m+1&=(2k+1)+1=2k+2\\\\&=2(k+1)=2n,\\end{align*}where"
+        );
+        expect(pretext).toEqual(
+            "Thus<md><mrow>x=m+1\\amp=(2k+1)+1=2k+2</mrow><mrow>\\amp=2(k+1)=2n,</mrow></md>where"
+        );
+    });
+    it.skip("replaces the emph box environment", () => {
         pretext = convert(
             "\\begin{emphbox}[Takeaway]\nA vector is not the same as a line segment.\n\\end{emphbox}"
         );
         expect(pretext).toEqual(
-            "<remark><p>[Takeaway] A vector is not the same as a line segment.</p></remark>"
+            "<remark><title>Takeaway</title><p>A vector is not the same as a line segment.</p></remark>"
         );
     });
-    it("replace inline math works", () => {
-        pretext = convert("$x+y$");
-        expect(pretext).toEqual("<m>x+y</m>");
+    it("replaces inline math", () => {
+        pretext = convert("Consider$x+y$foo");
+        expect(pretext).toEqual("Consider<m>x+y</m>foo");
     });
-    it("replace display math works", () => {
-        pretext = convert("\\[x+y\\]");
-        expect(pretext).toEqual("<p><me>x+y</me></p>");
+    it("replaces display math", () => {
+        pretext = convert("foo\\[x+y\\]bar");
+        expect(pretext).toEqual("foo<p><me>x+y</me></p>bar");
+    });
+    it.skip("replaces special math characters", () => {
+        pretext = convert("<>&");
+        expect(pretext).toEqual("\\lt\\gt\\amp");
     });
 });
