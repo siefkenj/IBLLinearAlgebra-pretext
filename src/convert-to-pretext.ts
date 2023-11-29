@@ -14,6 +14,9 @@ import {
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { replaceMath } from "./replace-math";
 import { splitOnHeadings } from "./split-on-headings";
+import { splitOnMacro } from "@unified-latex/unified-latex-util-split";
+import { Node } from "@unified-latex/unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -99,6 +102,50 @@ export function convert(value: string) {
                     }),
                 });
             },
+            "align*": (node) => {
+                // function isAstString(elm: any): elm is Ast.String {
+                //     return (
+                //         elm && typeof elm === "object" && elm.type === "string"
+                //     );
+                // }
+                // function hasContent(node: any, content: string): boolean {
+                //     if (!isAstString(node)) {
+                //         return false;
+                //     }
+                //     if (typeof node.content != "string") {
+                //         return false;
+                //     }
+                //     return node.content === content;
+                // }
+                // for (let i = 0; i < node.content.length; i++) {
+                //     if (hasContent(node.content[i], "&")) {
+                //         const amp: Ast.String = {
+                //             type: "string",
+                //             content: "\\amp",
+                //         };
+                //         node.content[i] = amp;
+                //     }
+                // }
+                const split = splitOnMacro(node.content, "\\");
+                const formattedSegments = split.segments.flatMap((segment) => {
+                    if (segment == null) {
+                        return [];
+                    } else {
+                        return htmlLike({
+                            tag: "mrow",
+                            content: segment,
+                        });
+                    }
+                });
+                console.log(split);
+                return htmlLike({
+                    tag: "p",
+                    content: htmlLike({
+                        tag: "md",
+                        content: formattedSegments,
+                    }),
+                });
+            },
         },
     });
 
@@ -111,7 +158,7 @@ export function convert(value: string) {
 }
 
 function testConvert() {
-    const source = `\\Heading{Sets} \n \\[\\Set{1,2,3}.\\] Hello \\emph{sets} $\\{$`;
+    const source = `\\begin{align*} x=m+1&=(2k+1)+1=2k+2\\\\&=2(k+1)=2n,\\end{align*}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
