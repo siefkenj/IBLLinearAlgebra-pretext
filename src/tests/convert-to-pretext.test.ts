@@ -29,12 +29,12 @@ describe("convert-to-pretext", () => {
             "<example><statement><p>foo</p></statement><solution><p>bar1</p><p>bar2</p></solution></example>"
         );
     });
-    it.skip("replaces the align* environment", () => {
+    it("replaces the align* environment", () => {
         pretext = convert(
-            "Thus \\begin{align*}x=m+1&=(2k+1)+1=2k+2\\\\&=2(k+1)=2n,\\end{align*}where"
+            "Thus \\begin{align*}x=m+1&=(2k+1)+1=2k+2\\\\&=2(k+1)=2n,\\end{align*}\n\nwhere"
         );
         expect(pretext).toEqual(
-            "Thus<md><mrow>x=m+1\\amp=(2k+1)+1=2k+2</mrow><mrow>\\amp=2(k+1)=2n,</mrow></md>where"
+            "<p>Thus</p><p><md><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></md></p><p>where</p>"
         );
     });
     it.skip("replaces the emph box environment", () => {
@@ -55,6 +55,6 @@ describe("convert-to-pretext", () => {
     });
     it.skip("replaces special math characters", () => {
         pretext = convert("<>&");
-        expect(pretext).toEqual("\\lt\\gt\\amp");
+        expect(pretext).toEqual("\\lt\\gt&#x26;");
     });
 });
