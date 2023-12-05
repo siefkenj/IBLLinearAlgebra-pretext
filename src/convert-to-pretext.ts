@@ -1,4 +1,4 @@
-import { unified, Plugin } from "unified";
+import { unified } from "unified";
 import rehypeStringify from "rehype-stringify";
 import chalk from "chalk";
 import { readFile } from "node:fs/promises";
@@ -12,11 +12,10 @@ import {
     unifiedLatexFromString,
 } from "@unified-latex/unified-latex-util-parse";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
-import { replaceMath } from "./replace-math";
-import { splitOnHeadings } from "./split-on-headings";
+import { replaceMath } from "./plugin-replace-math";
+import { splitOnHeadings } from "./plugin-split-on-headings";
 import { splitOnMacro } from "@unified-latex/unified-latex-util-split";
-import { Node } from "@unified-latex/unified-latex-types";
-import * as Ast from "@unified-latex/unified-latex-types";
+import { replaceDefinitions } from "./plugin-replace-definitions";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -33,10 +32,14 @@ export function convert(value: string) {
                 index: {
                     signature: "o m",
                 },
+                SavedDefinitionRender: {
+                    signature: "m",
+                },
             },
         })
         .use(unifiedLatexAstComplier)
-        .use(splitOnHeadings);
+        .use(splitOnHeadings)
+        .use(replaceDefinitions);
 
     const afterReplacements = addedMacros.use(unifiedLatexToHast, {
         macroReplacements: {
@@ -82,6 +85,23 @@ export function convert(value: string) {
                     content: args[0] || [],
                 });
             },
+            // SavedDefinitionRender: (node) => {
+            //     const definition = findDefinition(
+            //         node.args[0].content[0].content
+            //     );
+            //     const title = htmlLike({
+            //         tag: "title",
+            //         content: definition.title,
+            //     });
+            //     const statement = htmlLike({
+            //         tag: "statement",
+            //         content: definition.definition,
+            //     });
+            //     return htmlLike({
+            //         tag: "definition",
+            //         content: [title, statement],
+            //     });
+            // },
         },
         environmentReplacements: {
             example: (node) => {
@@ -94,7 +114,7 @@ export function convert(value: string) {
                 });
             },
             emphbox: (node) => {
-                 return htmlLike({
+                return htmlLike({
                     tag: "remark",
                     content: htmlLike({
                         tag: "p",
@@ -137,7 +157,6 @@ export function convert(value: string) {
                         });
                     }
                 });
-                console.log(split);
                 return htmlLike({
                     tag: "p",
                     content: htmlLike({
@@ -158,7 +177,7 @@ export function convert(value: string) {
 }
 
 function testConvert() {
-    const source = `\\begin{align*} x=m+1&=(2k+1)+1=2k+2\\\\&=2(k+1)=2n,\\end{align*}`;
+    const source = `\\SavedDefinitionRender{SubsetSuperset}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
