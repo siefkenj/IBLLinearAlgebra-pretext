@@ -34,6 +34,11 @@ export function convert(value: string) {
                     signature: "o m",
                 },
             },
+            environments: {
+                emphbox: {
+                    signature: "o m",
+                },
+            },
         })
         .use(unifiedLatexAstComplier)
         .use(splitOnHeadings);
@@ -87,27 +92,33 @@ export function convert(value: string) {
             example: (node) => {
                 let exampleContents = [];
                 let solutionContents: Node[] = [];
-                let lastParBreak = 0
+                let lastParBreak = 0;
                 let firstParBreak = 0;
-                for(let i = 0; i < node.content.length; i++) {
+                for (let i = 0; i < node.content.length; i++) {
                     // seperate on parbreaks
-                    if(node.content[i].type === "parbreak" || i === node.content.length - 1) {
+                    if (
+                        node.content[i].type === "parbreak" ||
+                        i === node.content.length - 1
+                    ) {
                         let endIndex = i;
-                        if(i === node.content.length - 1) {
+                        if (i === node.content.length - 1) {
                             endIndex += 1;
                         }
                         // first paragraph should be wrapped in statement tags
-                        if(lastParBreak === 0) {
+                        if (lastParBreak === 0) {
                             firstParBreak = i;
                             exampleContents.push(
                                 htmlLike({
                                     tag: "statement",
                                     content: htmlLike({
                                         tag: "p",
-                                        content: node.content.slice(lastParBreak, endIndex)
-                                    })
+                                        content: node.content.slice(
+                                            lastParBreak,
+                                            endIndex
+                                        ),
+                                    }),
                                 })
-                            )
+                            );
                         }
                         // the rest are wrapped in solution tags
                         else {
@@ -115,9 +126,12 @@ export function convert(value: string) {
                                 htmlLike({
                                     tag: "p",
                                     // + 1 to skip the parbreak
-                                    content: node.content.slice(lastParBreak + 1, endIndex)
+                                    content: node.content.slice(
+                                        lastParBreak + 1,
+                                        endIndex
+                                    ),
                                 })
-                            )
+                            );
                         }
                         lastParBreak = i;
                     }
@@ -125,20 +139,54 @@ export function convert(value: string) {
                 exampleContents.push(
                     htmlLike({
                         tag: "solution",
-                        content: solutionContents
+                        content: solutionContents,
                     })
-                )
+                );
                 return htmlLike({
                     tag: "example",
-                    content: exampleContents
+                    content: exampleContents,
                 });
             },
             emphbox: (node) => {
-                 return htmlLike({
+                const args = getArgsContent(node);
+                // const formattedArgs = args.flatMap((arg) => {
+                //     if (arg == null) {
+                //         return [];
+                //     } else {
+                //         return htmlLike({
+                //             tag: "h",
+                //             content: arg,
+                //         });
+                //     }
+                // });
+                // return htmlLike({
+                //     tag: "remark",
+                //     content: formattedArgs,
+                // });
+                console.log(args);
+                let remarkContents = [];
+                // check if has optional argument for title
+                if(args.length === 2 && args[0] !== null) {
+                    remarkContents.push(
+                        htmlLike({
+                            tag: "title",
+                            content: args[0]
+                        })
+                    )
+                }
+                if(args.length >= 1 && args[args.length - 1] !== null) {
+                    remarkContents.push(
+                        htmlLike({
+                            tag: "p",
+                            content: args[args.length - 1] // current issue: args only has the string A and not the full text
+                        })
+                    )
+                }
+                return htmlLike({
                     tag: "remark",
                     content: htmlLike({
                         tag: "p",
-                        content: node.content,
+                        content: remarkContents
                     }),
                 });
             },
@@ -258,16 +306,9 @@ if (command === "-h" || command === "--help" || !hasExecuted) {
 
 // npx vite-node src/convert-to-pretext.ts -f
 
-// macros:
-// hspace
-// square brackets on index tag
 
 // environments:
 // emph box
-// align
 
 // Other:
-// wrap <me> tags with <p> tags
-// preserve & in the align environment (and other places) since the & converts into different characters in html
-// p tags
 // preserved definition render
