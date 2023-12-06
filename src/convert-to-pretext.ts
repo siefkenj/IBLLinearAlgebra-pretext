@@ -85,12 +85,52 @@ export function convert(value: string) {
         },
         environmentReplacements: {
             example: (node) => {
+                let exampleContents = [];
+                let solutionContents: Node[] = [];
+                let lastParBreak = 0
+                let firstParBreak = 0;
+                for(let i = 0; i < node.content.length; i++) {
+                    // seperate on parbreaks
+                    if(node.content[i].type === "parbreak" || i === node.content.length - 1) {
+                        let endIndex = i;
+                        if(i === node.content.length - 1) {
+                            endIndex += 1;
+                        }
+                        // first paragraph should be wrapped in statement tags
+                        if(lastParBreak === 0) {
+                            firstParBreak = i;
+                            exampleContents.push(
+                                htmlLike({
+                                    tag: "statement",
+                                    content: htmlLike({
+                                        tag: "p",
+                                        content: node.content.slice(lastParBreak, endIndex)
+                                    })
+                                })
+                            )
+                        }
+                        // the rest are wrapped in solution tags
+                        else {
+                            solutionContents.push(
+                                htmlLike({
+                                    tag: "p",
+                                    // + 1 to skip the parbreak
+                                    content: node.content.slice(lastParBreak + 1, endIndex)
+                                })
+                            )
+                        }
+                        lastParBreak = i;
+                    }
+                }
+                exampleContents.push(
+                    htmlLike({
+                        tag: "solution",
+                        content: solutionContents
+                    })
+                )
                 return htmlLike({
                     tag: "example",
-                    content: htmlLike({
-                        tag: "statement",
-                        content: node.content,
-                    }),
+                    content: exampleContents
                 });
             },
             emphbox: (node) => {
