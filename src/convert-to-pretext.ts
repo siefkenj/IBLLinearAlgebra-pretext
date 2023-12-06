@@ -14,8 +14,12 @@ import {
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { replaceMath } from "./replace-math";
 import { splitOnHeadings } from "./split-on-headings";
-import { splitOnMacro } from "@unified-latex/unified-latex-util-split";
+import {
+    splitOnCondition,
+    splitOnMacro,
+} from "@unified-latex/unified-latex-util-split";
 import { Node } from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
 import * as Ast from "@unified-latex/unified-latex-types";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
@@ -92,56 +96,45 @@ export function convert(value: string) {
             example: (node) => {
                 let exampleContents = [];
                 let solutionContents: Node[] = [];
-                let lastParBreak = 0;
-                let firstParBreak = 0;
-                for (let i = 0; i < node.content.length; i++) {
-                    // seperate on parbreaks
-                    if (
-                        node.content[i].type === "parbreak" ||
-                        i === node.content.length - 1
-                    ) {
-                        let endIndex = i;
-                        if (i === node.content.length - 1) {
-                            endIndex += 1;
-                        }
-                        // first paragraph should be wrapped in statement tags
-                        if (lastParBreak === 0) {
-                            firstParBreak = i;
-                            exampleContents.push(
-                                htmlLike({
-                                    tag: "statement",
-                                    content: htmlLike({
-                                        tag: "p",
-                                        content: node.content.slice(
-                                            lastParBreak,
-                                            endIndex
-                                        ),
-                                    }),
-                                })
-                            );
-                        }
-                        // the rest are wrapped in solution tags
-                        else {
-                            solutionContents.push(
-                                htmlLike({
+
+                // seperate by paragraphs
+                let segments = splitOnCondition(
+                    node.content,
+                    match.parbreak
+                ).segments;
+
+                for (let i = 0; i < segments.length; i++) {
+                    // wrap the first paragraph in statement tags
+                    if (i === 0) {
+                        exampleContents.push(
+                            htmlLike({
+                                tag: "statement",
+                                content: htmlLike({
                                     tag: "p",
-                                    // + 1 to skip the parbreak
-                                    content: node.content.slice(
-                                        lastParBreak + 1,
-                                        endIndex
-                                    ),
-                                })
-                            );
-                        }
-                        lastParBreak = i;
+                                    content: segments[i],
+                                }),
+                            })
+                        );
+
+                    // put the rest in p tags for later
+                    } else {
+                        solutionContents.push(
+                            htmlLike({
+                                tag: "p",
+                                content: segments[i],
+                            })
+                        );
                     }
                 }
+
+                // wrap the rest in solution tags
                 exampleContents.push(
                     htmlLike({
                         tag: "solution",
                         content: solutionContents,
                     })
                 );
+
                 return htmlLike({
                     tag: "example",
                     content: exampleContents,
@@ -166,27 +159,27 @@ export function convert(value: string) {
                 console.log(args);
                 let remarkContents = [];
                 // check if has optional argument for title
-                if(args.length === 2 && args[0] !== null) {
+                if (args.length === 2 && args[0] !== null) {
                     remarkContents.push(
                         htmlLike({
                             tag: "title",
-                            content: args[0]
+                            content: args[0],
                         })
-                    )
+                    );
                 }
-                if(args.length >= 1 && args[args.length - 1] !== null) {
+                if (args.length >= 1 && args[args.length - 1] !== null) {
                     remarkContents.push(
                         htmlLike({
                             tag: "p",
-                            content: args[args.length - 1] // current issue: args only has the string A and not the full text
+                            content: args[args.length - 1], // current issue: args only has the string A and not the full text
                         })
-                    )
+                    );
                 }
                 return htmlLike({
                     tag: "remark",
                     content: htmlLike({
                         tag: "p",
-                        content: remarkContents
+                        content: remarkContents,
                     }),
                 });
             },
@@ -305,7 +298,6 @@ if (command === "-h" || command === "--help" || !hasExecuted) {
 }
 
 // npx vite-node src/convert-to-pretext.ts -f
-
 
 // environments:
 // emph box
