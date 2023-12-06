@@ -177,7 +177,7 @@ export function convert(value: string) {
 }
 
 function testConvert() {
-    const source = `\\SavedDefinitionRender{SubsetSuperset}`;
+    const source = `\\SavedDefinitionRender{UnionsIntersections}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
