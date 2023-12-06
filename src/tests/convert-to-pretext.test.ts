@@ -51,7 +51,9 @@ describe("convert-to-pretext", () => {
     });
     it("replaces display math", () => {
         pretext = convert("foo\\[x+y\\]bar\n\nextra words");
-        expect(pretext).toEqual("<p>foo</p><p><me>x+y</me></p><p>bar</p><p>extra words</p>");
+        expect(pretext).toEqual(
+            "<p>foo</p><p><me>x+y</me></p><p>bar</p><p>extra words</p>"
+        );
     });
     // shouldn't need these replacements; remove test when verified.
     it.skip("replaces special math characters", () => {
