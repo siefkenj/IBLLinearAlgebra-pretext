@@ -11,84 +11,24 @@ import { pgfkeysArgToObject } from "@unified-latex/unified-latex-util-pgfkeys";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 import { wrapPars } from "@unified-latex/unified-latex-to-hast";
+import { toString } from "@unified-latex/unified-latex-util-to-string";
+import { match } from "@unified-latex/unified-latex-util-match";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
 // Read the LaTeX file that contains definitions.
-const source = await readFile(
+const definitionsFile = await readFile(
     path.join(CWD, "../book/common/definitions.tex"),
     "utf-8"
 );
 
 /**
- * Check if an element is of type "Ast.Environment".
- */
-function isEnvironment(elm: any): elm is Ast.Environment {
-    return elm && typeof elm === "object" && elm.type === "environment";
-}
-/**
- * Check if an element is of type "Ast.String".
- */
-function isAstString(elm: any): elm is Ast.String {
-    return elm && typeof elm === "object" && elm.type === "string";
-}
-/**
- * Check if an "Ast.Environment" element is a "SavedDefinition" environment.
- */
-function isSaveDefinition(elm: Ast.Environment): boolean {
-    if (!isEnvironment(elm)) {
-        return false;
-    }
-    if (typeof elm.env != "string") {
-        return false;
-    }
-    return elm.env === "SaveDefinition";
-}
-/**
- * Check if an "Ast.String" element has the input content.
- */
-function hasContent(elm: Ast.String, contentName: string): boolean {
-    if (!isAstString(elm)) {
-        return false;
-    }
-    if (typeof elm.content != "string") {
-        return false;
-    }
-    return elm.content === contentName;
-}
-
-/**
- * This function finds a defintion in an array that contains defintions given the key name of the definition,
- * and returns the title and contents of the first defintion in the array that matches the key as an Javascript object.
- * Note: If the definition is not found, it will return an Javascript object that has two empty arrays.
- */
-function findDefinition(
-    definitions: Record<string, Ast.Node[]>[],
-    definitionName: string
-): Record<string, Ast.Node[]> {
-    let title: Ast.Node[] = [];
-    let definition: Ast.Node[] = [];
-
-    // Loop through the definnitions array.
-    for (let i = 0; i < definitions.length; i++) {
-        // If the definition matches, set the title and contents and break out of the loop.
-        if (hasContent(definitions[i].key[0] as Ast.String, definitionName)) {
-            title = definitions[i].title;
-            definition = definitions[i].definition;
-            break;
-        }
-    }
-
-    return { title, definition };
-}
-
-/**
  * This plugin visits every node in an AST tree and replaces each '\SavedDefinitionRender{}' macro with the corresponding defintion.
  */
-export const replaceDefinitions: Plugin<[], Ast.Root, Ast.Root> =
-    function replaceDefinitions() {
+export const replaceDefinitions: Plugin<string[], Ast.Root, Ast.Root> =
+    function replaceDefinitions(file) {
         // Parse the definitions into a LaTeX AST.
-        const ast = unified()
+        const definitionsAst = unified()
             .use(unifiedLatexFromString, {
                 macros: {
                     Heading: {
@@ -108,19 +48,22 @@ export const replaceDefinitions: Plugin<[], Ast.Root, Ast.Root> =
                 },
             })
             .use(unifiedLatexAstComplier)
-            .processSync(source).result as Ast.Root;
+            .processSync(file || definitionsFile).result as Ast.Root;
 
-        // Define the definitions array.
-        let definitions: Record<string, Ast.Node[]>[] = [];
+        // Define the definitions map.
+        let definitions = new Map<string, Record<string, Ast.Node[]>>();
         // Loop through every node in the LaTeX AST tree.
-        for (let i = 0; i < ast.content.length; i++) {
-            const node = ast.content[i] as Ast.Environment;
+        for (let definition of definitionsAst.content) {
             // Check if the node is a "SaveDefinition" environment with arguments.
-            if (isSaveDefinition(node) && node.args != undefined) {
-                // Add a new Javascript object to the definitions array with the corresponding key, title and content.
-                definitions.push({
-                    ...pgfkeysArgToObject(node.args[0]),
-                    definition: node.content,
+            if (
+                match.environment(definition, "SaveDefinition") &&
+                definition.args != undefined
+            ) {
+                // Add a new Javascript object to the definitions map with the corresponding key, title and content.
+                const pgfkeysObject = pgfkeysArgToObject(definition.args[0]);
+                definitions.set(toString(pgfkeysObject.key[0]), {
+                    title: pgfkeysObject.title,
+                    definition: definition.content,
                 });
             }
         }
@@ -129,31 +72,33 @@ export const replaceDefinitions: Plugin<[], Ast.Root, Ast.Root> =
             replaceNode(ast, (node) => {
                 // Check if the node is a "\SavedDefinitionRender{}" macro with a string argument.
                 if (
-                    node.type === "macro" &&
-                    node.content === "SavedDefinitionRender" &&
-                    node.args != undefined &&
-                    node.args[0].content[0].type === "string"
+                    match.macro(node, "SavedDefinitionRender") &&
+                    node.args != undefined
                 ) {
                     // Find the definition that matches the argument.
-                    const definition = findDefinition(
-                        definitions,
-                        node.args[0].content[0].content
+                    const definition = definitions.get(
+                        toString(node.args[0].content[0])
                     );
-                    // Wrap the title in '\html-tag:title{...}' macros.
-                    const title = htmlLike({
-                        tag: "title",
-                        content: definition.title,
-                    });
-                    // Wrap the contents of the definition in \html-tag:statement{...}' macros.
-                    const statement = htmlLike({
-                        tag: "statement",
-                        content: wrapPars(definition.definition),
-                    });
-                    // Wrap everything in \html-tag:definition{...}' in macros and replace the node.
-                    return htmlLike({
-                        tag: "definition",
-                        content: [title, statement],
-                    });
+                    if (definition != undefined) {
+                        // Wrap the title in '\html-tag:title{...}' macros.
+                        const title = htmlLike({
+                            tag: "title",
+                            content: definition.title,
+                        });
+                        // Wrap the contents of the definition in \html-tag:statement{...}' macros.
+                        const statement = htmlLike({
+                            tag: "statement",
+                            content: wrapPars(definition.definition),
+                        });
+                        // Wrap everything in \html-tag:definition{...}' in macros and replace the node.
+                        return htmlLike({
+                            tag: "definition",
+                            content: [title, statement],
+                            attributes: {
+                                "xml:id": toString(node.args[0].content[0]),
+                            },
+                        });
+                    }
                 }
             });
         };
