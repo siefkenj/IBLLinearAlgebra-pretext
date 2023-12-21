@@ -19,7 +19,7 @@ import { replaceDefinitions } from "./plugin-replace-definitions";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
-export function convert(value: string) {
+export function convert(value: string, definitionsFile?: string) {
     const addedMacros = unified()
         .use(unifiedLatexFromString, {
             macros: {
@@ -39,7 +39,7 @@ export function convert(value: string) {
         })
         .use(unifiedLatexAstComplier)
         .use(splitOnHeadings)
-        .use(replaceDefinitions);
+        .use(replaceDefinitions, definitionsFile || "");
 
     const afterReplacements = addedMacros.use(unifiedLatexToHast, {
         macroReplacements: {
