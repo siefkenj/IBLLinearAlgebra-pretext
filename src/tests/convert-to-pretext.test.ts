@@ -37,7 +37,7 @@ describe("convert-to-pretext", () => {
             "<p>Thus</p><p><md><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></md></p><p>where</p>"
         );
     });
-    it.skip("replaces the emph box environment", () => {
+    it("replaces the emph box environment", () => {
         pretext = convert(
             "\\begin{emphbox}[Takeaway]\nA vector is not the same as a line segment.\n\\end{emphbox}"
         );

@@ -18,6 +18,8 @@ import {
     splitOnCondition,
     splitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
+import { SP } from "@unified-latex/unified-latex-builder";
+import { s } from "@unified-latex/unified-latex-builder";
 import { Node } from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
 import * as Ast from "@unified-latex/unified-latex-types";
@@ -116,7 +118,7 @@ export function convert(value: string) {
                             })
                         );
 
-                    // put the rest in p tags for later
+                        // put the rest in p tags for later
                     } else {
                         solutionContents.push(
                             htmlLike({
@@ -135,31 +137,18 @@ export function convert(value: string) {
                     })
                 );
 
+                // wrap everything in example tags
                 return htmlLike({
                     tag: "example",
                     content: exampleContents,
                 });
             },
             emphbox: (node) => {
-                const args = getArgsContent(node);
-                // const formattedArgs = args.flatMap((arg) => {
-                //     if (arg == null) {
-                //         return [];
-                //     } else {
-                //         return htmlLike({
-                //             tag: "h",
-                //             content: arg,
-                //         });
-                //     }
-                // });
-                // return htmlLike({
-                //     tag: "remark",
-                //     content: formattedArgs,
-                // });
-                console.log(args);
+                const args: (Node[] | null)[] = getArgsContent(node);
                 let remarkContents = [];
-                // check if has optional argument for title
-                if (args.length === 2 && args[0] !== null) {
+
+                // check if there is the optional argument for title and wrap in title tags
+                if (args[0] !== null) {
                     remarkContents.push(
                         htmlLike({
                             tag: "title",
@@ -167,20 +156,29 @@ export function convert(value: string) {
                         })
                     );
                 }
-                if (args.length >= 1 && args[args.length - 1] !== null) {
-                    remarkContents.push(
-                        htmlLike({
-                            tag: "p",
-                            content: args[args.length - 1], // current issue: args only has the string A and not the full text
-                        })
-                    );
+
+                // args[1] has the first word of the text
+                let text: Node[] = [];
+                if (args[1] != null) {
+                    text = text.concat(args[1]);
                 }
+
+                // add white space between parts
+                text.push(SP);
+
+                // node.content has the rest of the text
+                text = text.concat(node.content);
+
+                remarkContents.push(
+                    htmlLike({
+                        tag: "p",
+                        content: text,
+                    })
+                );
+
                 return htmlLike({
                     tag: "remark",
-                    content: htmlLike({
-                        tag: "p",
-                        content: remarkContents,
-                    }),
+                    content: remarkContents,
                 });
             },
             "align*": (node) => {
