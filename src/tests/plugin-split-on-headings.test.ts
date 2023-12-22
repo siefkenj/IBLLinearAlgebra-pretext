@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { convert } from "../convert-to-pretext";
 
-describe("split-on-headings", () => {
+describe("plugin-split-on-headings", () => {
     it("can replace latex heading macros with title tag inside section tag", () => {
         expect(convert("\\Heading{Sets}")).toEqual(
             "<section><title>Sets</title></section>"

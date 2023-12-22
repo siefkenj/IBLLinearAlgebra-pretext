@@ -6,10 +6,10 @@ import { splitOnMacro } from "@unified-latex/unified-latex-util-split";
 
 /**
  * This plugin splits a LaTeX AST on '\Heading{}' macros,
- * puts the argument in '\html-tag:title{...}' html-like macros,
- * wraps any paragraphs in '\html-tag:p{...}' html-like macros,
+ * puts the argument in '\html-tag:title{...}' macros,
+ * wraps any paragraphs in '\html-tag:p{...}' macros,
  * and then finally wraps the content between the current '\Heading{}' macro
- * and the next one in '\html-tag:section{...}' html-like macros.
+ * and the next one in '\html-tag:section{...}' macros.
  */
 export const splitOnHeadings: Plugin<[], Ast.Root, Ast.Root> =
     function splitOnHeadings() {
