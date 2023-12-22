@@ -19,10 +19,8 @@ import {
     splitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
 import { SP } from "@unified-latex/unified-latex-builder";
-import { s } from "@unified-latex/unified-latex-builder";
 import { Node } from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
-import * as Ast from "@unified-latex/unified-latex-types";
 import { replaceDefinitions } from "./plugin-replace-definitions";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
@@ -42,11 +40,6 @@ export function convert(value: string, definitionsFile?: string) {
                 },
                 SavedDefinitionRender: {
                     signature: "m",
-                },
-            },
-            environments: {
-                emphbox: {
-                    signature: "o m",
                 },
             },
             environments: {
