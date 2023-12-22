@@ -14,7 +14,13 @@ import {
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { replaceMath } from "./plugin-replace-math";
 import { splitOnHeadings } from "./plugin-split-on-headings";
-import { splitOnMacro } from "@unified-latex/unified-latex-util-split";
+import {
+    splitOnCondition,
+    splitOnMacro,
+} from "@unified-latex/unified-latex-util-split";
+import { SP } from "@unified-latex/unified-latex-builder";
+import { Node } from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
 import { replaceDefinitions } from "./plugin-replace-definitions";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
@@ -34,6 +40,11 @@ export function convert(value: string, definitionsFile?: string) {
                 },
                 SavedDefinitionRender: {
                     signature: "m",
+                },
+            },
+            environments: {
+                emphbox: {
+                    signature: "o m",
                 },
             },
         })
@@ -105,21 +116,89 @@ export function convert(value: string, definitionsFile?: string) {
         },
         environmentReplacements: {
             example: (node) => {
+                let exampleContents = [];
+                let solutionContents: Node[] = [];
+
+                // seperate by paragraphs
+                let segments = splitOnCondition(
+                    node.content,
+                    match.parbreak
+                ).segments;
+
+                for (let i = 0; i < segments.length; i++) {
+                    // wrap the first paragraph in statement tags
+                    if (i === 0) {
+                        exampleContents.push(
+                            htmlLike({
+                                tag: "statement",
+                                content: htmlLike({
+                                    tag: "p",
+                                    content: segments[i],
+                                }),
+                            })
+                        );
+
+                        // put the rest in p tags for later
+                    } else {
+                        solutionContents.push(
+                            htmlLike({
+                                tag: "p",
+                                content: segments[i],
+                            })
+                        );
+                    }
+                }
+
+                // wrap the rest in solution tags
+                exampleContents.push(
+                    htmlLike({
+                        tag: "solution",
+                        content: solutionContents,
+                    })
+                );
+
+                // wrap everything in example tags
                 return htmlLike({
                     tag: "example",
-                    content: htmlLike({
-                        tag: "statement",
-                        content: node.content,
-                    }),
+                    content: exampleContents,
                 });
             },
             emphbox: (node) => {
+                const args: (Node[] | null)[] = getArgsContent(node);
+                let remarkContents = [];
+
+                // check if there is the optional argument for title and wrap in title tags
+                if (args[0] !== null) {
+                    remarkContents.push(
+                        htmlLike({
+                            tag: "title",
+                            content: args[0],
+                        })
+                    );
+                }
+
+                // args[1] has the first word of the text
+                let text: Node[] = [];
+                if (args[1] != null) {
+                    text = text.concat(args[1]);
+                }
+
+                // add white space between parts
+                text.push(SP);
+
+                // node.content has the rest of the text
+                text = text.concat(node.content);
+
+                remarkContents.push(
+                    htmlLike({
+                        tag: "p",
+                        content: text,
+                    })
+                );
+
                 return htmlLike({
                     tag: "remark",
-                    content: htmlLike({
-                        tag: "p",
-                        content: node.content,
-                    }),
+                    content: remarkContents,
                 });
             },
             "align*": (node) => {
@@ -237,16 +316,8 @@ if (command === "-h" || command === "--help" || !hasExecuted) {
 
 // npx vite-node src/convert-to-pretext.ts -f
 
-// macros:
-// hspace
-// square brackets on index tag
-
 // environments:
 // emph box
-// align
 
 // Other:
-// wrap <me> tags with <p> tags
-// preserve & in the align environment (and other places) since the & converts into different characters in html
-// p tags
 // preserved definition render
