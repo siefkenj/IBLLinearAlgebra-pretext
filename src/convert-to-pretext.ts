@@ -6,7 +6,10 @@ import path, { dirname } from "node:path";
 
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
-import { unifiedLatexToHast } from "@unified-latex/unified-latex-to-hast";
+import {
+    unifiedLatexToHast,
+    wrapPars,
+} from "@unified-latex/unified-latex-to-hast";
 import {
     unifiedLatexAstComplier,
     unifiedLatexFromString,
@@ -22,6 +25,9 @@ import { SP } from "@unified-latex/unified-latex-builder";
 import { Node } from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { replaceDefinitions } from "./plugin-replace-definitions";
+import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -50,7 +56,8 @@ export function convert(value: string, definitionsFile?: string) {
         })
         .use(unifiedLatexAstComplier)
         .use(splitOnHeadings)
-        .use(replaceDefinitions, definitionsFile || "");
+        .use(replaceDefinitions, definitionsFile || "")
+        .use(replaceIgnoredElements);
 
     const afterReplacements = addedMacros.use(unifiedLatexToHast, {
         macroReplacements: {
@@ -96,23 +103,6 @@ export function convert(value: string, definitionsFile?: string) {
                     content: args[0] || [],
                 });
             },
-            // SavedDefinitionRender: (node) => {
-            //     const definition = findDefinition(
-            //         node.args[0].content[0].content
-            //     );
-            //     const title = htmlLike({
-            //         tag: "title",
-            //         content: definition.title,
-            //     });
-            //     const statement = htmlLike({
-            //         tag: "statement",
-            //         content: definition.definition,
-            //     });
-            //     return htmlLike({
-            //         tag: "definition",
-            //         content: [title, statement],
-            //     });
-            // },
         },
         environmentReplacements: {
             example: (node) => {
@@ -202,29 +192,6 @@ export function convert(value: string, definitionsFile?: string) {
                 });
             },
             "align*": (node) => {
-                // function isAstString(elm: any): elm is Ast.String {
-                //     return (
-                //         elm && typeof elm === "object" && elm.type === "string"
-                //     );
-                // }
-                // function hasContent(node: any, content: string): boolean {
-                //     if (!isAstString(node)) {
-                //         return false;
-                //     }
-                //     if (typeof node.content != "string") {
-                //         return false;
-                //     }
-                //     return node.content === content;
-                // }
-                // for (let i = 0; i < node.content.length; i++) {
-                //     if (hasContent(node.content[i], "&")) {
-                //         const amp: Ast.String = {
-                //             type: "string",
-                //             content: "\\amp",
-                //         };
-                //         node.content[i] = amp;
-                //     }
-                // }
                 const split = splitOnMacro(node.content, "\\");
                 const formattedSegments = split.segments.flatMap((segment) => {
                     if (segment == null) {
@@ -241,6 +208,75 @@ export function convert(value: string, definitionsFile?: string) {
                     content: htmlLike({
                         tag: "md",
                         content: formattedSegments,
+                    }),
+                });
+            },
+            // For itemize, we are making an assumption that either all items have an argument or they don't.
+            itemize: (node) => {
+                const items: Ast.Macro[] = node.content.flatMap((node) => {
+                    if (match.macro(node, "item")) {
+                        return node;
+                    }
+                    return [];
+                });
+                const firstItemArgs: Ast.Node[][] = getArgsContent(
+                    items[0]
+                ).flatMap((arg) => {
+                    if (arg == null) {
+                        return [];
+                    }
+                    return [arg];
+                });
+                if (firstItemArgs.length >= 2) {
+                    const content = items.flatMap((item) => {
+                        const args: Ast.Node[][] = getArgsContent(item).flatMap(
+                            (arg) => {
+                                if (arg == null) {
+                                    return [];
+                                }
+                                return [arg];
+                            }
+                        );
+                        const title = htmlLike({
+                            tag: "title",
+                            content: args[0],
+                        });
+                        const liContent = wrapPars(args[1]);
+                        liContent.unshift(title);
+                        return htmlLike({
+                            tag: "li",
+                            content: liContent,
+                        });
+                    });
+                    return htmlLike({
+                        tag: "p",
+                        content: htmlLike({
+                            tag: "dl",
+                            content,
+                        }),
+                    });
+                }
+
+                const content = items.flatMap((item) => {
+                    const args: Ast.Node[][] = getArgsContent(item).flatMap(
+                        (arg) => {
+                            if (arg == null) {
+                                return [];
+                            }
+                            return [arg];
+                        }
+                    );
+                    return htmlLike({
+                        tag: "li",
+                        content: wrapPars(args[0]),
+                    });
+                });
+
+                return htmlLike({
+                    tag: "p",
+                    content: htmlLike({
+                        tag: "ul",
+                        content,
                     }),
                 });
             },
@@ -273,7 +309,7 @@ function testConvert() {
 async function testConvertFile() {
     let source = await readFile(
         // path.join(CWD, "../book/modules/module1.tex"),
-        path.join(CWD, "../sample-files/small-tex.tex"),
+        path.join(CWD, "../src/small-tex.tex"),
         "utf-8"
     );
     const converted = convert(source);
