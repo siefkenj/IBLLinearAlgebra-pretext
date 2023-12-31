@@ -280,6 +280,37 @@ export function convert(value: string, definitionsFile?: string) {
                     }),
                 });
             },
+            enumerate: (node) => {
+                const items: Ast.Macro[] = node.content.flatMap((node) => {
+                    if (match.macro(node, "item")) {
+                        return node;
+                    }
+                    return [];
+                });
+
+                const content = items.flatMap((item) => {
+                    const args: Ast.Node[][] = getArgsContent(item).flatMap(
+                        (arg) => {
+                            if (arg == null) {
+                                return [];
+                            }
+                            return [arg];
+                        }
+                    );
+                    return htmlLike({
+                        tag: "li",
+                        content: wrapPars(args[0]),
+                    });
+                });
+
+                return htmlLike({
+                    tag: "p",
+                    content: htmlLike({
+                        tag: "ol",
+                        content,
+                    }),
+                });
+            },
         },
     });
 
@@ -292,7 +323,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\SavedDefinitionRender{UnionsIntersections}`;
+    const source = `\\label{APPSLEI}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
