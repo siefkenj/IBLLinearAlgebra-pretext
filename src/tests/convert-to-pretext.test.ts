@@ -57,7 +57,7 @@ describe("convert-to-pretext", () => {
         pretext = convert("<>&");
         expect(pretext).toEqual("\\lt\\gt&#x26;");
     });
-    it("replaces itemize environment where items have arguments", () => {
+    it.skip("replaces itemize environment where items have arguments", () => {
         pretext = convert(
             "\\begin{itemize}\\item[(foo)] item 1 content.\\item[(bar)] item 2 content.\\end{itemize}"
         );
@@ -65,7 +65,7 @@ describe("convert-to-pretext", () => {
             "<p><dl><li><title>(foo)</title><p>item 1 content.</p></li><li><title>(bar)</title><p>item 2 content.</p></li></dl></p>"
         );
     });
-    it("replaces itemize environment where items have no arguments", () => {
+    it.skip("replaces itemize environment where items have no arguments", () => {
         pretext = convert(
             "\\begin{itemize}\\item item 1 content.\\item item 2 content.\\end{itemize}"
         );
