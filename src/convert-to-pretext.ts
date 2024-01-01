@@ -4,7 +4,10 @@ import chalk from "chalk";
 import { readFile } from "node:fs/promises";
 import path, { dirname } from "node:path";
 
-import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
+import {
+    htmlLike,
+    isHtmlLike,
+} from "@unified-latex/unified-latex-util-html-like";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import {
     unifiedLatexToHast,
@@ -17,11 +20,15 @@ import {
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { replaceMath } from "./plugin-replace-math";
 import { splitOnHeadings } from "./plugin-split-on-headings";
-import { splitOnMacro } from "@unified-latex/unified-latex-util-split";
+import {
+    splitOnCondition,
+    splitOnMacro,
+    unsplitOnMacro,
+} from "@unified-latex/unified-latex-util-split";
 import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { match } from "@unified-latex/unified-latex-util-match";
+import { match, math } from "@unified-latex/unified-latex-util-match";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -90,6 +97,19 @@ export function convert(value: string, definitionsFile?: string) {
                 return htmlLike({
                     tag: "em",
                     content: args[0] || [],
+                });
+            },
+            textsc: (node) => {
+                const args = getArgsContent(node)[0]?.flatMap((arg) => {
+                    if (arg.type === "string") {
+                        arg.content = arg.content.toUpperCase();
+                    }
+                    return arg;
+                });
+                console.log(args);
+                return htmlLike({
+                    tag: "em",
+                    content: args,
                 });
             },
         },
@@ -162,7 +182,20 @@ export function convert(value: string, definitionsFile?: string) {
                             tag: "title",
                             content: args[0],
                         });
-                        const liContent = wrapPars(args[1]);
+                        const segmentsSplit = splitOnCondition(
+                            args[1],
+                            (node) => {
+                                return isHtmlLike(node);
+                            }
+                        );
+                        const formattedSegments =
+                            segmentsSplit.segments.flatMap((segment) => {
+                                return [wrapPars(segment)];
+                            });
+                        const liContent = unsplitOnMacro({
+                            segments: formattedSegments,
+                            macros: segmentsSplit.separators,
+                        });
                         liContent.unshift(title);
                         return htmlLike({
                             tag: "li",
@@ -187,9 +220,20 @@ export function convert(value: string, definitionsFile?: string) {
                             return [arg];
                         }
                     );
+                    const segmentsSplit = splitOnCondition(args[0], (node) => {
+                        return isHtmlLike(node);
+                    });
+                    const formattedSegments = segmentsSplit.segments.flatMap(
+                        (segment) => {
+                            return [wrapPars(segment)];
+                        }
+                    );
                     return htmlLike({
                         tag: "li",
-                        content: wrapPars(args[0]),
+                        content: unsplitOnMacro({
+                            segments: formattedSegments,
+                            macros: segmentsSplit.separators,
+                        }),
                     });
                 });
 
@@ -218,9 +262,20 @@ export function convert(value: string, definitionsFile?: string) {
                             return [arg];
                         }
                     );
+                    const segmentsSplit = splitOnCondition(args[0], (node) => {
+                        return isHtmlLike(node);
+                    });
+                    const formattedSegments = segmentsSplit.segments.flatMap(
+                        (segment) => {
+                            return [wrapPars(segment)];
+                        }
+                    );
                     return htmlLike({
                         tag: "li",
-                        content: wrapPars(args[0]),
+                        content: unsplitOnMacro({
+                            segments: formattedSegments,
+                            macros: segmentsSplit.separators,
+                        }),
                     });
                 });
 
@@ -230,6 +285,74 @@ export function convert(value: string, definitionsFile?: string) {
                         tag: "ol",
                         content,
                     }),
+                });
+            },
+            exercises: (node) => {
+                const problist = splitOnCondition(node.content, (node) => {
+                    return match.environment(node, "problist");
+                }).separators[0] as Ast.Environment;
+                const probs = splitOnMacro(
+                    problist.content,
+                    "prob"
+                ).segments.flatMap((prob) => {
+                    if (prob.length == 0) return [];
+                    const solutionSplit = splitOnCondition(prob, (node) => {
+                        return match.environment(node, "solution");
+                    }) as {
+                        segments: Ast.Node[][];
+                        separators: Ast.Environment[];
+                    };
+                    const segmentsSplit = splitOnCondition(
+                        solutionSplit.segments[0],
+                        (node) => {
+                            return isHtmlLike(node);
+                        }
+                    );
+                    const formattedSegments = segmentsSplit.segments.flatMap(
+                        (segment) => {
+                            return [wrapPars(segment)];
+                        }
+                    );
+                    const statement = htmlLike({
+                        tag: "statement",
+                        content: unsplitOnMacro({
+                            segments: formattedSegments,
+                            macros: segmentsSplit.separators,
+                        }),
+                    });
+                    if (solutionSplit.separators.length > 0) {
+                        const separatorsSplit = splitOnCondition(
+                            solutionSplit.separators[0].content,
+                            (node) => {
+                                return isHtmlLike(node);
+                            }
+                        );
+                        console.log(separatorsSplit);
+                        const formattedSegments =
+                            separatorsSplit.segments.flatMap((segment) => {
+                                return [wrapPars(segment)];
+                            });
+                        const solution = htmlLike({
+                            tag: "solution",
+                            content: unsplitOnMacro({
+                                segments: formattedSegments,
+                                macros: separatorsSplit.separators,
+                            }),
+                        });
+                        return htmlLike({
+                            tag: "exercise",
+                            content: [statement, solution],
+                        });
+                    }
+                    return htmlLike({
+                        tag: "exercise",
+                        content: statement,
+                    });
+                });
+
+                return htmlLike({
+                    tag: "exercises",
+                    content: probs,
                 });
             },
         },
@@ -244,7 +367,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\label{APPSLEI}`;
+    const source = `\\begin{exercises} \\begin{problist} \\prob exercise 1 \\begin{solution} this is a solution \\end{solution} \\prob exercise 2 \\end{problist} \\end{exercises}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
