@@ -21,7 +21,7 @@ describe("convert-to-pretext", () => {
             "The symbol<idx><h>symbols</h><h>foo</h></idx>is used"
         );
     });
-    it.skip("replaces the example environment", () => {
+    it("replaces the example environment", () => {
         pretext = convert(
             "\\begin{example}\nfoo\n\nbar1\n\nbar2\\end{example}"
         );
@@ -37,7 +37,7 @@ describe("convert-to-pretext", () => {
             "<p>Thus</p><p><md><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></md></p><p>where</p>"
         );
     });
-    it.skip("replaces the emph box environment", () => {
+    it("replaces the emph box environment", () => {
         pretext = convert(
             "\\begin{emphbox}[Takeaway]\nA vector is not the same as a line segment.\n\\end{emphbox}"
         );
@@ -50,9 +50,12 @@ describe("convert-to-pretext", () => {
         expect(pretext).toEqual("Consider<m>x+y</m>foo");
     });
     it("replaces display math", () => {
-        pretext = convert("foo\\[x+y\\]bar");
-        expect(pretext).toEqual("foo<p><me>x+y</me></p>bar");
+        pretext = convert("foo\\[x+y\\]bar\n\nextra words");
+        expect(pretext).toEqual(
+            "<p>foo</p><p><me>x+y</me></p><p>bar</p><p>extra words</p>"
+        );
     });
+    // shouldn't need these replacements; remove test when verified.
     it.skip("replaces special math characters", () => {
         pretext = convert("<>&");
         expect(pretext).toEqual("\\lt\\gt&#x26;");
