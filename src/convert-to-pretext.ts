@@ -113,7 +113,6 @@ export function convert(value: string, definitionsFile?: string) {
                     }
                     return arg;
                 });
-                console.log(args);
                 return htmlLike({
                     tag: "em",
                     content: args,
@@ -402,7 +401,6 @@ export function convert(value: string, definitionsFile?: string) {
                                 return isHtmlLike(node);
                             }
                         );
-                        console.log(separatorsSplit);
                         const formattedSegments =
                             separatorsSplit.segments.flatMap((segment) => {
                                 return [wrapPars(segment)];
