@@ -84,4 +84,12 @@ describe("convert-to-pretext", () => {
             "<p><ol><li><p>item 1 content.</p></li><li><p>item 2 content.</p></li></ol></p>"
         );
     });
+    it("replaces exercises environment", () => {
+        pretext = convert(
+            "\\begin{exercises} \\begin{problist} \\prob exercise 1 \\begin{solution} this is a solution \\end{solution} \\prob exercise 2 \\end{problist} \\end{exercises}"
+        );
+        expect(pretext).toEqual(
+            "<exercises><exercise><statement><p>exercise 1</p></statement><solution><p>this is a solution</p></solution></exercise><exercise><statement><p>exercise 2</p></statement></exercise></exercises>"
+        );
+    });
 });
