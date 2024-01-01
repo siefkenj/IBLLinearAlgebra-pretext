@@ -25,6 +25,8 @@ import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
+import { SP } from "@unified-latex/unified-latex-builder";
+import { Node } from "@unified-latex/unified-latex-types";
 import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
 import * as Ast from "@unified-latex/unified-latex-types";
