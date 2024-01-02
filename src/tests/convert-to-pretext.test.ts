@@ -100,4 +100,8 @@ describe("convert-to-pretext", () => {
             "<definition><title>Definition Title</title><statement><p>This is the definition</p></statement></definition>"
         );
     });
+    it("replaces equation environment", () => {
+        pretext = convert("\\begin{equation} 1+1=2 \\end{equation}");
+        expect(pretext).toEqual("<p><men>1+1=2</men></p>");
+    });
 });
