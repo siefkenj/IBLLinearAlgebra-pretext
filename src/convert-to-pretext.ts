@@ -457,6 +457,15 @@ export function convert(value: string, definitionsFile?: string) {
                     content: statement,
                 });
             },
+            equation: (node) => {
+                return htmlLike({
+                    tag: "p",
+                    content: htmlLike({
+                        tag: "men",
+                        content: node.content,
+                    }),
+                });
+            },
         },
     });
 
@@ -469,7 +478,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\begin{definition}[Linear Algebra] A \\emph{linear equation} in the variables $x_1,\\ldots,x_n$ is one that can be expressed \\end{definition}`;
+    const source = `\\begin{equation} x+y=4 \\end{equation}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
