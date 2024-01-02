@@ -92,4 +92,12 @@ describe("convert-to-pretext", () => {
             "<exercises><exercise><statement><p>exercise 1</p></statement><solution><p>this is a solution</p></solution></exercise><exercise><statement><p>exercise 2</p></statement></exercise></exercises>"
         );
     });
+    it("replaces defintion environment with optional argument with optional argument", () => {
+        pretext = convert(
+            "\\begin{definition}[Definition Title] This is the definition \\end{definition}"
+        );
+        expect(pretext).toEqual(
+            "<definition><title>Definition Title</title><statement><p>This is the definition</p></statement></definition>"
+        );
+    });
 });

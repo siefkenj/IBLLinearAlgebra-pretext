@@ -55,6 +55,9 @@ export function convert(value: string, definitionsFile?: string) {
                 emphbox: {
                     signature: "o m",
                 },
+                definition: {
+                    signature: "o",
+                },
             },
         })
         .use(unifiedLatexAstComplier)
@@ -428,6 +431,32 @@ export function convert(value: string, definitionsFile?: string) {
                     content: probs,
                 });
             },
+            definition: (node) => {
+                const args = getArgsContent(node);
+                const statement = htmlLike({
+                    tag: "statement",
+                    content: wrapPars(node.content),
+                });
+                if (
+                    !(
+                        Array.isArray(args) &&
+                        args.every((item) => item === null)
+                    )
+                ) {
+                    const title = htmlLike({
+                        tag: "title",
+                        content: args[0] || undefined,
+                    });
+                    return htmlLike({
+                        tag: "definition",
+                        content: [title, statement],
+                    });
+                }
+                return htmlLike({
+                    tag: "defintion",
+                    content: statement,
+                });
+            },
         },
     });
 
@@ -440,7 +469,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\begin{exercises} \\begin{problist} \\prob exercise 1 \\begin{solution} this is a solution \\end{solution} \\prob exercise 2 \\end{problist} \\end{exercises}`;
+    const source = `\\begin{definition}[Linear Algebra] A \\emph{linear equation} in the variables $x_1,\\ldots,x_n$ is one that can be expressed \\end{definition}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
