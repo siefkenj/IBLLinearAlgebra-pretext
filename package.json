@@ -59,7 +59,7 @@
         "rehype": "^13.0.1",
         "rehype-format": "^5.0.0",
         "typescript": "^5.2.2",
-        "unified-latex": "github:OrhanBC/unified-latex#main",
+        "unified-latex": "github:siefkenj/unified-latex#main",
         "vite-node": "^0.34.6",
         "vitest": "^0.34.6"
     },

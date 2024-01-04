@@ -232,7 +232,10 @@ export function convert(value: string, definitionsFile?: string) {
                     } else {
                         return htmlLike({
                             tag: "mrow",
-                            content: segment,
+                            content: {
+                                type: "string",
+                                content: toString(segment),
+                            },
                         });
                     }
                 });
@@ -477,7 +480,10 @@ export function convert(value: string, definitionsFile?: string) {
                     tag: "p",
                     content: htmlLike({
                         tag: "men",
-                        content: node.content,
+                        content: {
+                            type: "string",
+                            content: toString(node.content),
+                        },
                     }),
                 });
             },
@@ -493,7 +499,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\ref{module1}`;
+    const source = `\\begin{align*}\\in\\end{align*}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
