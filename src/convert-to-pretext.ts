@@ -31,6 +31,7 @@ import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match, math } from "@unified-latex/unified-latex-util-match";
+import { toString } from "@unified-latex/unified-latex-util-to-string";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -48,6 +49,9 @@ export function convert(value: string, definitionsFile?: string) {
                     signature: "o m",
                 },
                 SavedDefinitionRender: {
+                    signature: "m",
+                },
+                ref: {
                     signature: "m",
                 },
             },
@@ -119,6 +123,17 @@ export function convert(value: string, definitionsFile?: string) {
                 return htmlLike({
                     tag: "em",
                     content: args,
+                });
+            },
+            ref: (node) => {
+                const args = getArgsContent(node) as Ast.Node[][];
+                return htmlLike({
+                    tag: "xref",
+                    content: { type: "string", content: "*" },
+                    attributes: {
+                        ref: toString(args[0]),
+                        text: "custom",
+                    },
                 });
             },
         },
@@ -478,7 +493,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\begin{equation} x+y=4 \\end{equation}`;
+    const source = `\\ref{module1}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
