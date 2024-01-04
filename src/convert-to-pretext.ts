@@ -247,6 +247,29 @@ export function convert(value: string, definitionsFile?: string) {
                     }),
                 });
             },
+            align: (node) => {
+                const split = splitOnMacro(node.content, "\\");
+                const formattedSegments = split.segments.flatMap((segment) => {
+                    if (segment == null) {
+                        return [];
+                    } else {
+                        return htmlLike({
+                            tag: "mrow",
+                            content: {
+                                type: "string",
+                                content: toString(segment),
+                            },
+                        });
+                    }
+                });
+                return htmlLike({
+                    tag: "p",
+                    content: htmlLike({
+                        tag: "md",
+                        content: formattedSegments,
+                    }),
+                });
+            },
             // For itemize and enumerate, we are making an assumption that either all items have an argument or they alls` don't.
             itemize: (node) => {
                 const items: Ast.Macro[] = node.content.flatMap((node) => {

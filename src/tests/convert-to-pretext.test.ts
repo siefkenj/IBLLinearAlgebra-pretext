@@ -33,9 +33,16 @@ describe("convert-to-pretext", () => {
             "<example><statement><p>foo</p></statement><solution><p>bar1</p><p>bar2</p></solution></example>"
         );
     });
-    it("replaces the align* environment", () => {
+    it("replaces align and align* environments", () => {
         pretext = convert(
             "Thus \\begin{align*}x=m+1&=(2k+1)+1=2k+2\\\\&=2(k+1)=2n,\\end{align*}\n\nwhere"
+        );
+        expect(pretext).toEqual(
+            "<p>Thus</p><p><md><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></md></p><p>where</p>"
+        );
+
+        pretext = convert(
+            "Thus \\begin{align}x=m+1&=(2k+1)+1=2k+2\\\\&=2(k+1)=2n,\\end{align}\n\nwhere"
         );
         expect(pretext).toEqual(
             "<p>Thus</p><p><md><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></md></p><p>where</p>"
@@ -114,8 +121,11 @@ describe("convert-to-pretext", () => {
         pretext = convert("\\begin{equation} 1+1=2 \\end{equation}");
         expect(pretext).toEqual("<p><men>1+1=2</men></p>");
     });
-    it("puts equation and align* environments in math mode", () => {
+    it("puts equation, align and align* environments in math mode", () => {
         pretext = convert("\\begin{align*} \\somemathmacro \\end{align*}");
+        expect(pretext).toEqual("<p><md><mrow>\\somemathmacro</mrow></md></p>");
+
+        pretext = convert("\\begin{align} \\somemathmacro \\end{align}");
         expect(pretext).toEqual("<p><md><mrow>\\somemathmacro</mrow></md></p>");
 
         pretext = convert("\\begin{equation} \\somemathmacro \\end{equation}");
