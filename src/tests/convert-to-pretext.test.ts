@@ -114,4 +114,11 @@ describe("convert-to-pretext", () => {
         pretext = convert("\\begin{equation} 1+1=2 \\end{equation}");
         expect(pretext).toEqual("<p><men>1+1=2</men></p>");
     });
+    it("puts equation and align* environments in math mode", () => {
+        pretext = convert("\\begin{align*} \\somemathmacro \\end{align*}");
+        expect(pretext).toEqual("<p><md><mrow>\\somemathmacro</mrow></md></p>");
+
+        pretext = convert("\\begin{equation} \\somemathmacro \\end{equation}");
+        expect(pretext).toEqual("<p><men>\\somemathmacro</men></p>");
+    });
 });
