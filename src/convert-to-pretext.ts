@@ -244,7 +244,7 @@ export function convert(value: string, definitionsFile?: string) {
                     }),
                 });
             },
-            // For itemize, we are making an assumption that either all items have an argument or they don't.
+            // For itemize and enumerate, we are making an assumption that either all items have an argument or they alls` don't.
             itemize: (node) => {
                 const items: Ast.Macro[] = node.content.flatMap((node) => {
                     if (match.macro(node, "item")) {
@@ -338,12 +338,53 @@ export function convert(value: string, definitionsFile?: string) {
                 });
             },
             enumerate: (node) => {
-                const items: Ast.Macro[] = node.content.flatMap((node) => {
-                    if (match.macro(node, "item")) {
-                        return node;
-                    }
-                    return [];
-                });
+                // const items: Ast.Macro[] = node.content.flatMap((node) => {
+                //     if (match.macro(node, "item")) {
+                //         return node;
+                //     }
+                //     return [];
+                // });
+                const items = splitOnMacro(node.content, "item").macros;
+
+                if (getArgsContent(items[0])[1] != null) {
+                    const content = items.flatMap((item) => {
+                        const fourthArg = getArgsContent(item)[3] as Ast.Node[];
+                        const args: Ast.Node[] = fourthArg.flatMap((arg) => {
+                            if (arg == null) {
+                                return [];
+                            }
+                            return [arg];
+                        });
+                        const segmentsSplit = splitOnCondition(args, (node) => {
+                            return isHtmlLike(node);
+                        });
+                        const formattedSegments =
+                            segmentsSplit.segments.flatMap((segment) => {
+                                return [wrapPars(segment)];
+                            });
+                        const liContent = unsplitOnMacro({
+                            segments: formattedSegments,
+                            macros: segmentsSplit.separators,
+                        });
+                        const title = htmlLike({
+                            tag: "title",
+                            content: getArgsContent(items[0])[1] || [],
+                        });
+                        liContent.unshift(title);
+                        return htmlLike({
+                            tag: "li",
+                            content: liContent,
+                        });
+                    });
+
+                    return htmlLike({
+                        tag: "p",
+                        content: htmlLike({
+                            tag: "dl",
+                            content,
+                        }),
+                    });
+                }
 
                 const content = items.flatMap((item) => {
                     const args: Ast.Node[][] = getArgsContent(item).flatMap(
