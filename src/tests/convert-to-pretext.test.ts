@@ -131,4 +131,10 @@ describe("convert-to-pretext", () => {
         pretext = convert("\\begin{equation} \\somemathmacro \\end{equation}");
         expect(pretext).toEqual("<p><men>\\somemathmacro</men></p>");
     });
+    it("replaces label macro in various environemnts", () => {
+        pretext = convert(
+            "\\begin{equation}\\label{EQUATION} 1+1=2 \\end{equation}"
+        );
+        expect(pretext).toEqual('<p><men xml:id="EQUATION">1+1=2</men></p>');
+    });
 });

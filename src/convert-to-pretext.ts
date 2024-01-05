@@ -54,6 +54,9 @@ export function convert(value: string, definitionsFile?: string) {
                 ref: {
                     signature: "m",
                 },
+                label: {
+                    signature: "m",
+                },
             },
             environments: {
                 emphbox: {
@@ -540,6 +543,30 @@ export function convert(value: string, definitionsFile?: string) {
                 });
             },
             equation: (node) => {
+                const labelSplit = splitOnMacro(node.content, "label");
+                if (labelSplit.macros.length == 1) {
+                    const args = getArgsContent(
+                        labelSplit.macros[0]
+                    ) as Ast.String[][];
+                    const id = args[0][0].content;
+                    return htmlLike({
+                        tag: "p",
+                        content: htmlLike({
+                            tag: "men",
+                            content: {
+                                type: "string",
+                                content: toString(
+                                    ([] as Ast.Node[]).concat(
+                                        ...labelSplit.segments
+                                    )
+                                ),
+                            },
+                            attributes: {
+                                "xml:id": id,
+                            },
+                        }),
+                    });
+                }
                 return htmlLike({
                     tag: "p",
                     content: htmlLike({
@@ -563,7 +590,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\begin{align*}\\in\\end{align*}`;
+    const source = `\\begin{equation}\\label{EQUATION} 1+1=2 \\end{equation}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
