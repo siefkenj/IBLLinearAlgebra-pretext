@@ -15,9 +15,13 @@ describe("convert-to-pretext", () => {
         pretext = convert("\\index{foo}");
         expect(pretext).toEqual("<idx><h>foo</h></idx>");
     });
-    it("replaces ref", () => {
+    it("replaces ref macro", () => {
         pretext = convert("\\ref{reference}");
         expect(pretext).toEqual('<xref ref="reference" text="custom">*</xref>');
+    });
+    it("replaces eqref macro", () => {
+        pretext = convert("\\eqref{reference}");
+        expect(pretext).toEqual('<xref ref="reference"></xref>');
     });
     it("replaces index with optional square brackets", () => {
         pretext = convert("The symbol\\index[symbols]{foo}is used");
@@ -33,21 +37,24 @@ describe("convert-to-pretext", () => {
             "<example><statement><p>foo</p></statement><solution><p>bar1</p><p>bar2</p></solution></example>"
         );
     });
-    it("replaces align and align* environments", () => {
+    it("replaces align* environment", () => {
         pretext = convert(
             "Thus \\begin{align*}x=m+1&=(2k+1)+1=2k+2\\\\&=2(k+1)=2n,\\end{align*}\n\nwhere"
         );
         expect(pretext).toEqual(
             "<p>Thus</p><p><md><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></md></p><p>where</p>"
         );
+    });
 
+    it("replaces align* environment", () => {
         pretext = convert(
             "Thus \\begin{align}x=m+1&=(2k+1)+1=2k+2\\\\&=2(k+1)=2n,\\end{align}\n\nwhere"
         );
         expect(pretext).toEqual(
-            "<p>Thus</p><p><md><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></md></p><p>where</p>"
+            "<p>Thus</p><p><mdn><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></mdn></p><p>where</p>"
         );
     });
+
     it("replaces the emph box environment", () => {
         pretext = convert(
             "\\begin{emphbox}[Takeaway]\nA vector is not the same as a line segment.\n\\end{emphbox}"
@@ -126,15 +133,24 @@ describe("convert-to-pretext", () => {
         expect(pretext).toEqual("<p><md><mrow>\\somemathmacro</mrow></md></p>");
 
         pretext = convert("\\begin{align} \\somemathmacro \\end{align}");
-        expect(pretext).toEqual("<p><md><mrow>\\somemathmacro</mrow></md></p>");
+        expect(pretext).toEqual(
+            "<p><mdn><mrow>\\somemathmacro</mrow></mdn></p>"
+        );
 
         pretext = convert("\\begin{equation} \\somemathmacro \\end{equation}");
         expect(pretext).toEqual("<p><men>\\somemathmacro</men></p>");
     });
     it("replaces label macro in various environemnts", () => {
+        // equation
         pretext = convert(
             "\\begin{equation}\\label{EQUATION} 1+1=2 \\end{equation}"
         );
         expect(pretext).toEqual('<p><men xml:id="EQUATION">1+1=2</men></p>');
+
+        // align
+        pretext = convert("\\begin{align}\\label{EQUATION} 1+1=2 \\end{align}");
+        expect(pretext).toEqual(
+            '<p><mdn><mrow xml:id="EQUATION">1+1=2</mrow></mdn></p>'
+        );
     });
 });

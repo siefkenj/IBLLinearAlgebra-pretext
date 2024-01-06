@@ -54,6 +54,9 @@ export function convert(value: string, definitionsFile?: string) {
                 ref: {
                     signature: "m",
                 },
+                eqref: {
+                    signature: "m",
+                },
                 label: {
                     signature: "m",
                 },
@@ -136,6 +139,15 @@ export function convert(value: string, definitionsFile?: string) {
                     attributes: {
                         ref: toString(args[0]),
                         text: "custom",
+                    },
+                });
+            },
+            eqref: (node) => {
+                const args = getArgsContent(node) as Ast.Node[][];
+                return htmlLike({
+                    tag: "xref",
+                    attributes: {
+                        ref: toString(args[0]),
                     },
                 });
             },
@@ -256,6 +268,27 @@ export function convert(value: string, definitionsFile?: string) {
                     if (segment == null) {
                         return [];
                     } else {
+                        const labelSplit = splitOnMacro(segment, "label");
+                        if (labelSplit.macros.length == 1) {
+                            const args = getArgsContent(
+                                labelSplit.macros[0]
+                            ) as Ast.String[][];
+                            const id = args[0][0].content;
+                            return htmlLike({
+                                tag: "mrow",
+                                content: {
+                                    type: "string",
+                                    content: toString(
+                                        ([] as Ast.Node[]).concat(
+                                            ...labelSplit.segments
+                                        )
+                                    ),
+                                },
+                                attributes: {
+                                    "xml:id": id,
+                                },
+                            });
+                        }
                         return htmlLike({
                             tag: "mrow",
                             content: {
@@ -268,7 +301,7 @@ export function convert(value: string, definitionsFile?: string) {
                 return htmlLike({
                     tag: "p",
                     content: htmlLike({
-                        tag: "md",
+                        tag: "mdn",
                         content: formattedSegments,
                     }),
                 });
@@ -590,7 +623,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\begin{equation}\\label{EQUATION} 1+1=2 \\end{equation}`;
+    const source = `\\eqref{equation}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
