@@ -580,6 +580,23 @@ export function convert(value: string, definitionsFile?: string) {
                     content: statement,
                 });
             },
+            proof: (node) => {
+                const segmentsSplit = splitOnCondition(node.content, (node) => {
+                    return isHtmlLike(node);
+                });
+                const formattedSegments = segmentsSplit.segments.flatMap(
+                    (segment) => {
+                        return [wrapPars(segment)];
+                    }
+                );
+                return htmlLike({
+                    tag: "proof",
+                    content: unsplitOnMacro({
+                        segments: formattedSegments,
+                        macros: segmentsSplit.separators,
+                    }),
+                });
+            },
         },
     });
 
@@ -592,7 +609,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\SavedDefinitionRender{Subspace}`;
+    const source = `\\begin{proof} This is the proof \\end{proof}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
