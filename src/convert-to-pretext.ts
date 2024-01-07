@@ -62,6 +62,9 @@ export function convert(value: string, definitionsFile?: string) {
                 definition: {
                     signature: "o",
                 },
+                theorem: {
+                    signature: "o",
+                },
             },
         })
         .use(unifiedLatexAstComplier)
@@ -535,7 +538,7 @@ export function convert(value: string, definitionsFile?: string) {
                     });
                 }
                 return htmlLike({
-                    tag: "defintion",
+                    tag: "definition",
                     content: statement,
                 });
             },
@@ -551,6 +554,32 @@ export function convert(value: string, definitionsFile?: string) {
                     }),
                 });
             },
+            theorem: (node) => {
+                const args = getArgsContent(node);
+                const statement = htmlLike({
+                    tag: "statement",
+                    content: wrapPars(node.content),
+                });
+                if (
+                    !(
+                        Array.isArray(args) &&
+                        args.every((item) => item === null)
+                    )
+                ) {
+                    const title = htmlLike({
+                        tag: "title",
+                        content: args[0] || undefined,
+                    });
+                    return htmlLike({
+                        tag: "theorem",
+                        content: [title, statement],
+                    });
+                }
+                return htmlLike({
+                    tag: "theorem",
+                    content: statement,
+                });
+            },
         },
     });
 
@@ -563,7 +592,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\begin{align*}\\in\\end{align*}`;
+    const source = `\\SavedDefinitionRender{Subspace}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
