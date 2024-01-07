@@ -32,6 +32,7 @@ import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match, math } from "@unified-latex/unified-latex-util-match";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -135,10 +136,10 @@ export function convert(value: string, definitionsFile?: string) {
                 const args = getArgsContent(node) as Ast.Node[][];
                 return htmlLike({
                     tag: "xref",
-                    content: { type: "string", content: "*" },
+                    // content: { type: "string", content: "*" },
                     attributes: {
                         ref: toString(args[0]),
-                        text: "custom",
+                        // text: "custom",
                     },
                 });
             },
@@ -156,12 +157,21 @@ export function convert(value: string, definitionsFile?: string) {
             example: (node) => {
                 let exampleContents = [];
                 let solutionContents: Node[] = [];
+                let id = "";
 
                 // seperate by paragraphs
                 let segments = splitOnCondition(
                     node.content,
                     match.parbreak
                 ).segments;
+
+                // check if there is a label
+                if (match.macro(segments[0][0], "label")) {
+                    id = toString(
+                        (getArgsContent(segments[0][0]) as Ast.String[][])[0]
+                    );
+                    segments[0].shift();
+                }
 
                 for (let i = 0; i < segments.length; i++) {
                     // wrap the first paragraph in statement tags
@@ -194,6 +204,17 @@ export function convert(value: string, definitionsFile?: string) {
                         content: solutionContents,
                     })
                 );
+
+                if (id) {
+                    // wrap everything in example tags with the id
+                    return htmlLike({
+                        tag: "example",
+                        content: exampleContents,
+                        attributes: {
+                            "xml:id": id,
+                        },
+                    });
+                }
 
                 // wrap everything in example tags
                 return htmlLike({
@@ -273,7 +294,7 @@ export function convert(value: string, definitionsFile?: string) {
                             const args = getArgsContent(
                                 labelSplit.macros[0]
                             ) as Ast.String[][];
-                            const id = args[0][0].content;
+                            const id = toString(args[0]);
                             return htmlLike({
                                 tag: "mrow",
                                 content: {
@@ -430,7 +451,7 @@ export function convert(value: string, definitionsFile?: string) {
                         });
                         const title = htmlLike({
                             tag: "title",
-                            content: getArgsContent(items[0])[1] || [],
+                            content: getArgsContent(item)[1] || [],
                         });
                         liContent.unshift(title);
                         return htmlLike({
@@ -449,6 +470,7 @@ export function convert(value: string, definitionsFile?: string) {
                 }
 
                 const content = items.flatMap((item) => {
+                    let id = "";
                     const args: Ast.Node[][] = getArgsContent(item).flatMap(
                         (arg) => {
                             if (arg == null) {
@@ -462,9 +484,33 @@ export function convert(value: string, definitionsFile?: string) {
                     });
                     const formattedSegments = segmentsSplit.segments.flatMap(
                         (segment) => {
+                            for (let node of segment) {
+                                if (match.macro(node, "label")) {
+                                    id = toString(
+                                        (
+                                            getArgsContent(
+                                                node
+                                            ) as Ast.String[][]
+                                        )[0]
+                                    );
+                                    segment.splice(segment.indexOf(node), 1);
+                                }
+                            }
                             return [wrapPars(segment)];
                         }
                     );
+                    if (id) {
+                        return htmlLike({
+                            tag: "li",
+                            content: unsplitOnMacro({
+                                segments: formattedSegments,
+                                macros: segmentsSplit.separators,
+                            }),
+                            attributes: {
+                                "xml:id": id,
+                            },
+                        });
+                    }
                     return htmlLike({
                         tag: "li",
                         content: unsplitOnMacro({
@@ -491,6 +537,15 @@ export function convert(value: string, definitionsFile?: string) {
                     "prob"
                 ).segments.flatMap((prob) => {
                     if (prob.length == 0) return [];
+                    let id = "";
+                    // const labelSplit = splitOnMacro(prob, "label");
+                    // if (splitOnMacro(prob, "label").macros.length == 1) {
+                    //     id = (
+                    //         getArgsContent(
+                    //             labelSplit.macros[0]
+                    //         ) as Ast.String[][]
+                    //     )[0][0].content;
+                    // }
                     const solutionSplit = splitOnCondition(prob, (node) => {
                         return match.environment(node, "solution");
                     }) as {
@@ -505,6 +560,18 @@ export function convert(value: string, definitionsFile?: string) {
                     );
                     const formattedSegments = segmentsSplit.segments.flatMap(
                         (segment) => {
+                            for (let node of segment) {
+                                if (match.macro(node, "label")) {
+                                    id = toString(
+                                        (
+                                            getArgsContent(
+                                                node
+                                            ) as Ast.String[][]
+                                        )[0]
+                                    );
+                                    segment.splice(segment.indexOf(node), 1);
+                                }
+                            }
                             return [wrapPars(segment)];
                         }
                     );
@@ -533,6 +600,15 @@ export function convert(value: string, definitionsFile?: string) {
                                 macros: separatorsSplit.separators,
                             }),
                         });
+                        if (id) {
+                            return htmlLike({
+                                tag: "exercise",
+                                content: [statement, solution],
+                                attributes: {
+                                    "xml:id": id,
+                                },
+                            });
+                        }
                         return htmlLike({
                             tag: "exercise",
                             content: [statement, solution],
@@ -581,7 +657,7 @@ export function convert(value: string, definitionsFile?: string) {
                     const args = getArgsContent(
                         labelSplit.macros[0]
                     ) as Ast.String[][];
-                    const id = args[0][0].content;
+                    const id = toString(args[0]);
                     return htmlLike({
                         tag: "p",
                         content: htmlLike({
@@ -623,7 +699,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\eqref{equation}`;
+    const source = `\\begin{enumerate}\\item[(foo)] item 1 content.\\item[(bar)] item 2 content.\\end{enumerate}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
