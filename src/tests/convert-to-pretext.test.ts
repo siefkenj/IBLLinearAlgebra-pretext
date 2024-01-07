@@ -109,12 +109,36 @@ describe("convert-to-pretext", () => {
             "<exercises><exercise><statement><p>exercise 1</p></statement><solution><p>this is a solution</p></solution></exercise><exercise><statement><p>exercise 2</p></statement></exercise></exercises>"
         );
     });
-    it("replaces defintion environment with optional argument with optional argument", () => {
+    it("replaces definition environment with no optional argument", () => {
+        pretext = convert(
+            "\\begin{definition} This is the definition \\end{definition}"
+        );
+        expect(pretext).toEqual(
+            "<definition><statement><p>This is the definition</p></statement></definition>"
+        );
+    });
+    it("replaces definition environment with optional argument", () => {
         pretext = convert(
             "\\begin{definition}[Definition Title] This is the definition \\end{definition}"
         );
         expect(pretext).toEqual(
             "<definition><title>Definition Title</title><statement><p>This is the definition</p></statement></definition>"
+        );
+    });
+    it("replaces theorem environment with no optional argument", () => {
+        pretext = convert(
+            "\\begin{theorem} This is the theorem \\end{theorem}"
+        );
+        expect(pretext).toEqual(
+            "<theorem><statement><p>This is the theorem</p></statement></theorem>"
+        );
+    });
+    it("replaces theorem environment with optional argument", () => {
+        pretext = convert(
+            "\\begin{theorem}[Theorem Title] This is the theorem \\end{theorem}"
+        );
+        expect(pretext).toEqual(
+            "<theorem><title>Theorem Title</title><statement><p>This is the theorem</p></statement></theorem>"
         );
     });
     it("replaces equation environment", () => {
