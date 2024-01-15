@@ -173,10 +173,20 @@ export function convert(value: string, definitionsFile?: string) {
 
                         // put the rest in p tags for later
                     } else {
+                        const segmentsSplit = splitOnCondition(
+                            segments[i],
+                            (node) => {
+                                return isHtmlLike(node);
+                            }
+                        );
+                        const formattedSegments =
+                            segmentsSplit.segments.flatMap((segment) => {
+                                return [wrapPars(segment)];
+                            });
                         solutionContents.push(
-                            htmlLike({
-                                tag: "p",
-                                content: segments[i],
+                            ...unsplitOnMacro({
+                                segments: formattedSegments,
+                                macros: segmentsSplit.separators,
                             })
                         );
                     }
@@ -756,7 +766,7 @@ async function testConvertFile() {
     );
     const converted = convert(source);
 
-    writeFile("module.1.ptx", converted, (err) => {
+    writeFile("module.1.xml", converted, (err) => {
         if (err) throw err;
     });
 
