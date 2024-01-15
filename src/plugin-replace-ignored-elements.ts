@@ -9,7 +9,8 @@ export const replaceIgnoredElements: Plugin<[], Ast.Root, Ast.Root> =
             replaceNode(ast, (node) => {
                 if (
                     match.macro(node, "hfill") ||
-                    match.macro(node, "smallskip")
+                    match.macro(node, "smallskip") ||
+                    match.macro(node, "emptybox")
                 ) {
                     return null;
                 } else if (match.environment(node, "minipage")) {

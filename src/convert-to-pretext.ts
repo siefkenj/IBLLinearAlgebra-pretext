@@ -3,6 +3,7 @@ import rehypeStringify from "rehype-stringify";
 import chalk from "chalk";
 import { readFile } from "node:fs/promises";
 import path, { dirname } from "node:path";
+import { writeFile } from "fs";
 
 import {
     htmlLike,
@@ -64,6 +65,9 @@ export function convert(value: string, definitionsFile?: string) {
                 },
                 theorem: {
                     signature: "o",
+                },
+                tabular: {
+                    signature: "m",
                 },
             },
         })
@@ -138,6 +142,9 @@ export function convert(value: string, definitionsFile?: string) {
                         text: "custom",
                     },
                 });
+            },
+            label: (node) => {
+                return node;
             },
         },
         environmentReplacements: {
@@ -228,16 +235,16 @@ export function convert(value: string, definitionsFile?: string) {
                 });
             },
             "align*": (node) => {
-                const split = splitOnMacro(node.content, "\\");
-                const formattedSegments = split.segments.flatMap((segment) => {
-                    if (segment == null) {
+                const rows = splitOnMacro(node.content, "\\").segments;
+                const formattedRows = rows.flatMap((row) => {
+                    if (row == null) {
                         return [];
                     } else {
                         return htmlLike({
                             tag: "mrow",
                             content: {
                                 type: "string",
-                                content: toString(segment),
+                                content: toString(row),
                             },
                         });
                     }
@@ -246,21 +253,21 @@ export function convert(value: string, definitionsFile?: string) {
                     tag: "p",
                     content: htmlLike({
                         tag: "md",
-                        content: formattedSegments,
+                        content: formattedRows,
                     }),
                 });
             },
             align: (node) => {
-                const split = splitOnMacro(node.content, "\\");
-                const formattedSegments = split.segments.flatMap((segment) => {
-                    if (segment == null) {
+                const rows = splitOnMacro(node.content, "\\").segments;
+                const formattedRows = rows.flatMap((row) => {
+                    if (row == null) {
                         return [];
                     } else {
                         return htmlLike({
                             tag: "mrow",
                             content: {
                                 type: "string",
-                                content: toString(segment),
+                                content: toString(row),
                             },
                         });
                     }
@@ -269,7 +276,7 @@ export function convert(value: string, definitionsFile?: string) {
                     tag: "p",
                     content: htmlLike({
                         tag: "md",
-                        content: formattedSegments,
+                        content: formattedRows,
                     }),
                 });
             },
@@ -597,6 +604,124 @@ export function convert(value: string, definitionsFile?: string) {
                     }),
                 });
             },
+            tabular: (node) => {
+                const args = toString(
+                    ([] as Ast.Node[]).concat(
+                        ...(getArgsContent(node) as Ast.Node[][])
+                    )
+                ).split(/(?=[| ])|(?<=[| ])/g);
+                if (args[0] != "|") {
+                    args.unshift(" ");
+                }
+                if (args[args.length - 1] != "|") {
+                    args.push(" ");
+                }
+                const borderArgs: string[] = [];
+                const alignArgs: string[] = [];
+                for (let i = 0; i < args.length; i++) {
+                    if (i % 2 == 0) {
+                        borderArgs.push(args[i]);
+                    } else {
+                        alignArgs.push(args[i]);
+                    }
+                }
+
+                const tabularAttributes: { [k: string]: string } = {};
+                const rows = splitOnMacro(node.content, "\\").segments;
+
+                const formattedRows = rows.flatMap((row) => {
+                    const rowIdx = rows.indexOf(row);
+                    const rowAttributes: { [k: string]: string } = {};
+
+                    const cells = splitOnCondition(row, (node) => {
+                        return match.string(node, "&");
+                    }).segments;
+                    const formattedCells = cells.flatMap((cell) => {
+                        const cellIdx = cells.indexOf(cell);
+                        const cellAttributes: { [k: string]: string } = {};
+
+                        // for (const node of cells[cellIdx + 1]) {
+                        //     if (match.macro(node, "hline")) {
+                        //         if (rowIdx == 0) {
+                        //             tabularAttributes.top = "medium";
+                        //         } else {
+                        //             rowAttributes.bottom = "medium";
+                        //         }
+                        //         cell.splice(cell.indexOf(node), 1);
+                        //     }
+                        // }
+
+                        if (rowIdx == 0) {
+                            for (const node of cell) {
+                                if (match.macro(node, "hline")) {
+                                    tabularAttributes.top = "medium";
+                                    cell.splice(cell.indexOf(node), 1);
+                                }
+                            }
+                        }
+                        if (rowIdx + 1 < rows.length) {
+                            for (const node of rows[rowIdx + 1]) {
+                                if (match.macro(node, "hline")) {
+                                    rowAttributes.bottom = "medium";
+                                    rows[rowIdx + 1].splice(
+                                        rows[rowIdx + 1].indexOf(node),
+                                        1
+                                    );
+                                }
+                            }
+                        }
+
+                        if (alignArgs.length > cellIdx) {
+                            switch (alignArgs[cellIdx]) {
+                                case "c":
+                                    cellAttributes.halign = "center";
+                                    break;
+                                case "r":
+                                    cellAttributes.halign = "right";
+                                    break;
+                                case "l":
+                                    cellAttributes.halign = "left";
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        if (
+                            borderArgs.length - 1 > cellIdx &&
+                            borderArgs[cellIdx + 1] === "|"
+                        ) {
+                            cellAttributes.right = "medium";
+                        }
+
+                        return htmlLike({
+                            tag: "cell",
+                            content: cell,
+                            attributes: cellAttributes,
+                        });
+                    });
+                    if (
+                        (rowIdx == rows.length - 1 || rowIdx == 0) &&
+                        row.length == 1 &&
+                        row[0].type === "whitespace"
+                    ) {
+                        return [];
+                    }
+                    if (borderArgs[0] === "|") {
+                        rowAttributes.left = "medium";
+                    }
+                    return htmlLike({
+                        tag: "row",
+                        content: formattedCells,
+                        attributes: rowAttributes,
+                    });
+                });
+                return htmlLike({
+                    tag: "tabular",
+                    content: formattedRows,
+                    attributes: tabularAttributes,
+                });
+            },
         },
     });
 
@@ -609,7 +734,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\begin{proof} This is the proof \\end{proof}`;
+    const source = `\\begin{tabular}{|c|c|}  \\end{tabular}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
@@ -625,21 +750,26 @@ function testConvert() {
 
 async function testConvertFile() {
     let source = await readFile(
-        // path.join(CWD, "../book/modules/module1.tex"),
-        path.join(CWD, "../src/small-tex.tex"),
+        path.join(CWD, "../book/modules/module1.tex"),
+        // path.join(CWD, "../src/small-tex.tex"),
         "utf-8"
     );
     const converted = convert(source);
-    process.stdout.write(
-        chalk.green("Converted") +
-            "\n\n" +
-            source +
-            "\n\n" +
-            chalk.green("to") +
-            "\n\n" +
-            converted +
-            "\n"
-    );
+
+    writeFile("module.1.ptx", converted, (err) => {
+        if (err) throw err;
+    });
+
+    // process.stdout.write(
+    //     chalk.green("Converted") +
+    //         "\n\n" +
+    //         source +
+    //         "\n\n" +
+    //         chalk.green("to") +
+    //         "\n\n" +
+    //         converted +
+    //         "\n"
+    // );
 }
 
 function printHelp() {

@@ -3,5 +3,6 @@ dist
 out
 .vscode
 sample-files
+module.1.ptx
 src/unified-latex-plugin-to-hast-without-validation.ts
 src/small-tex.tex
