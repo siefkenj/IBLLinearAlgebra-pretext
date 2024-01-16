@@ -10,6 +10,9 @@ describe("convert-to-pretext", () => {
     it("replaces footnote", () => {
         pretext = convert("\\footnote{foo}");
         expect(pretext).toEqual("<fn>foo</fn>");
+
+        pretext = convert("\\footnote{foo \\index{bar}}");
+        expect(pretext).toEqual("<fn>foo </fn><idx><h>bar</h></idx>");
     });
     it("replaces index", () => {
         pretext = convert("\\index{foo}");

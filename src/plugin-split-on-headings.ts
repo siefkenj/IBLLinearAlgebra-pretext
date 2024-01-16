@@ -22,7 +22,11 @@ export const splitOnHeadings: Plugin<[], Ast.Root, Ast.Root> =
                 htmlLike({ tag: "title", content: heading.args![0].content })
             );
             // Wrap any paragraphs in '\html-tag:p{...}' html-like macros
-            const pars = split.segments.map((seg) => wrapPars(seg));
+            const pars = split.segments.map((seg) =>
+                wrapPars(seg, {
+                    macrosThatBreakPars: ["SavedDefinitionRender"],
+                })
+            );
             let sections: Ast.Root["content"] = [];
             // Procced only if there are \Heading{}' macros in the original AST tree.
             if (newHeadings.length > 0) {
