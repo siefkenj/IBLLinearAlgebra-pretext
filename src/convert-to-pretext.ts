@@ -80,10 +80,26 @@ export function convert(value: string, definitionsFile?: string) {
         macroReplacements: {
             footnote: (node) => {
                 const args = getArgsContent(node);
-                return htmlLike({
+                const split = splitOnMacro(
+                    args[0] as Ast.Node[],
+                    "html-tag:idx"
+                );
+                if (split.macros.length === 0) {
+                    return htmlLike({
+                        tag: "fn",
+                        content: args[0] || [],
+                    });
+                }
+
+                const fn = htmlLike({
                     tag: "fn",
-                    content: args[0] || [],
+                    content: ([] as Ast.Node[]).concat(...split.segments),
                 });
+
+                return {
+                    type: "root",
+                    content: [fn].concat(split.macros),
+                };
             },
             index: (node) => {
                 const args = getArgsContent(node);
@@ -142,9 +158,6 @@ export function convert(value: string, definitionsFile?: string) {
                         text: "custom",
                     },
                 });
-            },
-            label: (node) => {
-                return node;
             },
         },
         environmentReplacements: {
