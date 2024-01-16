@@ -159,6 +159,13 @@ export function convert(value: string, definitionsFile?: string) {
                     },
                 });
             },
+            textbf: (node) => {
+                const args = getArgsContent(node);
+                return htmlLike({
+                    tag: "term",
+                    content: args[0] || [],
+                });
+            },
         },
         environmentReplacements: {
             example: (node) => {
@@ -757,7 +764,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\begin{tabular}{|c|c|}  \\end{tabular}`;
+    const source = `{\\color{myorange}\\huge\\bfseries\\sffamily Linear Algebra} {\\bf a}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +

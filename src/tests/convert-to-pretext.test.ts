@@ -22,6 +22,10 @@ describe("convert-to-pretext", () => {
         pretext = convert("\\ref{reference}");
         expect(pretext).toEqual('<xref ref="reference" text="custom">*</xref>');
     });
+    it("replaces textbf", () => {
+        pretext = convert("{\\bfseries bf}");
+        expect(pretext).toEqual("<term>bf</term>");
+    });
     it("replaces index with optional square brackets", () => {
         pretext = convert("The symbol\\index[symbols]{foo}is used");
         expect(pretext).toEqual(
