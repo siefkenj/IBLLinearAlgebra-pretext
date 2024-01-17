@@ -77,6 +77,7 @@ export function convert(value: string, definitionsFile?: string) {
         .use(replaceIgnoredElements);
 
     const afterReplacements = addedMacros.use(unifiedLatexToHast, {
+        skipHtmlValidation: true,
         macroReplacements: {
             footnote: (node) => {
                 const args = getArgsContent(node);
@@ -427,7 +428,7 @@ export function convert(value: string, definitionsFile?: string) {
                         });
                         const title = htmlLike({
                             tag: "title",
-                            content: getArgsContent(items[0])[1] || [],
+                            content: getArgsContent(item)[1] || [],
                         });
                         liContent.unshift(title);
                         return htmlLike({
