@@ -26,7 +26,7 @@ import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
-import { SP } from "@unified-latex/unified-latex-builder";
+import { SP, s } from "@unified-latex/unified-latex-builder";
 import { Node } from "@unified-latex/unified-latex-types";
 import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
@@ -745,13 +745,29 @@ export function convert(value: string, definitionsFile?: string) {
                     attributes: tabularAttributes,
                 });
             },
+            tikzpicture: (node) => {
+                const imageAttributes: { [k: string]: string } = {}
+                imageAttributes.width = "100%";
+                return htmlLike({
+                    tag: "figure",
+                    content: htmlLike({
+                        tag: "__image",
+                        content: htmlLike({
+                            tag: "latex-image",
+                            content: s("\\begin{tikzpicture}" + toString(node.content) + "\\end{tikzpicture}"),
+                        }),
+                        attributes: imageAttributes,
+                    }),
+                })
+            },
         },
-    });
-
-    const output = afterReplacements
+    }, {skipHtmlValidation: true});
+    const beforeImageReplacement = afterReplacements
         .use(replaceMath)
-        .use(rehypeStringify)
+        .use(rehypeStringify, {voids: []})
         .processSync(value).value as string;
+
+    const output = beforeImageReplacement.replaceAll("__image", "image");
 
     return output;
 }
@@ -774,12 +790,12 @@ function testConvert() {
 async function testConvertFile() {
     let source = await readFile(
         path.join(CWD, "../book/modules/module1.tex"),
-        // path.join(CWD, "../src/small-tex.tex"),
+        // path.join(CWD, "../sample-files/small-tex.tex"),
         "utf-8"
     );
     const converted = convert(source);
 
-    writeFile("module.1.xml", converted, (err) => {
+    writeFile("sample-files/module1.xml", converted, (err) => {
         if (err) throw err;
     });
 
@@ -822,8 +838,3 @@ if (command === "-h" || command === "--help" || !hasExecuted) {
 
 // npx vite-node src/convert-to-pretext.ts -f
 
-// environments:
-// emph box
-
-// Other:
-// preserved definition render

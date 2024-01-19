@@ -10,11 +10,12 @@ export const replaceIgnoredElements: Plugin<[], Ast.Root, Ast.Root> =
                 if (
                     match.macro(node, "hfill") ||
                     match.macro(node, "smallskip") ||
-                    match.macro(node, "emptybox") ||
-                    match.environment(node, "center")
+                    match.macro(node, "emptybox")  ||
+                    match.macro(node, "medskip") 
+                    // match.environment(node, "center")
                 ) {
                     return null;
-                } else if (match.environment(node, "minipage")) {
+                } else if (match.environment(node, "minipage") || match.environment(node, "center")) {
                     return (node as Ast.Environment).content;
                 }
             });

@@ -24,5 +24,6 @@
         "moduleResolution": "node",
         "resolveJsonModule": true,
         "skipLibCheck": true,
+        "lib": ["ES2021.String"]
     }
 }
