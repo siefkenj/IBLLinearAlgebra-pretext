@@ -76,7 +76,7 @@ export function convert(value: string, definitionsFile?: string) {
         .use(replaceDefinitions, definitionsFile || "")
         .use(replaceIgnoredElements);
 
-    const afterReplacements = addedMacros.use(unifiedLatexToHast, {
+    const afterReplacements = addedMacros.use(unifiedLatexToHast, {skipHtmlValidation: true,
         macroReplacements: {
             footnote: (node) => {
                 const args = getArgsContent(node);
@@ -751,7 +751,7 @@ export function convert(value: string, definitionsFile?: string) {
                 return htmlLike({
                     tag: "figure",
                     content: htmlLike({
-                        tag: "__image",
+                        tag: "image",
                         content: htmlLike({
                             tag: "latex-image",
                             content: s("\\begin{tikzpicture}" + toString(node.content) + "\\end{tikzpicture}"),
@@ -761,13 +761,11 @@ export function convert(value: string, definitionsFile?: string) {
                 })
             },
         },
-    }, {skipHtmlValidation: true});
-    const beforeImageReplacement = afterReplacements
+    });
+    const output = afterReplacements
         .use(replaceMath)
         .use(rehypeStringify, {voids: []})
         .processSync(value).value as string;
-
-    const output = beforeImageReplacement.replaceAll("__image", "image");
 
     return output;
 }
