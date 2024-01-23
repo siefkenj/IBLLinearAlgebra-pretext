@@ -26,10 +26,11 @@ import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
-import { SP } from "@unified-latex/unified-latex-builder";
+import { SP, arg } from "@unified-latex/unified-latex-builder";
 import { Node } from "@unified-latex/unified-latex-types";
 import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
+import { replaceLabels } from "./plugin-replace-labels";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match, math } from "@unified-latex/unified-latex-util-match";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
@@ -55,6 +56,12 @@ export function convert(value: string, definitionsFile?: string) {
                 ref: {
                     signature: "m",
                 },
+                eqref: {
+                    signature: "m",
+                },
+                label: {
+                    signature: "m",
+                },
             },
             environments: {
                 emphbox: {
@@ -69,14 +76,21 @@ export function convert(value: string, definitionsFile?: string) {
                 tabular: {
                     signature: "m",
                 },
+                equation: {
+                    renderInfo: {
+                        inMathMode: true,
+                    },
+                },
             },
         })
         .use(unifiedLatexAstComplier)
         .use(splitOnHeadings)
         .use(replaceDefinitions, definitionsFile || "")
-        .use(replaceIgnoredElements);
+        .use(replaceIgnoredElements)
+        .use(replaceLabels);
 
     const afterReplacements = addedMacros.use(unifiedLatexToHast, {
+        skipHtmlValidation: true,
         macroReplacements: {
             footnote: (node) => {
                 const args = getArgsContent(node);
@@ -152,18 +166,56 @@ export function convert(value: string, definitionsFile?: string) {
                 const args = getArgsContent(node) as Ast.Node[][];
                 return htmlLike({
                     tag: "xref",
-                    content: { type: "string", content: "*" },
                     attributes: {
                         ref: toString(args[0]),
-                        text: "custom",
+                        text: "global",
                     },
                 });
             },
+            eqref: (node) => {
+                const args = getArgsContent(node) as Ast.Node[][];
+                return htmlLike({
+                    tag: "xref",
+                    attributes: {
+                        ref: toString(args[0]),
+                        text: "global",
+                    },
+                });
+            },
+            // label: (node, info) => {
+            //     const arg = (
+            //         getArgsContent(node as Ast.Macro) as Ast.String[][]
+            //     )[0][0].content;
+            //     console.log("hello");
+            //     replaceNode(info.parents[info.parents.length - 1], (node) => {
+            //         if (node === info.parents[1]) {
+            //             const htmlLikeInfo = extractFromHtmlLike(
+            //                 info.parents[1] as Ast.Macro
+            //             );
+            //             return htmlLike({
+            //                 tag: htmlLikeInfo.tag,
+            //                 content: htmlLikeInfo.content,
+            //                 attributes: {
+            //                     "xml:id": arg,
+            //                     ...htmlLikeInfo.attributes,
+            //                 },
+            //             });
+            //         } else if (match.macro(node, "label")) {
+            //             return null;
+            //         }
+            //     });
+            //     return node;
+            // },
         },
         environmentReplacements: {
             example: (node) => {
                 let exampleContents = [];
                 let solutionContents: Node[] = [];
+                const attributes: { [k: string]: string } = {};
+
+                if (node._renderInfo?.id !== undefined) {
+                    attributes["xml:id"] = node._renderInfo.id as string;
+                }
 
                 // seperate by paragraphs
                 let segments = splitOnCondition(
@@ -217,6 +269,7 @@ export function convert(value: string, definitionsFile?: string) {
                 return htmlLike({
                     tag: "example",
                     content: exampleContents,
+                    attributes,
                 });
             },
             emphbox: (node) => {
@@ -281,24 +334,41 @@ export function convert(value: string, definitionsFile?: string) {
                 });
             },
             align: (node) => {
-                const rows = splitOnMacro(node.content, "\\").segments;
+                if (node._renderInfo?.extraMacro !== undefined) {
+                    node.content.unshift(
+                        node._renderInfo.extraMacro as Ast.Macro
+                    );
+                }
+                const alignSplit = splitOnMacro(node.content, "\\");
+                const rows = alignSplit.segments;
                 const formattedRows = rows.flatMap((row) => {
-                    if (row == null) {
+                    if (row == null || row.length == 0) {
                         return [];
                     } else {
+                        const attributes: { [k: string]: string } = {};
+                        if (
+                            rows.indexOf(row) !== 0 &&
+                            alignSplit.macros[rows.indexOf(row) - 1]._renderInfo
+                                ?.id !== undefined
+                        ) {
+                            attributes["xml:id"] = alignSplit.macros[
+                                rows.indexOf(row) - 1
+                            ]._renderInfo?.id as string;
+                        }
                         return htmlLike({
                             tag: "mrow",
                             content: {
                                 type: "string",
                                 content: toString(row),
                             },
+                            attributes,
                         });
                     }
                 });
                 return htmlLike({
                     tag: "p",
                     content: htmlLike({
-                        tag: "md",
+                        tag: "mdn",
                         content: formattedRows,
                     }),
                 });
@@ -427,7 +497,7 @@ export function convert(value: string, definitionsFile?: string) {
                         });
                         const title = htmlLike({
                             tag: "title",
-                            content: getArgsContent(items[0])[1] || [],
+                            content: getArgsContent(item)[1] || [],
                         });
                         liContent.unshift(title);
                         return htmlLike({
@@ -454,6 +524,7 @@ export function convert(value: string, definitionsFile?: string) {
                             return [arg];
                         }
                     );
+                    const attributes: { [k: string]: string } = {};
                     const segmentsSplit = splitOnCondition(args[0], (node) => {
                         return isHtmlLike(node);
                     });
@@ -462,12 +533,18 @@ export function convert(value: string, definitionsFile?: string) {
                             return [wrapPars(segment)];
                         }
                     );
+
+                    if (item._renderInfo?.id != undefined) {
+                        attributes["xml:id"] = item._renderInfo?.id as string;
+                    }
+
                     return htmlLike({
                         tag: "li",
                         content: unsplitOnMacro({
                             segments: formattedSegments,
                             macros: segmentsSplit.separators,
                         }),
+                        attributes,
                     });
                 });
 
@@ -483,11 +560,18 @@ export function convert(value: string, definitionsFile?: string) {
                 const problist = splitOnCondition(node.content, (node) => {
                     return match.environment(node, "problist");
                 }).separators[0] as Ast.Environment;
-                const probs = splitOnMacro(
-                    problist.content,
-                    "prob"
-                ).segments.flatMap((prob) => {
+                const probSplit = splitOnMacro(problist.content, "prob");
+                const probs = probSplit.segments.flatMap((prob) => {
                     if (prob.length == 0) return [];
+                    const attributes: { [k: string]: string } = {};
+                    if (
+                        probSplit.macros[probSplit.segments.indexOf(prob) - 1]
+                            ._renderInfo?.id !== undefined
+                    ) {
+                        attributes["xml:id"] = probSplit.macros[
+                            probSplit.segments.indexOf(prob) - 1
+                        ]._renderInfo?.id as string;
+                    }
                     const solutionSplit = splitOnCondition(prob, (node) => {
                         return match.environment(node, "solution");
                     }) as {
@@ -533,11 +617,13 @@ export function convert(value: string, definitionsFile?: string) {
                         return htmlLike({
                             tag: "exercise",
                             content: [statement, solution],
+                            attributes,
                         });
                     }
                     return htmlLike({
                         tag: "exercise",
                         content: statement,
+                        attributes,
                     });
                 });
 
@@ -573,6 +659,10 @@ export function convert(value: string, definitionsFile?: string) {
                 });
             },
             equation: (node) => {
+                const attributes: { [k: string]: string } = {};
+                if (node._renderInfo?.id != undefined) {
+                    attributes["xml:id"] = node._renderInfo?.id as string;
+                }
                 return htmlLike({
                     tag: "p",
                     content: htmlLike({
@@ -581,6 +671,7 @@ export function convert(value: string, definitionsFile?: string) {
                             type: "string",
                             content: toString(node.content),
                         },
+                        attributes,
                     }),
                 });
             },
@@ -757,7 +848,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\begin{tabular}{|c|c|}  \\end{tabular}`;
+    const source = `\\begin{align}\\label{EQUATION} 1+1=2 \\end{align}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
@@ -773,26 +864,26 @@ function testConvert() {
 
 async function testConvertFile() {
     let source = await readFile(
-        path.join(CWD, "../book/modules/module1.tex"),
-        // path.join(CWD, "../src/small-tex.tex"),
+        // path.join(CWD, "../book/modules/module1.tex"),
+        path.join(CWD, "../src/small-tex.tex"),
         "utf-8"
     );
     const converted = convert(source);
 
-    writeFile("module.1.xml", converted, (err) => {
-        if (err) throw err;
-    });
+    // writeFile("module.1.xml", converted, (err) => {
+    //     if (err) throw err;
+    // });
 
-    // process.stdout.write(
-    //     chalk.green("Converted") +
-    //         "\n\n" +
-    //         source +
-    //         "\n\n" +
-    //         chalk.green("to") +
-    //         "\n\n" +
-    //         converted +
-    //         "\n"
-    // );
+    process.stdout.write(
+        chalk.green("Converted") +
+            "\n\n" +
+            source +
+            "\n\n" +
+            chalk.green("to") +
+            "\n\n" +
+            converted +
+            "\n"
+    );
 }
 
 function printHelp() {
