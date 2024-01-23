@@ -25,9 +25,35 @@ describe("convert-to-pretext", () => {
         pretext = convert("\\eqref{reference}");
         expect(pretext).toEqual('<xref ref="reference" text="global"></xref>');
     });
-    it("replaces textbf", () => {
+    it("replaces streaming commands", () => {
+        // font
         pretext = convert("{\\bfseries bf}");
-        expect(pretext).toEqual("<term>bf</term>");
+        expect(pretext).toEqual("<alert>bf</alert>");
+
+        pretext = convert("{\\itshape it}");
+        expect(pretext).toEqual("<em>it</em>");
+
+        pretext = convert("{\\rmfamily rm}");
+        expect(pretext).toEqual("<em>rm</em>");
+
+        pretext = convert("{\\scshape sc}");
+        expect(pretext).toEqual("<em>SC</em>");
+
+        pretext = convert("{\\sffamily sf}");
+        expect(pretext).toEqual("<em>sf</em>");
+
+        pretext = convert("{\\slshape sl}");
+        expect(pretext).toEqual("<em>sl</em>");
+
+        pretext = convert("{\\ttfamily tt}");
+        expect(pretext).toEqual("<em>tt</em>");
+
+        // pretext = convert("{\\em em}");
+        // expect(pretext).toEqual("<em>em</em>");
+
+        // color
+        pretext = convert("{\\color{somecolor} text}");
+        expect(pretext).toEqual("<alert>text</alert>");
     });
     it("replaces index with optional square brackets", () => {
         pretext = convert("The symbol\\index[symbols]{foo}is used");
