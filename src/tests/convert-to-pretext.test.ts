@@ -192,6 +192,14 @@ describe("convert-to-pretext", () => {
         expect(pretext).toEqual(
             "<p><ol><li><p>item 1 content.</p></li><li><p>item 2 content.</p></li></ol></p>"
         );
+
+        // optional param
+        pretext = convert(
+            "\\begin{enumerate}[label=(\\roman*)] \\item item \\end{enumerate}"
+        );
+        expect(pretext).toEqual(
+            '<p><ol marker="i"><li><p>item</p></li></ol></p>'
+        );
     });
     it("replaces exercises environment", () => {
         pretext = convert(
