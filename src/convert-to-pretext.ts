@@ -34,6 +34,7 @@ import { replaceLabels } from "./plugin-replace-labels";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match, math } from "@unified-latex/unified-latex-util-match";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
+import { pgfkeysArgToObject } from "@unified-latex/unified-latex-util-pgfkeys";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -548,11 +549,25 @@ export function convert(value: string, definitionsFile?: string) {
                     });
                 });
 
+                const attributes: { [k: string]: string } = {};
+                const pgfkeys = pgfkeysArgToObject(
+                    (node.args as Ast.Argument[])[0]
+                );
+
+                if (
+                    pgfkeys.label != undefined &&
+                    pgfkeys.label.length > 1 &&
+                    (pgfkeys.label[1] as Ast.Macro).content == "roman"
+                ) {
+                    attributes.marker = "i";
+                }
+
                 return htmlLike({
                     tag: "p",
                     content: htmlLike({
                         tag: "ol",
                         content,
+                        attributes,
                     }),
                 });
             },
@@ -848,7 +863,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\begin{align}\\label{EQUATION} 1+1=2 \\end{align}`;
+    const source = `\\begin{enumerate}[label=(\\roman*)] \\item item \\end{enumerate}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
