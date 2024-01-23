@@ -18,9 +18,12 @@ describe("convert-to-pretext", () => {
         pretext = convert("\\index{foo}");
         expect(pretext).toEqual("<idx><h>foo</h></idx>");
     });
-    it("replaces ref", () => {
+    it("replaces ref and eqref", () => {
         pretext = convert("\\ref{reference}");
-        expect(pretext).toEqual('<xref ref="reference" text="custom">*</xref>');
+        expect(pretext).toEqual('<xref ref="reference" text="global"></xref>');
+
+        pretext = convert("\\eqref{reference}");
+        expect(pretext).toEqual('<xref ref="reference" text="global"></xref>');
     });
     it("replaces textbf", () => {
         pretext = convert("{\\bfseries bf}");
@@ -52,7 +55,7 @@ describe("convert-to-pretext", () => {
             "Thus \\begin{align}x=m+1&=(2k+1)+1=2k+2\\\\&=2(k+1)=2n,\\end{align}\n\nwhere"
         );
         expect(pretext).toEqual(
-            "<p>Thus</p><p><md><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></md></p><p>where</p>"
+            "<p>Thus</p><p><mdn><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></mdn></p><p>where</p>"
         );
     });
     it("replaces tabular environment", () => {
@@ -164,7 +167,7 @@ describe("convert-to-pretext", () => {
         pretext = convert("<>&");
         expect(pretext).toEqual("\\lt\\gt&#x26;");
     });
-    it.skip("replaces itemize and enumerate environments where items have arguments", () => {
+    it("replaces itemize and enumerate environments where items have arguments", () => {
         pretext = convert(
             "\\begin{itemize}\\item[(foo)] item 1 content.\\item[(bar)] item 2 content.\\end{itemize}"
         );
@@ -178,7 +181,7 @@ describe("convert-to-pretext", () => {
             "<p><dl><li><title>(foo)</title><p>item 1 content.</p></li><li><title>(bar)</title><p>item 2 content.</p></li></dl></p>"
         );
     });
-    it.skip("replaces itemize environment where items have no arguments", () => {
+    it("replaces itemize environment where items have no arguments", () => {
         pretext = convert(
             "\\begin{itemize}\\item item 1 content.\\item item 2 content.\\end{itemize}"
         );
@@ -186,12 +189,20 @@ describe("convert-to-pretext", () => {
             "<p><ul><li><p>item 1 content.</p></li><li><p>item 2 content.</p></li></ul></p>"
         );
     });
-    it.skip("replaces enumerate environment", () => {
+    it("replaces enumerate environment", () => {
         pretext = convert(
             "\\begin{enumerate}\\item item 1 content.\\item item 2 content.\\end{enumerate}"
         );
         expect(pretext).toEqual(
             "<p><ol><li><p>item 1 content.</p></li><li><p>item 2 content.</p></li></ol></p>"
+        );
+
+        // optional param
+        pretext = convert(
+            "\\begin{enumerate}[label=(\\roman*)] \\item item \\end{enumerate}"
+        );
+        expect(pretext).toEqual(
+            '<p><ol marker="i"><li><p>item</p></li></ol></p>'
         );
     });
     it("replaces exercises environment", () => {
@@ -247,9 +258,48 @@ describe("convert-to-pretext", () => {
         expect(pretext).toEqual("<p><md><mrow>\\somemathmacro</mrow></md></p>");
 
         pretext = convert("\\begin{align} \\somemathmacro \\end{align}");
-        expect(pretext).toEqual("<p><md><mrow>\\somemathmacro</mrow></md></p>");
+        expect(pretext).toEqual(
+            "<p><mdn><mrow>\\somemathmacro</mrow></mdn></p>"
+        );
 
         pretext = convert("\\begin{equation} \\somemathmacro \\end{equation}");
         expect(pretext).toEqual("<p><men>\\somemathmacro</men></p>");
+    });
+    it("replaces label macro in various environemnts", () => {
+        // equation
+        pretext = convert(
+            "\\begin{equation}\\label{EQUATION} 1+1=2 \\end{equation}"
+        );
+        expect(pretext).toEqual('<p><men xml:id="EQUATION">1+1=2</men></p>');
+
+        // align
+        pretext = convert("\\begin{align}\\label{EQUATION} 1+1=2 \\end{align}");
+        expect(pretext).toEqual(
+            '<p><mdn><mrow xml:id="EQUATION">1+1=2</mrow></mdn></p>'
+        );
+
+        //example
+        pretext = convert(
+            "\\begin{example}\\label{EXAMPLE}\nfoo\n\nbar1\n\nbar2\\end{example}"
+        );
+        expect(pretext).toEqual(
+            '<example xml:id="EXAMPLE"><statement><p> foo</p></statement><solution><p>bar1</p><p>bar2</p></solution></example>'
+        );
+
+        //enumerate (item macro)
+        pretext = convert(
+            "\\begin{enumerate}\\item\\label{ITEM} item 1 \\item item 2 \\end{enumerate}"
+        );
+        expect(pretext).toEqual(
+            '<p><ol><li xml:id="ITEM"><p>item 1</p></li><li><p>item 2</p></li></ol></p>'
+        );
+
+        //exercise (prob macro)
+        pretext = convert(
+            "\\begin{exercises} \\begin{problist} \\prob \\label{PROB} exercise 1 \\begin{solution} this is a solution \\end{solution} \\prob exercise 2 \\end{problist} \\end{exercises}"
+        );
+        expect(pretext).toEqual(
+            '<exercises><exercise xml:id="PROB"><statement><p>exercise 1</p></statement><solution><p>this is a solution</p></solution></exercise><exercise><statement><p>exercise 2</p></statement></exercise></exercises>'
+        );
     });
 });
