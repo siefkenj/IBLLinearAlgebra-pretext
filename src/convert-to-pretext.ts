@@ -173,6 +173,55 @@ export function convert(value: string, definitionsFile?: string) {
                     },
                 });
             },
+            textbf: (node) => {
+                const args = getArgsContent(node);
+                return htmlLike({
+                    tag: "alert",
+                    content: args[0] || [],
+                });
+            },
+            textcolor: (node) => {
+                const args = getArgsContent(node);
+                return htmlLike({
+                    tag: "alert",
+                    content: args[2] || [],
+                });
+            },
+            textsf: (node) => {
+                const args = getArgsContent(node);
+                return htmlLike({
+                    tag: "em",
+                    content: args[0] || [],
+                });
+            },
+            textit: (node) => {
+                const args = getArgsContent(node);
+                return htmlLike({
+                    tag: "em",
+                    content: args[0] || [],
+                });
+            },
+            textsl: (node) => {
+                const args = getArgsContent(node);
+                return htmlLike({
+                    tag: "em",
+                    content: args[0] || [],
+                });
+            },
+            texttt: (node) => {
+                const args = getArgsContent(node);
+                return htmlLike({
+                    tag: "em",
+                    content: args[0] || [],
+                });
+            },
+            textrm: (node) => {
+                const args = getArgsContent(node);
+                return htmlLike({
+                    tag: "em",
+                    content: args[0] || [],
+                });
+            },
             eqref: (node) => {
                 const args = getArgsContent(node) as Ast.Node[][];
                 return htmlLike({
@@ -863,7 +912,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\begin{enumerate}[label=(\\roman*)] \\item item \\end{enumerate}`;
+    const source = `{\\color{myorange}\\huge\\bfseries\\sffamily Linear Algebra} {\\bf a}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
