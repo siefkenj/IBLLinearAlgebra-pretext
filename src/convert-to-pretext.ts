@@ -6,7 +6,6 @@ import path, { dirname } from "node:path";
 import { writeFile } from "fs";
 
 import {
-    extractFromHtmlLike,
     htmlLike,
     isHtmlLike,
 } from "@unified-latex/unified-latex-util-html-like";
@@ -27,7 +26,7 @@ import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
-import { SP, arg, m } from "@unified-latex/unified-latex-builder";
+import { SP, arg } from "@unified-latex/unified-latex-builder";
 import { Node } from "@unified-latex/unified-latex-types";
 import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
@@ -35,12 +34,6 @@ import { replaceLabels } from "./plugin-replace-labels";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match, math } from "@unified-latex/unified-latex-util-match";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
-import { visit } from "@unified-latex/unified-latex-util-visit";
-import {
-    replaceNode,
-    replaceNodeDuringVisit,
-} from "@unified-latex/unified-latex-util-replace";
-import { S } from "vitest/dist/reporters-5f784f42";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -61,6 +54,9 @@ export function convert(value: string, definitionsFile?: string) {
                     signature: "m",
                 },
                 ref: {
+                    signature: "m",
+                },
+                eqref: {
                     signature: "m",
                 },
                 label: {
@@ -170,10 +166,19 @@ export function convert(value: string, definitionsFile?: string) {
                 const args = getArgsContent(node) as Ast.Node[][];
                 return htmlLike({
                     tag: "xref",
-                    content: { type: "string", content: "*" },
                     attributes: {
                         ref: toString(args[0]),
-                        text: "custom",
+                        text: "global",
+                    },
+                });
+            },
+            eqref: (node) => {
+                const args = getArgsContent(node) as Ast.Node[][];
+                return htmlLike({
+                    tag: "xref",
+                    attributes: {
+                        ref: toString(args[0]),
+                        text: "global",
                     },
                 });
             },

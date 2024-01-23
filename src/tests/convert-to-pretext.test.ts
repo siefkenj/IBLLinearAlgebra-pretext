@@ -18,9 +18,12 @@ describe("convert-to-pretext", () => {
         pretext = convert("\\index{foo}");
         expect(pretext).toEqual("<idx><h>foo</h></idx>");
     });
-    it("replaces ref", () => {
+    it("replaces ref and eqref", () => {
         pretext = convert("\\ref{reference}");
-        expect(pretext).toEqual('<xref ref="reference" text="custom">*</xref>');
+        expect(pretext).toEqual('<xref ref="reference" text="global"></xref>');
+
+        pretext = convert("\\eqref{reference}");
+        expect(pretext).toEqual('<xref ref="reference" text="global"></xref>');
     });
     it("replaces index with optional square brackets", () => {
         pretext = convert("The symbol\\index[symbols]{foo}is used");
