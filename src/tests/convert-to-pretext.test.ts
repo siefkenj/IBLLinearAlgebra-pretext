@@ -61,6 +61,10 @@ describe("convert-to-pretext", () => {
             "The symbol<idx><h>symbols</h><h>foo</h></idx>is used"
         );
     });
+    it("replaces mbox macro", () => {
+        pretext = convert("\\mbox{.}");
+        expect(pretext).toEqual(".");
+    });
     it("replaces the example environment", () => {
         pretext = convert(
             "\\begin{example}\nfoo\n\nbar1\n\nbar2\\end{example}"

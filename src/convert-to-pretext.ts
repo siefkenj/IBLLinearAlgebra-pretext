@@ -232,6 +232,13 @@ export function convert(value: string, definitionsFile?: string) {
                     },
                 });
             },
+            mbox: (node) => {
+                const args = getArgsContent(node);
+                return {
+                    type: "root",
+                    content: args[0] || [],
+                };
+            },
             // label: (node, info) => {
             //     const arg = (
             //         getArgsContent(node as Ast.Macro) as Ast.String[][]
@@ -912,7 +919,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `{\\color{myorange}\\huge\\bfseries\\sffamily Linear Algebra} {\\bf a}`;
+    const source = `\\mbox{.}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
