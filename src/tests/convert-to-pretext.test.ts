@@ -332,4 +332,12 @@ describe("convert-to-pretext", () => {
             '<exercises><exercise xml:id="PROB"><statement><p>exercise 1</p></statement><solution><p>this is a solution</p></solution></exercise><exercise><statement><p>exercise 2</p></statement></exercise></exercises>'
         );
     });
+    it("replaces the prob macro that has optional argument", () => {
+        pretext = convert(
+            "\\begin{exercises}\\begin{problist}\\prob[\\hefferon[2.21,2.22]] prob\\end{problist}\\end{exercises}"
+        );
+        expect(pretext).toEqual(
+            "<exercises><exercise><statement><p><fn>Hefferon's Linear Algebra (2.21,2.22)</fn></p><p>prob</p></statement></exercise></exercises>"
+        );
+    });
 });
