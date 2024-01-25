@@ -63,6 +63,12 @@ export function convert(value: string, definitionsFile?: string) {
                 label: {
                     signature: "m",
                 },
+                prob: {
+                    signature: "o",
+                },
+                hefferon: {
+                    signature: "o",
+                },
             },
             environments: {
                 emphbox: {
@@ -237,6 +243,16 @@ export function convert(value: string, definitionsFile?: string) {
                 return {
                     type: "root",
                     content: args[0] || [],
+                };
+            },
+            hefferon: (node) => {
+                const arg = getArgsContent(node)[0];
+                const annotation = `Hefferon's Linear Algebra ${
+                    arg == null ? "" : `(${toString(arg)})`
+                }`;
+                return {
+                    type: "string",
+                    content: annotation,
                 };
             },
             // label: (node, info) => {
@@ -635,6 +651,9 @@ export function convert(value: string, definitionsFile?: string) {
                 const probs = probSplit.segments.flatMap((prob) => {
                     if (prob.length == 0) return [];
                     const attributes: { [k: string]: string } = {};
+                    const args = getArgsContent(
+                        probSplit.macros[probSplit.segments.indexOf(prob) - 1]
+                    );
                     if (
                         probSplit.macros[probSplit.segments.indexOf(prob) - 1]
                             ._renderInfo?.id !== undefined
@@ -642,6 +661,16 @@ export function convert(value: string, definitionsFile?: string) {
                         attributes["xml:id"] = probSplit.macros[
                             probSplit.segments.indexOf(prob) - 1
                         ]._renderInfo?.id as string;
+                    }
+                    if (args.length > 0 && args[0] != null) {
+                        const fn = htmlLike({
+                            tag: "p",
+                            content: htmlLike({
+                                tag: "fn",
+                                content: (args as Ast.Node[][])[0],
+                            }),
+                        });
+                        prob.unshift(fn);
                     }
                     const solutionSplit = splitOnCondition(prob, (node) => {
                         return match.environment(node, "solution");
@@ -919,7 +948,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\mbox{.}`;
+    const source = `\\hefferon`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
