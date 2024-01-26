@@ -969,6 +969,7 @@ export function convert(value: string, definitionsFile?: string) {
                 if (tikzCount <= 1) {
                     return htmlLike({
                         tag: "",
+                        content: node.content,
                     });
                 } else {
                     return htmlLike({
@@ -1013,13 +1014,13 @@ function testConvert() {
 
 async function testConvertFile() {
     let source = await readFile(
-        path.join(CWD, "../book/modules/module2.tex"),
+        path.join(CWD, "../book/modules/module1.tex"),
         // path.join(CWD, "../sample-files/small-tex.tex"),
         "utf-8"
     );
     const converted = convert(source);
 
-    writeFile("sample-files/module2.xml", converted, (err) => {
+    writeFile("sample-files/module1.xml", converted, (err) => {
         if (err) throw err;
     });
 
