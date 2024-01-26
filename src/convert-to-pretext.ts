@@ -330,13 +330,15 @@ export function convert(value: string, definitionsFile?: string) {
                     }
                 }
 
-                // wrap the rest in solution tags
-                exampleContents.push(
-                    htmlLike({
-                        tag: "solution",
-                        content: solutionContents,
-                    })
-                );
+                // wrap the rest in solution tags (if there is solution content)
+                if (solutionContents.length != 0) {
+                    exampleContents.push(
+                        htmlLike({
+                            tag: "solution",
+                            content: solutionContents,
+                        })
+                    );
+                }
 
                 // wrap everything in example tags
                 return htmlLike({
