@@ -26,13 +26,14 @@ import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
-import { SP, s } from "@unified-latex/unified-latex-builder";
+import { SP, m, s } from "@unified-latex/unified-latex-builder";
 import { Node } from "@unified-latex/unified-latex-types";
 import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match, math } from "@unified-latex/unified-latex-util-match";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
+import { b } from "vitest/dist/reporters-5f784f42";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -747,7 +748,9 @@ export function convert(value: string, definitionsFile?: string) {
             },
             tikzpicture: (node) => {
                 const imageAttributes: { [k: string]: string } = {}
-                imageAttributes.width = "100%";
+                imageAttributes.width = "50%";
+                
+                // note that skipHtmlValidation must be true or else image tags will be replaced by img
                 return htmlLike({
                     tag: "figure",
                     content: htmlLike({
@@ -762,11 +765,14 @@ export function convert(value: string, definitionsFile?: string) {
             },
         },
     });
-    const output = afterReplacements
+    const beforeTextSize = afterReplacements
         .use(replaceMath)
         .use(rehypeStringify, {voids: []})
         .processSync(value).value as string;
 
+    const beforeFill = beforeTextSize.replaceAll(/\\textsize{(.*?)}/g, "\\$1");
+    const beforeFootnoteSize = beforeFill.replaceAll(/{,fill=(.*?)}/g, ",fill=$1");
+    const output = beforeFootnoteSize.replaceAll(/\\(footnotesize|small){(.*?)};/g, "{\\$1$2};")
     return output;
 }
 
@@ -787,13 +793,13 @@ function testConvert() {
 
 async function testConvertFile() {
     let source = await readFile(
-        path.join(CWD, "../book/modules/module1.tex"),
+        path.join(CWD, "../book/modules/module2.tex"),
         // path.join(CWD, "../sample-files/small-tex.tex"),
         "utf-8"
     );
     const converted = convert(source);
 
-    writeFile("sample-files/module1.xml", converted, (err) => {
+    writeFile("sample-files/module2.xml", converted, (err) => {
         if (err) throw err;
     });
 
