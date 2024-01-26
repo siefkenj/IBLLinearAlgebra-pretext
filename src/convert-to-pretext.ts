@@ -993,8 +993,8 @@ function testConvert() {
 
 async function testConvertFile() {
     let source = await readFile(
-        // path.join(CWD, "../book/modules/module1.tex"),
-        path.join(CWD, "../src/small-tex.tex"),
+        path.join(CWD, "../book/modules/module2.tex"),
+        // path.join(CWD, "../sample-files/small-tex.tex"),
         "utf-8"
     );
     const converted = convert(source);
