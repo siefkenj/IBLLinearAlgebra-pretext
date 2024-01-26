@@ -960,14 +960,13 @@ export function convert(value: string, definitionsFile?: string) {
                 });
             },
             center: (node) => {
-                let count = 0;
+                let tikzCount = 0;
                 for (let i = 0; i < node.content.length; i++) {
                     if ((match.environment(node.content[i]), "tikzpicture")) {
-                        count++;
-                        console.log(count);
+                        tikzCount++;
                     }
                 }
-                if (count <= 1) {
+                if (tikzCount <= 1) {
                     return htmlLike({
                         tag: "",
                     });
@@ -1014,13 +1013,13 @@ function testConvert() {
 
 async function testConvertFile() {
     let source = await readFile(
-        // path.join(CWD, "../book/modules/module2.tex"),
-        path.join(CWD, "../sample-files/small-tex.tex"),
+        path.join(CWD, "../book/modules/module2.tex"),
+        // path.join(CWD, "../sample-files/small-tex.tex"),
         "utf-8"
     );
     const converted = convert(source);
 
-    writeFile("converted.xml", converted, (err) => {
+    writeFile("sample-files/module2.xml", converted, (err) => {
         if (err) throw err;
     });
 
