@@ -35,6 +35,7 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { match, math } from "@unified-latex/unified-latex-util-match";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
 import { pgfkeysArgToObject } from "@unified-latex/unified-latex-util-pgfkeys";
+import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -93,6 +94,7 @@ export function convert(value: string, definitionsFile?: string) {
         .use(unifiedLatexAstComplier)
         .use(splitOnHeadings)
         .use(replaceDefinitions, definitionsFile || "")
+        .use(stringifyTikzContent)
         .use(replaceIgnoredElements)
         .use(replaceLabels);
 
@@ -959,22 +961,32 @@ export function convert(value: string, definitionsFile?: string) {
                     }),
                 });
             },
+            center: (node) => {
+                let tikzCount = 0;
+                for (let i = 0; i < node.content.length; i++) {
+                    if ((match.environment(node.content[i]), "tikzpicture")) {
+                        tikzCount++;
+                    }
+                }
+                if (tikzCount <= 1) {
+                    return htmlLike({
+                        tag: "",
+                        content: node.content,
+                    });
+                } else {
+                    return htmlLike({
+                        tag: "sidebyside",
+                        content: node.content,
+                    });
+                }
+            },
         },
     });
-    const beforeTextSize = afterReplacements
+    const output = afterReplacements
         .use(replaceMath)
         .use(rehypeStringify, { voids: [] })
         .processSync(value).value as string;
 
-    const beforeFill = beforeTextSize.replaceAll(/\\textsize{(.*?)}/g, "\\$1");
-    const beforeFootnoteSize = beforeFill.replaceAll(
-        /{,fill=(.*?)}/g,
-        ",fill=$1"
-    );
-    const output = beforeFootnoteSize.replaceAll(
-        /\\(footnotesize|small){(.*?)};/g,
-        "{\\$1$2};"
-    );
     return output;
 }
 
@@ -995,13 +1007,13 @@ function testConvert() {
 
 async function testConvertFile() {
     let source = await readFile(
-        path.join(CWD, "../book/modules/module2.tex"),
+        path.join(CWD, "../book/modules/module3.tex"),
         // path.join(CWD, "../sample-files/small-tex.tex"),
         "utf-8"
     );
     const converted = convert(source);
 
-    writeFile("sample-files/module2.xml", converted, (err) => {
+    writeFile("sample-files/converted.xml", converted, (err) => {
         if (err) throw err;
     });
 

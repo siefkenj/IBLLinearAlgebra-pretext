@@ -20,8 +20,7 @@ export const replaceIgnoredElements: Plugin<[], Ast.Root, Ast.Root> =
                 ) {
                     return null;
                 } else if (
-                    match.environment(node, "minipage") ||
-                    match.environment(node, "center")
+                    match.environment(node, "minipage")
                 ) {
                     return node.content;
                 }
