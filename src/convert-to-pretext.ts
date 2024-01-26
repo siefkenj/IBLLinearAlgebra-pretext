@@ -77,7 +77,8 @@ export function convert(value: string, definitionsFile?: string) {
         .use(replaceDefinitions, definitionsFile || "")
         .use(replaceIgnoredElements);
 
-    const afterReplacements = addedMacros.use(unifiedLatexToHast, {skipHtmlValidation: true,
+    const afterReplacements = addedMacros.use(unifiedLatexToHast, {
+        skipHtmlValidation: true,
         macroReplacements: {
             footnote: (node) => {
                 const args = getArgsContent(node);
@@ -747,9 +748,9 @@ export function convert(value: string, definitionsFile?: string) {
                 });
             },
             tikzpicture: (node) => {
-                const imageAttributes: { [k: string]: string } = {}
+                const imageAttributes: { [k: string]: string } = {};
                 imageAttributes.width = "50%";
-                
+
                 // note that skipHtmlValidation must be true or else image tags will be replaced by img
                 return htmlLike({
                     tag: "figure",
@@ -757,22 +758,32 @@ export function convert(value: string, definitionsFile?: string) {
                         tag: "image",
                         content: htmlLike({
                             tag: "latex-image",
-                            content: s("\\begin{tikzpicture}" + toString(node.content) + "\\end{tikzpicture}"),
+                            content: s(
+                                "\\begin{tikzpicture}" +
+                                    toString(node.content) +
+                                    "\\end{tikzpicture}"
+                            ),
                         }),
                         attributes: imageAttributes,
                     }),
-                })
+                });
             },
         },
     });
     const beforeTextSize = afterReplacements
         .use(replaceMath)
-        .use(rehypeStringify, {voids: []})
+        .use(rehypeStringify, { voids: [] })
         .processSync(value).value as string;
 
     const beforeFill = beforeTextSize.replaceAll(/\\textsize{(.*?)}/g, "\\$1");
-    const beforeFootnoteSize = beforeFill.replaceAll(/{,fill=(.*?)}/g, ",fill=$1");
-    const output = beforeFootnoteSize.replaceAll(/\\(footnotesize|small){(.*?)};/g, "{\\$1$2};")
+    const beforeFootnoteSize = beforeFill.replaceAll(
+        /{,fill=(.*?)}/g,
+        ",fill=$1"
+    );
+    const output = beforeFootnoteSize.replaceAll(
+        /\\(footnotesize|small){(.*?)};/g,
+        "{\\$1$2};"
+    );
     return output;
 }
 
@@ -841,4 +852,3 @@ if (command === "-h" || command === "--help" || !hasExecuted) {
 }
 
 // npx vite-node src/convert-to-pretext.ts -f
-
