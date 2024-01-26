@@ -26,7 +26,7 @@ import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
-import { SP, arg } from "@unified-latex/unified-latex-builder";
+import { SP, m, s, arg } from "@unified-latex/unified-latex-builder";
 import { Node } from "@unified-latex/unified-latex-types";
 import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
@@ -936,14 +936,43 @@ export function convert(value: string, definitionsFile?: string) {
                     attributes: tabularAttributes,
                 });
             },
+            tikzpicture: (node) => {
+                const imageAttributes: { [k: string]: string } = {};
+                imageAttributes.width = "50%";
+
+                // note that skipHtmlValidation must be true or else image tags will be replaced by img
+                return htmlLike({
+                    tag: "figure",
+                    content: htmlLike({
+                        tag: "image",
+                        content: htmlLike({
+                            tag: "latex-image",
+                            content: s(
+                                "\\begin{tikzpicture}" +
+                                    toString(node.content) +
+                                    "\\end{tikzpicture}"
+                            ),
+                        }),
+                        attributes: imageAttributes,
+                    }),
+                });
+            },
         },
     });
-
-    const output = afterReplacements
+    const beforeTextSize = afterReplacements
         .use(replaceMath)
-        .use(rehypeStringify)
+        .use(rehypeStringify, { voids: [] })
         .processSync(value).value as string;
 
+    const beforeFill = beforeTextSize.replaceAll(/\\textsize{(.*?)}/g, "\\$1");
+    const beforeFootnoteSize = beforeFill.replaceAll(
+        /{,fill=(.*?)}/g,
+        ",fill=$1"
+    );
+    const output = beforeFootnoteSize.replaceAll(
+        /\\(footnotesize|small){(.*?)};/g,
+        "{\\$1$2};"
+    );
     return output;
 }
 
@@ -964,8 +993,8 @@ function testConvert() {
 
 async function testConvertFile() {
     let source = await readFile(
-        // path.join(CWD, "../book/modules/module1.tex"),
-        path.join(CWD, "../src/small-tex.tex"),
+        path.join(CWD, "../book/modules/module2.tex"),
+        // path.join(CWD, "../sample-files/small-tex.tex"),
         "utf-8"
     );
     const converted = convert(source);
@@ -1012,9 +1041,3 @@ if (command === "-h" || command === "--help" || !hasExecuted) {
 }
 
 // npx vite-node src/convert-to-pretext.ts -f
-
-// environments:
-// emph box
-
-// Other:
-// preserved definition render
