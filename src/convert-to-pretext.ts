@@ -330,13 +330,15 @@ export function convert(value: string, definitionsFile?: string) {
                     }
                 }
 
-                // wrap the rest in solution tags
-                exampleContents.push(
-                    htmlLike({
-                        tag: "solution",
-                        content: solutionContents,
-                    })
-                );
+                // wrap the rest in solution tags (if there is solution content)
+                if (solutionContents.length != 0) {
+                    exampleContents.push(
+                        htmlLike({
+                            tag: "solution",
+                            content: solutionContents,
+                        })
+                    );
+                }
 
                 // wrap everything in example tags
                 return htmlLike({
@@ -999,20 +1001,20 @@ async function testConvertFile() {
     );
     const converted = convert(source);
 
-    // writeFile("module.1.xml", converted, (err) => {
-    //     if (err) throw err;
-    // });
+    writeFile("sample-files/module2.xml", converted, (err) => {
+        if (err) throw err;
+    });
 
-    process.stdout.write(
-        chalk.green("Converted") +
-            "\n\n" +
-            source +
-            "\n\n" +
-            chalk.green("to") +
-            "\n\n" +
-            converted +
-            "\n"
-    );
+    // process.stdout.write(
+    //     chalk.green("Converted") +
+    //         "\n\n" +
+    //         source +
+    //         "\n\n" +
+    //         chalk.green("to") +
+    //         "\n\n" +
+    //         converted +
+    //         "\n"
+    // );
 }
 
 function printHelp() {
