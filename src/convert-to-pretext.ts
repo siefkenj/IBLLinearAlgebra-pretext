@@ -957,6 +957,25 @@ export function convert(value: string, definitionsFile?: string) {
                     }),
                 });
             },
+            center: (node) => {
+                let count = 0;
+                for (let i = 0; i < node.content.length; i++) {
+                    if ((match.environment(node.content[i]), "tikzpicture")) {
+                        count++;
+                        console.log(count);
+                    }
+                }
+                if (count <= 1) {
+                    return htmlLike({
+                        tag: "",
+                    });
+                } else {
+                    return htmlLike({
+                        tag: "sidebyside",
+                        content: node.content,
+                    });
+                }
+            },
         },
     });
     const beforeTextSize = afterReplacements
@@ -993,26 +1012,26 @@ function testConvert() {
 
 async function testConvertFile() {
     let source = await readFile(
-        path.join(CWD, "../book/modules/module2.tex"),
-        // path.join(CWD, "../sample-files/small-tex.tex"),
+        // path.join(CWD, "../book/modules/module2.tex"),
+        path.join(CWD, "../sample-files/small-tex.tex"),
         "utf-8"
     );
     const converted = convert(source);
 
-    // writeFile("module.1.xml", converted, (err) => {
-    //     if (err) throw err;
-    // });
+    writeFile("converted.xml", converted, (err) => {
+        if (err) throw err;
+    });
 
-    process.stdout.write(
-        chalk.green("Converted") +
-            "\n\n" +
-            source +
-            "\n\n" +
-            chalk.green("to") +
-            "\n\n" +
-            converted +
-            "\n"
-    );
+    // process.stdout.write(
+    //     chalk.green("Converted") +
+    //         "\n\n" +
+    //         source +
+    //         "\n\n" +
+    //         chalk.green("to") +
+    //         "\n\n" +
+    //         converted +
+    //         "\n"
+    // );
 }
 
 function printHelp() {
