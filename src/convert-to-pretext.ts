@@ -26,7 +26,7 @@ import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
-import { SP, arg } from "@unified-latex/unified-latex-builder";
+import { SP, arg, s } from "@unified-latex/unified-latex-builder";
 import { Node } from "@unified-latex/unified-latex-types";
 import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
@@ -35,6 +35,7 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { match, math } from "@unified-latex/unified-latex-util-match";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
 import { pgfkeysArgToObject } from "@unified-latex/unified-latex-util-pgfkeys";
+import { replaceIndecesInMathMode } from "./plugin-replace-indeces-in-math-mode";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -94,7 +95,8 @@ export function convert(value: string, definitionsFile?: string) {
         .use(splitOnHeadings)
         .use(replaceDefinitions, definitionsFile || "")
         .use(replaceIgnoredElements)
-        .use(replaceLabels);
+        .use(replaceLabels)
+        .use(replaceIndecesInMathMode);
 
     const afterReplacements = addedMacros.use(unifiedLatexToHast, {
         skipHtmlValidation: true,
@@ -389,12 +391,26 @@ export function convert(value: string, definitionsFile?: string) {
                     if (row == null) {
                         return [];
                     } else {
+                        const rowRoot = { type: "root", content: row };
+
+                        const content = rowRoot.content
+                            .filter((node) => isHtmlLike(node))
+                            .concat(
+                                rowRoot.content.filter(
+                                    (node) => !isHtmlLike(node)
+                                )
+                            )
+                            .flatMap((node) => {
+                                if (isHtmlLike(node)) {
+                                    return node;
+                                }
+
+                                return s(toString(node));
+                            });
+
                         return htmlLike({
                             tag: "mrow",
-                            content: {
-                                type: "string",
-                                content: toString(row),
-                            },
+                            content,
                         });
                     }
                 });
@@ -948,7 +964,7 @@ export function convert(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\hefferon`;
+    const source = `\\emph{representation of $\\vec v$ in the $\\mathcal B$ basis}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
