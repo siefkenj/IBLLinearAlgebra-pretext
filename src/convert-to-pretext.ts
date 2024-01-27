@@ -26,7 +26,8 @@ import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
-import { SP, arg, s } from "@unified-latex/unified-latex-builder";
+
+import { SP, m, s, arg } from "@unified-latex/unified-latex-builder";
 import { Node } from "@unified-latex/unified-latex-types";
 import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
@@ -36,6 +37,7 @@ import { match, math } from "@unified-latex/unified-latex-util-match";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
 import { pgfkeysArgToObject } from "@unified-latex/unified-latex-util-pgfkeys";
 import { replaceIndecesInMathMode } from "./plugin-replace-indeces-in-math-mode";
+import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -94,6 +96,7 @@ export function convert(value: string, definitionsFile?: string) {
         .use(unifiedLatexAstComplier)
         .use(splitOnHeadings)
         .use(replaceDefinitions, definitionsFile || "")
+        .use(stringifyTikzContent)
         .use(replaceIgnoredElements)
         .use(replaceLabels)
         .use(replaceIndecesInMathMode);
@@ -332,13 +335,15 @@ export function convert(value: string, definitionsFile?: string) {
                     }
                 }
 
-                // wrap the rest in solution tags
-                exampleContents.push(
-                    htmlLike({
-                        tag: "solution",
-                        content: solutionContents,
-                    })
-                );
+                // wrap the rest in solution tags (if there is solution content)
+                if (solutionContents.length != 0) {
+                    exampleContents.push(
+                        htmlLike({
+                            tag: "solution",
+                            content: solutionContents,
+                        })
+                    );
+                }
 
                 // wrap everything in example tags
                 return htmlLike({
@@ -952,12 +957,51 @@ export function convert(value: string, definitionsFile?: string) {
                     attributes: tabularAttributes,
                 });
             },
+            tikzpicture: (node) => {
+                const imageAttributes: { [k: string]: string } = {};
+                imageAttributes.width = "50%";
+
+                // note that skipHtmlValidation must be true or else image tags will be replaced by img
+                return htmlLike({
+                    tag: "figure",
+                    content: htmlLike({
+                        tag: "image",
+                        content: htmlLike({
+                            tag: "latex-image",
+                            content: s(
+                                "\\begin{tikzpicture}" +
+                                    toString(node.content) +
+                                    "\\end{tikzpicture}"
+                            ),
+                        }),
+                        attributes: imageAttributes,
+                    }),
+                });
+            },
+            center: (node) => {
+                let tikzCount = 0;
+                for (let i = 0; i < node.content.length; i++) {
+                    if ((match.environment(node.content[i]), "tikzpicture")) {
+                        tikzCount++;
+                    }
+                }
+                if (tikzCount <= 1) {
+                    return htmlLike({
+                        tag: "",
+                        content: node.content,
+                    });
+                } else {
+                    return htmlLike({
+                        tag: "sidebyside",
+                        content: node.content,
+                    });
+                }
+            },
         },
     });
-
     const output = afterReplacements
         .use(replaceMath)
-        .use(rehypeStringify)
+        .use(rehypeStringify, { voids: [] })
         .processSync(value).value as string;
 
     return output;
@@ -980,26 +1024,26 @@ function testConvert() {
 
 async function testConvertFile() {
     let source = await readFile(
-        // path.join(CWD, "../book/modules/module1.tex"),
-        path.join(CWD, "../src/small-tex.tex"),
+        path.join(CWD, "../book/modules/module3.tex"),
+        // path.join(CWD, "../sample-files/small-tex.tex"),
         "utf-8"
     );
     const converted = convert(source);
 
-    // writeFile("module.1.xml", converted, (err) => {
-    //     if (err) throw err;
-    // });
+    writeFile("sample-files/converted.xml", converted, (err) => {
+        if (err) throw err;
+    });
 
-    process.stdout.write(
-        chalk.green("Converted") +
-            "\n\n" +
-            source +
-            "\n\n" +
-            chalk.green("to") +
-            "\n\n" +
-            converted +
-            "\n"
-    );
+    // process.stdout.write(
+    //     chalk.green("Converted") +
+    //         "\n\n" +
+    //         source +
+    //         "\n\n" +
+    //         chalk.green("to") +
+    //         "\n\n" +
+    //         converted +
+    //         "\n"
+    // );
 }
 
 function printHelp() {
@@ -1028,9 +1072,3 @@ if (command === "-h" || command === "--help" || !hasExecuted) {
 }
 
 // npx vite-node src/convert-to-pretext.ts -f
-
-// environments:
-// emph box
-
-// Other:
-// preserved definition render
