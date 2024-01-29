@@ -282,7 +282,7 @@ export function convert(value: string, definitionsFile?: string) {
         },
         environmentReplacements: {
             example: (node) => {
-                let exampleContents = [];
+                let exampleContents: Ast.Node[] = [];
                 let solutionContents: Node[] = [];
                 const attributes: { [k: string]: string } = {};
 
@@ -347,7 +347,7 @@ export function convert(value: string, definitionsFile?: string) {
             },
             emphbox: (node) => {
                 const args: (Node[] | null)[] = getArgsContent(node);
-                let remarkContents = [];
+                let remarkContents: Ast.Node[] = [];
 
                 // check if there is the optional argument for title and wrap in title tags
                 if (args[0] !== null) {
