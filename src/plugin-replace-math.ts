@@ -36,7 +36,7 @@ export const replaceMath: Plugin<[], Hast.Root, Hast.Root> =
                     node.tagName = "m";
                     node.properties.className = undefined;
                 }
-                // Replace elements that have class name "display-math" with '<m>...<\m>' <me>...<\me>' tags
+                // Replace elements that have class name "display-math" with <me>...<\me>' tags
                 // wrapped in '<p>...<\p>' tags.
                 if (node.tagName === "div" && hasClass(node, "display-math")) {
                     node.tagName = "p";
