@@ -35,6 +35,9 @@ export const environmentInfo: Ast.EnvInfoRecord = {
             inMathMode: true,
         },
     },
+    "alignat*": {
+        signature: "m",
+    },
 };
 
 export const environmentReplacements: Record<
@@ -165,6 +168,44 @@ export const environmentReplacements: Record<
                 return htmlLike({
                     tag: "mrow",
                     content,
+                });
+            }
+        });
+        return htmlLike({
+            tag: "p",
+            content: htmlLike({
+                tag: "md",
+                content: formattedRows,
+            }),
+        });
+    },
+    "alignat*": (node) => {
+        if (node._renderInfo?.extraMacro !== undefined) {
+            node.content.unshift(node._renderInfo.extraMacro as Ast.Macro);
+        }
+        const alignSplit = splitOnMacro(node.content, "\\");
+        const rows = alignSplit.segments;
+        const formattedRows = rows.flatMap((row) => {
+            if (row == null || row.length == 0) {
+                return [];
+            } else {
+                const attributes: { [k: string]: string } = {};
+                if (
+                    rows.indexOf(row) !== 0 &&
+                    alignSplit.macros[rows.indexOf(row) - 1]._renderInfo?.id !==
+                        undefined
+                ) {
+                    attributes["xml:id"] = alignSplit.macros[
+                        rows.indexOf(row) - 1
+                    ]._renderInfo?.id as string;
+                }
+                return htmlLike({
+                    tag: "mrow",
+                    content: {
+                        type: "string",
+                        content: toString(row),
+                    },
+                    attributes,
                 });
             }
         });

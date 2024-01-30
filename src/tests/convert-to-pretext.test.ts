@@ -73,9 +73,16 @@ describe("convert-to-pretext", () => {
             "<example><statement><p>foo</p></statement><solution><p>bar1</p><p>bar2</p></solution></example>"
         );
     });
-    it("replaces align and align* environments", () => {
+    it("replaces align, align* and alignat* environments", () => {
         pretext = convert(
             "Thus \\begin{align*}x=m+1&=(2k+1)+1=2k+2\\\\&=2(k+1)=2n,\\end{align*}\n\nwhere"
+        );
+        expect(pretext).toEqual(
+            "<p>Thus</p><p><md><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></md></p><p>where</p>"
+        );
+
+        pretext = convert(
+            "Thus \\begin{alignat*}{2}x=m+1&=(2k+1)+1=2k+2\\\\&=2(k+1)=2n,\\end{alignat*}\n\nwhere"
         );
         expect(pretext).toEqual(
             "<p>Thus</p><p><md><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></md></p><p>where</p>"
