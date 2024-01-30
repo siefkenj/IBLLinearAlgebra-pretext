@@ -4,38 +4,17 @@ import chalk from "chalk";
 import { readFile } from "node:fs/promises";
 import path, { dirname } from "node:path";
 import { writeFile } from "fs";
-
-import {
-    htmlLike,
-    isHtmlLike,
-} from "@unified-latex/unified-latex-util-html-like";
-import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
-import {
-    unifiedLatexToHast,
-    wrapPars,
-} from "@unified-latex/unified-latex-to-hast";
+import { unifiedLatexToHast } from "@unified-latex/unified-latex-to-hast";
 import {
     unifiedLatexAstComplier,
     unifiedLatexFromString,
 } from "@unified-latex/unified-latex-util-parse";
-import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { replaceMath } from "./plugin-replace-math";
 import { splitOnHeadings } from "./plugin-split-on-headings";
-import {
-    splitOnCondition,
-    splitOnMacro,
-    unsplitOnMacro,
-} from "@unified-latex/unified-latex-util-split";
 
-import { SP, s } from "@unified-latex/unified-latex-builder";
-import { Node } from "@unified-latex/unified-latex-types";
 import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
 import { replaceLabels } from "./plugin-replace-labels";
-import * as Ast from "@unified-latex/unified-latex-types";
-import { match } from "@unified-latex/unified-latex-util-match";
-import { toString } from "@unified-latex/unified-latex-util-to-string";
-import { pgfkeysArgToObject } from "@unified-latex/unified-latex-util-pgfkeys";
 import { replaceModules } from "./plugin-replace-modules";
 import { replaceIndecesInMathMode } from "./plugin-replace-indeces-in-math-mode";
 import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
