@@ -20,27 +20,19 @@ import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
-// const linearalgebraFile = await readFile(
-//     path.join(CWD, "../book/linearalgebra.tex"),
-//     "utf-8"
-// );
+/**
+ * Plugin for replacing "\input{}" macros with the LaTeX AST of the corresponding module.
+ *
+ */
 
 export const replaceModules: Plugin<[], Ast.Root, Ast.Root> =
     function replaceModules() {
-        // const linearalgebra = unified()
-        //     .use(unifiedLatexFromString, {
-        //         macros: {
-        //             input: {
-        //                 signature: "m",
-        //             },
-        //         },
-        //     })
-        //     .use(unifiedLatexAstComplier)
-        //     .processSync(linearalgebraFile).result as Ast.Root;
-
+        // Create a map with the file as the key, and the AST tree of the corresponding modules as the value.
         let modules = new Map<string, Ast.Root>();
 
+        // Read every file in "book/modules" directory.
         readdirSync("book/modules").forEach((file) => {
+            // Parse module into LaTeX AST
             const module = unified()
                 .use(unifiedLatexFromString, {
                     macros: {
@@ -102,17 +94,19 @@ export const replaceModules: Plugin<[], Ast.Root, Ast.Root> =
                 .processSync(
                     readFileSync("book/modules/" + file, { encoding: "utf8" })
                 ).result as Ast.Root;
-
+            // Set a key and value pair in the map
             modules.set("modules/" + file, module);
         });
 
         return function (ast: Ast.Root) {
             replaceNode(ast, (node) => {
+                // Check if the node is a "\input{}" macro.
                 if (match.macro(node, "input")) {
+                    // Get the argument of the node which is the name of the file.
                     const file = toString(
                         (getArgsContent(node) as Ast.Node[][])[0]
                     );
-
+                    // Used the file name to replace the node with the corresponding LaTeX AST.
                     return modules.get(file);
                 }
             });
