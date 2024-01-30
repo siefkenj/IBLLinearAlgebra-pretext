@@ -1071,8 +1071,10 @@ export function convertTextbook(value: string, definitionsFile?: string) {
         .use(replaceModules)
         .use(splitOnHeadings)
         .use(replaceDefinitions, definitionsFile || "")
+        .use(stringifyTikzContent)
         .use(replaceIgnoredElements)
-        .use(replaceLabels);
+        .use(replaceLabels)
+        .use(replaceIndecesInMathMode);
 
     const afterReplacements = addedMacros.use(unifiedLatexToHast, {
         skipHtmlValidation: true,
@@ -1367,12 +1369,26 @@ export function convertTextbook(value: string, definitionsFile?: string) {
                     if (row == null) {
                         return [];
                     } else {
+                        const rowRoot = { type: "root", content: row };
+
+                        const content = rowRoot.content
+                            .filter((node) => isHtmlLike(node))
+                            .concat(
+                                rowRoot.content.filter(
+                                    (node) => !isHtmlLike(node)
+                                )
+                            )
+                            .flatMap((node) => {
+                                if (isHtmlLike(node)) {
+                                    return node;
+                                }
+
+                                return s(toString(node));
+                            });
+
                         return htmlLike({
                             tag: "mrow",
-                            content: {
-                                type: "string",
-                                content: toString(row),
-                            },
+                            content,
                         });
                     }
                 });
@@ -1919,6 +1935,7 @@ export function convertTextbook(value: string, definitionsFile?: string) {
                     tag: "chapter",
                     content: node.content,
                 });
+            },
             tikzpicture: (node) => {
                 const imageAttributes: { [k: string]: string } = {};
                 imageAttributes.width = "50%";
@@ -1986,27 +2003,27 @@ function testConvert() {
 
 async function testConvertFile() {
     let source = await readFile(
-        path.join(CWD, "../book/modules/module1.tex"),
-        // path.join(CWD, "../src/small-tex.tex"),
+        // path.join(CWD, "../book/modules/module1.tex"),
+        path.join(CWD, "../src/small-tex.tex"),
 
         "utf-8"
     );
-    const converted = convert(source);
+    const converted = convertTextbook(source);
 
-    writeFile("sample-files/converted.xml", converted, (err) => {
-        if (err) throw err;
-    });
+    // writeFile("sample-files/converted.xml", converted, (err) => {
+    //     if (err) throw err;
+    // });
 
-    // process.stdout.write(
-    //     chalk.green("Converted") +
-    //         "\n\n" +
-    //         source +
-    //         "\n\n" +
-    //         chalk.green("to") +
-    //         "\n\n" +
-    //         converted +
-    //         "\n"
-    // );
+    process.stdout.write(
+        chalk.green("Converted") +
+            "\n\n" +
+            source +
+            "\n\n" +
+            chalk.green("to") +
+            "\n\n" +
+            converted +
+            "\n"
+    );
 }
 
 function printHelp() {

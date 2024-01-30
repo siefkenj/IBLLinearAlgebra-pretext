@@ -15,6 +15,8 @@ import { match } from "@unified-latex/unified-latex-util-match";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
 import { splitOnHeadings } from "./plugin-split-on-headings";
+import { replaceIndecesInMathMode } from "./plugin-replace-indeces-in-math-mode";
+import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -93,8 +95,10 @@ export const replaceModules: Plugin<[], Ast.Root, Ast.Root> =
                 .use(unifiedLatexAstComplier)
                 .use(splitOnHeadings)
                 .use(replaceDefinitions)
+                .use(stringifyTikzContent)
                 .use(replaceIgnoredElements)
                 .use(replaceLabels)
+                .use(replaceIndecesInMathMode)
                 .processSync(
                     readFileSync("book/modules/" + file, { encoding: "utf8" })
                 ).result as Ast.Root;
@@ -109,7 +113,7 @@ export const replaceModules: Plugin<[], Ast.Root, Ast.Root> =
                         (getArgsContent(node) as Ast.Node[][])[0]
                     );
 
-                    return modules.get(file)?.content;
+                    return modules.get(file);
                 }
             });
         };
