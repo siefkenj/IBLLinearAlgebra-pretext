@@ -34,6 +34,9 @@ export const macroInfo: Ast.MacroInfoRecord = {
     hefferon: {
         signature: "o",
     },
+    Title: {
+        signature: "m",
+    },
 };
 
 export const macroReplacements: Record<
@@ -196,28 +199,11 @@ export const macroReplacements: Record<
             content: annotation,
         };
     },
-    // label: (node, info) => {
-    //     const arg = (
-    //         getArgsContent(node as Ast.Macro) as Ast.String[][]
-    //     )[0][0].content;
-    //     console.log("hello");
-    //     replaceNode(info.parents[info.parents.length - 1], (node) => {
-    //         if (node === info.parents[1]) {
-    //             const htmlLikeInfo = extractFromHtmlLike(
-    //                 info.parents[1] as Ast.Macro
-    //             );
-    //             return htmlLike({
-    //                 tag: htmlLikeInfo.tag,
-    //                 content: htmlLikeInfo.content,
-    //                 attributes: {
-    //                     "xml:id": arg,
-    //                     ...htmlLikeInfo.attributes,
-    //                 },
-    //             });
-    //         } else if (match.macro(node, "label")) {
-    //             return null;
-    //         }
-    //     });
-    //     return node;
-    // },
+    Title: (node) => {
+        const args = getArgsContent(node);
+        return htmlLike({
+            tag: "title",
+            content: args[0] || [],
+        });
+    },
 };
