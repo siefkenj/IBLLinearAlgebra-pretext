@@ -726,9 +726,16 @@ export const environmentReplacements: Record<
         });
     },
     module: (node) => {
+        const attributes: { [k: string]: string } = {};
+
+        if (node._renderInfo?.id !== undefined) {
+            attributes["xml:id"] = node._renderInfo.id as string;
+        }
+
         return htmlLike({
             tag: "chapter",
             content: node.content,
+            attributes,
         });
     },
     tikzpicture: (node) => {
