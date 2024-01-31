@@ -17,6 +17,8 @@ import { toString } from "@unified-latex/unified-latex-util-to-string";
 import { splitOnHeadings } from "./plugin-split-on-headings";
 import { replaceIndecesInMathMode } from "./plugin-replace-indeces-in-math-mode";
 import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
+import { macroInfo } from "./subs/macro-subs";
+import { environmentInfo } from "./subs/environment-subs";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -35,54 +37,8 @@ export const replaceModules: Plugin<[], Ast.Root, Ast.Root> =
             // Parse module into LaTeX AST
             const module = unified()
                 .use(unifiedLatexFromString, {
-                    macros: {
-                        Heading: {
-                            signature: "m",
-                        },
-                        footnote: {
-                            signature: "m",
-                        },
-                        index: {
-                            signature: "o m",
-                        },
-                        SavedDefinitionRender: {
-                            signature: "m",
-                        },
-                        ref: {
-                            signature: "m",
-                        },
-                        eqref: {
-                            signature: "m",
-                        },
-                        label: {
-                            signature: "m",
-                        },
-                        prob: {
-                            signature: "o",
-                        },
-                        hefferon: {
-                            signature: "o",
-                        },
-                    },
-                    environments: {
-                        emphbox: {
-                            signature: "o m",
-                        },
-                        definition: {
-                            signature: "o",
-                        },
-                        theorem: {
-                            signature: "o",
-                        },
-                        tabular: {
-                            signature: "m",
-                        },
-                        equation: {
-                            renderInfo: {
-                                inMathMode: true,
-                            },
-                        },
-                    },
+                    macros: macroInfo,
+                    environments: environmentInfo,
                 })
                 .use(unifiedLatexAstComplier)
                 .use(splitOnHeadings)
@@ -106,8 +62,15 @@ export const replaceModules: Plugin<[], Ast.Root, Ast.Root> =
                     const file = toString(
                         (getArgsContent(node) as Ast.Node[][])[0]
                     );
-                    // Used the file name to replace the node with the corresponding LaTeX AST.
-                    return modules.get(file);
+
+                    // Check if the file is a module
+                    if (file.includes("modules")) {
+                        // Used the file name to replace the node with the corresponding LaTeX AST.
+                        return modules.get(file)?.content;
+                    }
+
+                    // Otherwise remove input
+                    return null;
                 }
             });
         };
