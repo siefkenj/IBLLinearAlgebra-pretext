@@ -41,10 +41,7 @@ export const macroInfo: Ast.MacroInfoRecord = {
 
 export const macroReplacements: Record<
     string,
-    (
-        node: Ast.Macro,
-        info: VisitInfo
-    ) => Ast.Macro | Ast.String | Ast.Environment | Ast.Root
+    (node: Ast.Macro, info: VisitInfo) => Ast.Node
 > = {
     footnote: (node) => {
         const args = getArgsContent(node);
