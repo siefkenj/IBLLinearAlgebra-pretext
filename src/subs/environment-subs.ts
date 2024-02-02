@@ -483,6 +483,11 @@ export const environmentReplacements: Record<
                 return [arg];
             });
             const attributes: { [k: string]: string } = {};
+            if (args[0] == undefined) {
+                return htmlLike({
+                    tag: "li",
+                });
+            }
             const segmentsSplit = splitOnCondition(args[0], (node) => {
                 return isHtmlLike(node);
             });
@@ -807,6 +812,46 @@ export const environmentReplacements: Record<
         });
     },
     module: (node) => {
+        const attributes: { [k: string]: string } = {};
+
+        if (node._renderInfo?.id !== undefined) {
+            attributes["xml:id"] = node._renderInfo.id as string;
+        }
+
+        let introduction = {};
+        const split = splitOnMacro(node.content, ["html-tag:section", "Title"]);
+        let introductionContent = split.segments[1];
+
+        const introductionSplit = splitOnCondition(
+            introductionContent,
+            isHtmlLike
+        );
+        const formattedSegments = introductionSplit.segments.flatMap((node) => {
+            return [wrapPars(node)];
+        });
+
+        if (introductionContent.length > 0) {
+            introduction = htmlLike({
+                tag: "introduction",
+                content: unsplitOnMacro({
+                    segments: formattedSegments,
+                    macros: introductionSplit.separators,
+                }),
+            });
+        }
+
+        split.segments[1] = [introduction as Ast.Node];
+
+        return htmlLike({
+            tag: "chapter",
+            content: unsplitOnMacro({
+                segments: split.segments,
+                macros: split.macros,
+            }),
+            attributes,
+        });
+    },
+    appendix: (node) => {
         const attributes: { [k: string]: string } = {};
 
         if (node._renderInfo?.id !== undefined) {
