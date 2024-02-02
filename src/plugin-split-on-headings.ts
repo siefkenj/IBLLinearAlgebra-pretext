@@ -27,7 +27,7 @@ export const splitOnHeadings: Plugin<[], Ast.Root, Ast.Root> =
                     macrosThatBreakPars: ["SavedDefinitionRender"],
                 })
             );
-            let sections: Ast.Root["content"] = [];
+            let sections: Ast.Root["content"] = pars[0];
             // Procced only if there are \Heading{}' macros in the original AST tree.
             if (newHeadings.length > 0) {
                 for (let i = 0; i < newHeadings.length; i++) {
