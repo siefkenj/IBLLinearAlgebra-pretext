@@ -16,13 +16,22 @@ export const replaceIgnoredElements: Plugin<[], Ast.Root, Ast.Root> =
                     match.macro(node, "medskip") ||
                     match.macro(node, "bigskip") ||
                     match.macro(node, "emptybox") ||
-                    match.macro(node, "noindent")
+                    match.macro(node, "noindent") ||
+                    match.parbreak(node)
                 ) {
                     return null;
-                } else if (
-                    match.environment(node, "minipage")
-                ) {
-                    return node.content;
+                } else if (match.environment(node, "center")) {
+                    let tikzCount = 0;
+                    for (let i = 0; i < node.content.length; i++) {
+                        if (match.environment(node.content[i], "tikzpicture")) {
+                            tikzCount++;
+                        }
+                    }
+                    if (tikzCount <= 1) {
+                        return node.content;
+                    }
+                } else if (match.environment(node, "minipage")) {
+                    return (node as Ast.Environment).content;
                 }
             });
         };
