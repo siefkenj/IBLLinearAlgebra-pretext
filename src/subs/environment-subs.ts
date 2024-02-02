@@ -45,8 +45,69 @@ export const environmentReplacements: Record<
     (
         node: Ast.Environment,
         info: VisitInfo
-    ) => Ast.Macro | Ast.String | Ast.Environment
+    ) => Ast.Macro | Ast.Environment | Ast.String
 > = {
+    // example: (node) => {
+    //     let exampleContents: Ast.Node[] = [];
+    //     let solutionContents: Node[] = [];
+    //     const attributes: { [k: string]: string } = {};
+
+    //     if (node._renderInfo?.id !== undefined) {
+    //         attributes["xml:id"] = node._renderInfo.id as string;
+    //     }
+
+    //     // seperate by paragraphs
+    //     let segments = splitOnCondition(node.content, match.parbreak).segments;
+
+    //     for (let i = 0; i < segments.length; i++) {
+    //         // wrap the first paragraph in statement tags
+    //         if (i === 0) {
+    //             exampleContents.push(
+    //                 htmlLike({
+    //                     tag: "statement",
+    //                     content: htmlLike({
+    //                         tag: "p",
+    //                         content: segments[i],
+    //                     }),
+    //                 })
+    //             );
+
+    //             // put the rest in p tags for later
+    //         } else {
+    //             const segmentsSplit = splitOnCondition(segments[i], (node) => {
+    //                 return isHtmlLike(node);
+    //             });
+    //             const formattedSegments = segmentsSplit.segments.flatMap(
+    //                 (segment) => {
+    //                     return [wrapPars(segment)];
+    //                 }
+    //             );
+    //             solutionContents.push(
+    //                 ...unsplitOnMacro({
+    //                     segments: formattedSegments,
+    //                     macros: segmentsSplit.separators,
+    //                 })
+    //             );
+    //         }
+    //     }
+
+    //     // wrap the rest in solution tags (if there is solution content)
+    //     if (solutionContents.length != 0) {
+    //         exampleContents.push(
+    //             htmlLike({
+    //                 tag: "solution",
+    //                 content: solutionContents,
+    //             })
+    //         );
+    //     }
+
+    //     // wrap everything in example tags
+    //     return htmlLike({
+    //         tag: "example",
+    //         content: exampleContents,
+    //         attributes,
+    //     });
+    // },
     example: (node) => {
         let exampleContents: Ast.Node[] = [];
         let solutionContents: Node[] = [];
@@ -56,55 +117,75 @@ export const environmentReplacements: Record<
             attributes["xml:id"] = node._renderInfo.id as string;
         }
 
+        const split = splitOnCondition(node.content, (node) => {
+            return (
+                match.parbreak(node) ||
+                node.type === "displaymath" ||
+                isHtmlLike(node)
+            );
+        });
+
+        const formattedSegments = split.segments.flatMap((segment) => {
+            return [wrapPars(segment)];
+        });
+
+        const content = unsplitOnMacro({
+            segments: formattedSegments,
+            macros: split.separators,
+        });
+
         // seperate by paragraphs
-        let segments = splitOnCondition(node.content, match.parbreak).segments;
+        // let segments = splitOnCondition(node.content, match.parbreak).segments;
 
-        for (let i = 0; i < segments.length; i++) {
-            // wrap the first paragraph in statement tags
-            if (i === 0) {
-                exampleContents.push(
-                    htmlLike({
-                        tag: "statement",
-                        content: htmlLike({
-                            tag: "p",
-                            content: segments[i],
-                        }),
-                    })
-                );
+        // for (let i = 0; i < segments.length; i++) {
+        //     // wrap the first paragraph in statement tags
+        //     if (i === 0) {
+        //         exampleContents.push(
+        //             htmlLike({
+        //                 tag: "statement",
+        //                 content: htmlLike({
+        //                     tag: "p",
+        //                     content: segments[i],
+        //                 }),
+        //             })
+        //         );
 
-                // put the rest in p tags for later
-            } else {
-                const segmentsSplit = splitOnCondition(segments[i], (node) => {
-                    return isHtmlLike(node);
-                });
-                const formattedSegments = segmentsSplit.segments.flatMap(
-                    (segment) => {
-                        return [wrapPars(segment)];
-                    }
-                );
-                solutionContents.push(
-                    ...unsplitOnMacro({
-                        segments: formattedSegments,
-                        macros: segmentsSplit.separators,
-                    })
-                );
-            }
-        }
+        //         // put the rest in p tags for later
+        //     } else {
+        //         const segmentsSplit = splitOnCondition(segments[i], (node) => {
+        //             return isHtmlLike(node);
+        //         });
+        //         const formattedSegments = segmentsSplit.segments.flatMap(
+        //             (segment) => {
+        //                 return [wrapPars(segment)];
+        //             }
+        //         );
+        //         solutionContents.push(
+        //             ...unsplitOnMacro({
+        //                 segments: formattedSegments,
+        //                 macros: segmentsSplit.separators,
+        //             })
+        //         );
+        //     }
+        // }
 
         // wrap the rest in solution tags (if there is solution content)
-        if (solutionContents.length != 0) {
-            exampleContents.push(
-                htmlLike({
-                    tag: "solution",
-                    content: solutionContents,
-                })
-            );
-        }
+        // if (solutionContents.length != 0) {
+        //     exampleContents.push(
+        //         htmlLike({
+        //             tag: "solution",
+        //             content: solutionContents,
+        //         })
+        //     );
+        // }
 
         // wrap everything in example tags
         return htmlLike({
             tag: "example",
-            content: exampleContents,
+            content: htmlLike({
+                tag: "statement",
+                content,
+            }),
             attributes,
         });
     },
@@ -732,9 +813,36 @@ export const environmentReplacements: Record<
             attributes["xml:id"] = node._renderInfo.id as string;
         }
 
+        let introduction = {};
+        const split = splitOnMacro(node.content, ["html-tag:section", "Title"]);
+        let introductionContent = split.segments[1];
+
+        const introductionSplit = splitOnCondition(
+            introductionContent,
+            isHtmlLike
+        );
+        const formattedSegments = introductionSplit.segments.flatMap((node) => {
+            return [wrapPars(node)];
+        });
+
+        if (introductionContent.length > 0) {
+            introduction = htmlLike({
+                tag: "introduction",
+                content: unsplitOnMacro({
+                    segments: formattedSegments,
+                    macros: introductionSplit.separators,
+                }),
+            });
+        }
+
+        split.segments[1] = [introduction as Ast.Node];
+
         return htmlLike({
             tag: "chapter",
-            content: node.content,
+            content: unsplitOnMacro({
+                segments: split.segments,
+                macros: split.macros,
+            }),
             attributes,
         });
     },
@@ -742,40 +850,50 @@ export const environmentReplacements: Record<
         const imageAttributes: { [k: string]: string } = {};
         imageAttributes.width = "50%";
 
+        const caption = htmlLike({
+            tag: "caption",
+        });
+
+        const image = htmlLike({
+            tag: "image",
+            content: htmlLike({
+                tag: "latex-image",
+                content: s(
+                    "\\begin{tikzpicture}" +
+                        toString(node.content) +
+                        "\\end{tikzpicture}"
+                ),
+            }),
+            attributes: imageAttributes,
+        });
+
         // note that skipHtmlValidation must be true or else image tags will be replaced by img
         return htmlLike({
             tag: "figure",
-            content: htmlLike({
-                tag: "image",
-                content: htmlLike({
-                    tag: "latex-image",
-                    content: s(
-                        "\\begin{tikzpicture}" +
-                            toString(node.content) +
-                            "\\end{tikzpicture}"
-                    ),
-                }),
-                attributes: imageAttributes,
-            }),
+            content: [caption, image],
         });
     },
     center: (node) => {
-        let tikzCount = 0;
-        for (let i = 0; i < node.content.length; i++) {
-            if ((match.environment(node.content[i]), "tikzpicture")) {
-                tikzCount++;
-            }
-        }
-        if (tikzCount <= 1) {
-            return htmlLike({
-                tag: "",
-                content: node.content,
-            });
-        } else {
-            return htmlLike({
-                tag: "sidebyside",
-                content: node.content,
-            });
-        }
+        // let tikzCount = 0;
+        // for (let i = 0; i < node.content.length; i++) {
+        //     if (match.environment(node.content[i], "tikzpicture")) {
+        //         tikzCount++;
+        //     }
+        // }
+        // if (tikzCount <= 1) {
+        //     return htmlLike({
+        //         tag: "",
+        //         content: node.content,
+        //     });
+        // } else {
+        //     return htmlLike({
+        //         tag: "sidebyside",
+        //         content: node.content,
+        //     });
+        // }
+        return htmlLike({
+            tag: "sidebyside",
+            content: node.content,
+        });
     },
 };
