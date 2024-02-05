@@ -733,9 +733,18 @@ export const environmentReplacements: Record<
     },
     definition: (node) => {
         const args = getArgsContent(node);
+        const segmentsSplit = splitOnCondition(node.content, (node) => {
+            return isHtmlLike(node) || match.parbreak(node);
+        });
+        const formattedSegments = segmentsSplit.segments.flatMap((segment) => {
+            return [wrapPars(segment)];
+        });
         const statement = htmlLike({
             tag: "statement",
-            content: wrapPars(node.content),
+            content: unsplitOnMacro({
+                segments: formattedSegments,
+                macros: segmentsSplit.separators,
+            }),
         });
         if (!(Array.isArray(args) && args.every((item) => item === null))) {
             const title = htmlLike({
