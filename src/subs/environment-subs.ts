@@ -1069,4 +1069,13 @@ export const environmentReplacements: Record<
             }),
         });
     },
+    quote: (node) => {
+        return htmlLike({
+            tag: "blockquote",
+            content: htmlLike({
+                tag: "p",
+                content: node.content,
+            }),
+        });
+    },
 };
