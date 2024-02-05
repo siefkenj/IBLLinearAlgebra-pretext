@@ -38,6 +38,11 @@ export const environmentInfo: Ast.EnvInfoRecord = {
     "alignat*": {
         signature: "m",
     },
+    "dmath*": {
+        renderInfo: {
+            inMathMode: true,
+        },
+    },
 };
 
 export const environmentReplacements: Record<
@@ -426,6 +431,112 @@ export const environmentReplacements: Record<
         });
     },
     enumerate: (node) => {
+        // const items: Ast.Macro[] = node.content.flatMap((node) => {
+        //     if (match.macro(node, "item")) {
+        //         return node;
+        //     }
+        //     return [];
+        // });
+        const items = splitOnMacro(node.content, "item").macros;
+
+        if (getArgsContent(items[0])[1] != null) {
+            const content = items.flatMap((item) => {
+                const fourthArg = getArgsContent(item)[3] as Ast.Node[];
+                const args: Ast.Node[] = fourthArg.flatMap((arg) => {
+                    if (arg == null) {
+                        return [];
+                    }
+                    return [arg];
+                });
+                const segmentsSplit = splitOnCondition(args, (node) => {
+                    return isHtmlLike(node);
+                });
+                const formattedSegments = segmentsSplit.segments.flatMap(
+                    (segment) => {
+                        return [wrapPars(segment)];
+                    }
+                );
+                const liContent = unsplitOnMacro({
+                    segments: formattedSegments,
+                    macros: segmentsSplit.separators,
+                });
+                const title = htmlLike({
+                    tag: "title",
+                    content: getArgsContent(item)[1] || [],
+                });
+                liContent.unshift(title);
+                return htmlLike({
+                    tag: "li",
+                    content: liContent,
+                });
+            });
+
+            return htmlLike({
+                tag: "p",
+                content: htmlLike({
+                    tag: "dl",
+                    content,
+                }),
+            });
+        }
+
+        const content = items.flatMap((item) => {
+            const args: Ast.Node[][] = getArgsContent(item).flatMap((arg) => {
+                if (arg == null) {
+                    return [];
+                }
+                return [arg];
+            });
+            const attributes: { [k: string]: string } = {};
+            if (args[0] == undefined) {
+                return htmlLike({
+                    tag: "li",
+                });
+            }
+            const segmentsSplit = splitOnCondition(args[0], (node) => {
+                return isHtmlLike(node);
+            });
+            const formattedSegments = segmentsSplit.segments.flatMap(
+                (segment) => {
+                    return [wrapPars(segment)];
+                }
+            );
+
+            if (item._renderInfo?.id != undefined) {
+                attributes["xml:id"] = item._renderInfo?.id as string;
+            }
+
+            return htmlLike({
+                tag: "li",
+                content: unsplitOnMacro({
+                    segments: formattedSegments,
+                    macros: segmentsSplit.separators,
+                }),
+                attributes,
+            });
+        });
+
+        const attributes: { [k: string]: string } = {};
+        const pgfkeys = pgfkeysArgToObject((node.args as Ast.Argument[])[0]);
+
+        if (
+            pgfkeys.label != undefined &&
+            pgfkeys.label.length > 1 &&
+            (pgfkeys.label[1] as Ast.Macro).content == "roman"
+        ) {
+            attributes.marker = "i";
+        }
+
+        return htmlLike({
+            tag: "p",
+            content: htmlLike({
+                tag: "ol",
+                content,
+                attributes,
+            }),
+        });
+    },
+    "enumerate*": (node) => {
         // const items: Ast.Macro[] = node.content.flatMap((node) => {
         //     if (match.macro(node, "item")) {
         //         return node;
@@ -939,6 +1050,15 @@ export const environmentReplacements: Record<
         return htmlLike({
             tag: "sidebyside",
             content: node.content,
+        });
+    },
+    "dmath*": (node) => {
+        return htmlLike({
+            tag: "p",
+            content: htmlLike({
+                tag: "me",
+                content: s(toString(node.content)),
+            }),
         });
     },
 };
