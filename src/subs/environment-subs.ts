@@ -66,27 +66,27 @@ export const environmentReplacements: Record<
 
         for (let i = 0; i < segments.length; i++) {
             // wrap the first paragraph in statement tags
+            const segmentsSplit = splitOnCondition(segments[i], (node) => {
+                return isHtmlLike(node) || match.parbreak(node);
+            });
+            const formattedSegments = segmentsSplit.segments.flatMap(
+                (segment) => {
+                    return [wrapPars(segment)];
+                }
+            );
             if (i === 0) {
                 exampleContents.push(
                     htmlLike({
                         tag: "statement",
-                        content: htmlLike({
-                            tag: "p",
-                            content: segments[i],
+                        content: unsplitOnMacro({
+                            segments: formattedSegments,
+                            macros: segmentsSplit.separators,
                         }),
                     })
                 );
 
                 // put the rest in p tags for later
             } else {
-                const segmentsSplit = splitOnCondition(segments[i], (node) => {
-                    return isHtmlLike(node);
-                });
-                const formattedSegments = segmentsSplit.segments.flatMap(
-                    (segment) => {
-                        return [wrapPars(segment)];
-                    }
-                );
                 solutionContents.push(
                     ...unsplitOnMacro({
                         segments: formattedSegments,
@@ -622,23 +622,22 @@ export const environmentReplacements: Record<
             });
         });
 
-        const attributes: { [k: string]: string } = {};
-        const pgfkeys = pgfkeysArgToObject((node.args as Ast.Argument[])[0]);
+        // const attributes: { [k: string]: string } = {};
+        // const pgfkeys = pgfkeysArgToObject((node.args as Ast.Argument[])[0]);
 
-        if (
-            pgfkeys.label != undefined &&
-            pgfkeys.label.length > 1 &&
-            (pgfkeys.label[1] as Ast.Macro).content == "roman"
-        ) {
-            attributes.marker = "i";
-        }
+        // if (
+        //     pgfkeys.label != undefined &&
+        //     pgfkeys.label.length > 1 &&
+        //     (pgfkeys.label[1] as Ast.Macro).content == "roman"
+        // ) {
+        //     attributes.marker = "i";
+        // }
 
         return htmlLike({
             tag: "p",
             content: htmlLike({
                 tag: "ol",
                 content,
-                attributes,
             }),
         });
     },
