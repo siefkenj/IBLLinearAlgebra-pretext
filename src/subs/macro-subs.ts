@@ -37,6 +37,9 @@ export const macroInfo: Ast.MacroInfoRecord = {
     Title: {
         signature: "m",
     },
+    url: {
+        signature: "m",
+    },
 };
 
 export const macroReplacements: Record<
@@ -201,6 +204,15 @@ export const macroReplacements: Record<
         return htmlLike({
             tag: "title",
             content: args[0] || [],
+        });
+    },
+    url: (node) => {
+        const args = getArgsContent(node);
+        return htmlLike({
+            tag: "url",
+            attributes: {
+                href: toString((args as Ast.Node[][])[0]),
+            },
         });
     },
 };
