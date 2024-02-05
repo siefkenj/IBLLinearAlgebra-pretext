@@ -9,7 +9,7 @@ import { match } from "@unified-latex/unified-latex-util-match";
 export const replaceIgnoredElements: Plugin<[], Ast.Root, Ast.Root> =
     function replaceIgnoredElements() {
         return function (ast) {
-            replaceNode(ast, (node) => {
+            replaceNode(ast, (node, info) => {
                 if (
                     match.macro(node, "hfill") ||
                     match.macro(node, "smallskip") ||
@@ -17,9 +17,15 @@ export const replaceIgnoredElements: Plugin<[], Ast.Root, Ast.Root> =
                     match.macro(node, "bigskip") ||
                     match.macro(node, "emptybox") ||
                     match.macro(node, "noindent") ||
-                    match.parbreak(node)
+                    match.macro(node, "hspace") ||
+                    match.macro(node, "newpage")
                 ) {
                     return null;
+                    // } else if (
+                    //     match.macro(node, "\\") &&
+                    //     info.context.inMathMode === false
+                    // ) {
+                    //     return { type: "parbreak" };
                 } else if (match.environment(node, "center")) {
                     let tikzCount = 0;
                     for (let i = 0; i < node.content.length; i++) {
