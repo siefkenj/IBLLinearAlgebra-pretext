@@ -1055,10 +1055,32 @@ export const environmentReplacements: Record<
         //         content: node.content,
         //     });
         // }
-        return htmlLike({
-            tag: "sidebyside",
-            content: node.content,
-        });
+        if (
+            node._renderInfo?.hasTikzpictures !== undefined &&
+            node._renderInfo.hasTikzpictures
+        ) {
+            return htmlLike({
+                tag: "sidebyside",
+                content: node.content,
+            });
+        }
+
+        for (let el of node.content) {
+            if (match.macro(el, "footnote")) {
+                node.content.splice(node.content.indexOf(el));
+                const caption = htmlLike({
+                    tag: "caption",
+                    content: (getArgsContent(el) as Ast.Node[][])[0],
+                });
+
+                return htmlLike({
+                    tag: "figure",
+                    content: [caption, ...node.content],
+                });
+            }
+        }
+
+        return node;
     },
     "dmath*": (node) => {
         return htmlLike({
