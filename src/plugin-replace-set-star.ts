@@ -3,6 +3,9 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 
+/**
+ * This plugin replaces \Set* found in math environments with \Set before HTML conversion
+ */
 export const replaceSetStar: Plugin<[], Ast.Root, Ast.Root> =
     function replaceSetStar() {
         return function (tree: Ast.Root) {
