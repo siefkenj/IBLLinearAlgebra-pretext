@@ -18,6 +18,7 @@ import { replaceLabels } from "./plugin-replace-labels";
 import { replaceModules } from "./plugin-replace-modules";
 import { replaceIndecesInMathMode } from "./plugin-replace-indeces-in-math-mode";
 import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
+import { replaceSetStar } from "./plugin-replace-set-star";
 import { macroInfo, macroReplacements } from "./subs/macro-subs";
 import {
     environmentInfo,
@@ -36,6 +37,7 @@ export function convert(value: string, definitionsFile?: string) {
         .use(splitOnHeadings)
         .use(replaceDefinitions, definitionsFile || "")
         .use(stringifyTikzContent)
+        .use(replaceSetStar)
         .use(replaceIgnoredElements)
         .use(replaceLabels)
         .use(replaceIndecesInMathMode);
@@ -65,6 +67,7 @@ export function convertTextbook(value: string, definitionsFile?: string) {
         .use(splitOnHeadings)
         .use(replaceDefinitions, definitionsFile || "")
         .use(stringifyTikzContent)
+        .use(replaceSetStar)
         .use(replaceIgnoredElements)
         .use(replaceLabels)
         .use(replaceIndecesInMathMode);
@@ -99,16 +102,17 @@ function testConvert() {
 
 async function testConvertFile() {
     let source = await readFile(
-        // path.join(CWD, "../book/modules/module1.tex"),
-        path.join(CWD, "../src/small-tex.tex"),
+        // path.join(CWD, "../book/modules/module3.tex"),
+        path.join(CWD, "../sample-files/small-tex.tex"),
 
         "utf-8"
     );
-    const converted = convertTextbook(source);
+    // const converted = convertTextbook(source);
+    const converted = convert(source);
 
-    // writeFile("sample-files/converted.xml", converted, (err) => {
-    //     if (err) throw err;
-    // });
+    writeFile("sample-files/converted.xml", converted, (err) => {
+        if (err) throw err;
+    });
 
     process.stdout.write(
         chalk.green("Converted") +
