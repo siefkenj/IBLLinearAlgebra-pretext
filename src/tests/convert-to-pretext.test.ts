@@ -354,6 +354,6 @@ describe("convert-to-pretext", () => {
         );
         expect(pretext).toEqual(
             "<m>1+2\\Set{1, 2, 3}+ \\Set{4, 5, 6}- \\Set{99, 25, 6}\\Set{1, 2}</m><p><me>\\Span\\Set{1}.</me></p>"
-        )
+        );
     });
 });
