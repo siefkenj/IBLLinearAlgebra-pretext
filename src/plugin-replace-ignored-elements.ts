@@ -28,13 +28,20 @@ export const replaceIgnoredElements: Plugin<[], Ast.Root, Ast.Root> =
                     //     return { type: "parbreak" };
                 } else if (match.environment(node, "center")) {
                     let tikzCount = 0;
-                    for (let i = 0; i < node.content.length; i++) {
-                        if (match.environment(node.content[i], "tikzpicture")) {
+                    let includegraphicsCount = 0;
+                    node.content.forEach((node) => {
+                        if (match.environment(node, "tikzpicture")) {
                             tikzCount++;
+                        } else if (match.macro(node, "includegraphics")) {
+                            includegraphicsCount++;
                         }
-                    }
-                    if (tikzCount <= 1) {
+                    });
+                    if (tikzCount <= 1 && includegraphicsCount == 0) {
                         return node.content;
+                    } else if (tikzCount > 1) {
+                        const renderInfo = node._renderInfo ?? {};
+                        renderInfo.hasTikzpictures = true;
+                        node._renderInfo = renderInfo;
                     }
                 } else if (match.environment(node, "minipage")) {
                     return (node as Ast.Environment).content;
