@@ -347,4 +347,13 @@ describe("convert-to-pretext", () => {
             "<exercises><exercise><statement><p><fn>Hefferon's Linear Algebra (2.21,2.22)</fn></p><p>prob</p></statement></exercise></exercises>"
         );
     });
+
+    it("replaces \\Set* with \\Set", () => {
+        pretext = convert(
+            "$1+2\\Set*{1, 2, 3} + \\Set*{4, 5, 6} - \\Set*{99, 25, 6}\\Set{1, 2}$\\[\\Span\\Set*{1}.\\]"
+        );
+        expect(pretext).toEqual(
+            "<m>1+2\\Set{1, 2, 3}+ \\Set{4, 5, 6}- \\Set{99, 25, 6}\\Set{1, 2}</m><p><me>\\Span\\Set{1}.</me></p>"
+        );
+    });
 });
