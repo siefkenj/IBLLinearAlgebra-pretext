@@ -5,6 +5,7 @@ import { splitOnMacro } from "@unified-latex/unified-latex-util-split";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
+import { s } from "@unified-latex/unified-latex-builder";
 
 export const macroInfo: Ast.MacroInfoRecord = {
     Heading: {
@@ -85,13 +86,11 @@ export const macroReplacements: Record<
     },
     includegraphics: (node) => {
         const args = getArgsContent(node);
-        const path = printRaw(args[args.length - 1] || []).replace(
-            /\.pdf$/,
-            ".png"
-        );
+        const path = printRaw(args[args.length - 1] || []);
         return htmlLike({
-            tag: "img",
-            attributes: { src: path },
+            tag: "image",
+            content: s(" "),
+            attributes: { source: path },
         });
     },
     emph: (node) => {
