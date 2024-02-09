@@ -10,29 +10,18 @@ export const replaceSetStar: Plugin<[], Ast.Root, Ast.Root> =
     function replaceSetStar() {
         return function (tree: Ast.Root) {
             replaceNode(tree, (node, info) => {
+                if (!match.string(node, "*") || !info.context.inMathMode) {
+                    return;
+                }
+
+                // check if the node before is a \Set macro
                 if (
-                    match.string(node, "*") &&
-                    (info.parents[0].type === "mathenv" ||
-                        info.parents[0].type === "inlinemath" ||
-                        info.parents[0].type === "displaymath")
+                    info.index !== undefined &&
+                    info.index > 0 &&
+                    info.containingArray !== undefined &&
+                    match.macro(info.containingArray[info.index - 1], "Set")
                 ) {
-                    // look for a * in the content then check there is a \Set macro before it
-                    let starIndex = 0;
-                    let i = 0;
-                    for (i; i < info.parents[0].content.length; i++) {
-                        
-                        if (match.string(info.parents[0].content[i], "*")) {
-                            starIndex = i;
-                            break;
-                        }
-                    }
-                    if (
-                        starIndex !== 0 &&
-                        match.macro(info.parents[0].content[i - 1], "Set")
-                    )
-                    return [];
-                } else {
-                    return node;
+                    return null;
                 }
             });
         };
