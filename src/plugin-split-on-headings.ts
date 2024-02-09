@@ -55,19 +55,6 @@ export const splitOnHeadings: Plugin<[], Ast.Root, Ast.Root> =
                                     subsectionSplit.macros[j - 1].args![3]
                                         .content,
                             });
-                            for (
-                                let k = 0;
-                                k < subsectionSplit.segments[j].length;
-                                k++
-                            ) {
-                                // subsectionContent.push(
-                                //     wrapPars(subsectionSplit.segments[j], {
-                                //         macrosThatBreakPars: [
-                                //             "SavedDefinitionRender",
-                                //         ],
-                                //     })[k]
-                                // );
-                            }
                             const subsection = htmlLike({
                                 tag: "subsection",
                                 content: [
@@ -79,15 +66,6 @@ export const splitOnHeadings: Plugin<[], Ast.Root, Ast.Root> =
                         }
                     } else {
                         for (let j = 0; j < split.segments[i + 1].length; j++) {
-                            // sectionContent.push(pars[i + 1][j]);
-                            // sectionContent.push(
-                            //     wrapPars(split.segments[i + 1], {
-                            //         macrosThatBreakPars: [
-                            //             "SavedDefinitionRender",
-                            //         ],
-                            //     })[j]
-                            // );
-                            // sectionContent.push(split.segments[i + 1][j]);
                         }
                         sectionContent.push(
                             ...wrapPars(split.segments[i + 1], {

@@ -21,11 +21,6 @@ export const replaceIgnoredElements: Plugin<[], Ast.Root, Ast.Root> =
                     match.macro(node, "newpage")
                 ) {
                     return null;
-                    // } else if (
-                    //     match.macro(node, "\\") &&
-                    //     info.context.inMathMode === false
-                    // ) {
-                    //     return { type: "parbreak" };
                 } else if (match.environment(node, "center")) {
                     let tikzCount = 0;
                     let includegraphicsCount = 0;

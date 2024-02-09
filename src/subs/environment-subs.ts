@@ -113,87 +113,6 @@ export const environmentReplacements: Record<
             attributes,
         });
     },
-    // example: (node) => {
-    //     let exampleContents: Ast.Node[] = [];
-    //     let solutionContents: Node[] = [];
-    //     const attributes: { [k: string]: string } = {};
-
-    //     if (node._renderInfo?.id !== undefined) {
-    //         attributes["xml:id"] = node._renderInfo.id as string;
-    //     }
-
-    //     const split = splitOnCondition(node.content, (node) => {
-    //         return (
-    //             match.parbreak(node) ||
-    //             node.type === "displaymath" ||
-    //             isHtmlLike(node)
-    //         );
-    //     });
-
-    //     const formattedSegments = split.segments.flatMap((segment) => {
-    //         return [wrapPars(segment)];
-    //     });
-
-    //     const content = unsplitOnMacro({
-    //         segments: formattedSegments,
-    //         macros: split.separators,
-    //     });
-
-    //     // seperate by paragraphs
-    //     // let segments = splitOnCondition(node.content, match.parbreak).segments;
-
-    //     // for (let i = 0; i < segments.length; i++) {
-    //     //     // wrap the first paragraph in statement tags
-    //     //     if (i === 0) {
-    //     //         exampleContents.push(
-    //     //             htmlLike({
-    //     //                 tag: "statement",
-    //     //                 content: htmlLike({
-    //     //                     tag: "p",
-    //     //                     content: segments[i],
-    //     //                 }),
-    //     //             })
-    //     //         );
-
-    //     //         // put the rest in p tags for later
-    //     //     } else {
-    //     //         const segmentsSplit = splitOnCondition(segments[i], (node) => {
-    //     //             return isHtmlLike(node);
-    //     //         });
-    //     //         const formattedSegments = segmentsSplit.segments.flatMap(
-    //     //             (segment) => {
-    //     //                 return [wrapPars(segment)];
-    //     //             }
-    //     //         );
-    //     //         solutionContents.push(
-    //     //             ...unsplitOnMacro({
-    //     //                 segments: formattedSegments,
-    //     //                 macros: segmentsSplit.separators,
-    //     //             })
-    //     //         );
-    //     //     }
-    //     // }
-
-    //     // wrap the rest in solution tags (if there is solution content)
-    //     // if (solutionContents.length != 0) {
-    //     //     exampleContents.push(
-    //     //         htmlLike({
-    //     //             tag: "solution",
-    //     //             content: solutionContents,
-    //     //         })
-    //     //     );
-    //     // }
-
-    //     // wrap everything in example tags
-    //     return htmlLike({
-    //         tag: "example",
-    //         content: htmlLike({
-    //             tag: "statement",
-    //             content,
-    //         }),
-    //         attributes,
-    //     });
-    // },
     emphbox: (node) => {
         const args: (Node[] | null)[] = getArgsContent(node);
         let remarkContents: Ast.Node[] = [];
@@ -537,12 +456,6 @@ export const environmentReplacements: Record<
         });
     },
     "enumerate*": (node) => {
-        // const items: Ast.Macro[] = node.content.flatMap((node) => {
-        //     if (match.macro(node, "item")) {
-        //         return node;
-        //     }
-        //     return [];
-        // });
         const items = splitOnMacro(node.content, "item").macros;
 
         if (getArgsContent(items[0])[1] != null) {
@@ -621,17 +534,6 @@ export const environmentReplacements: Record<
                 attributes,
             });
         });
-
-        // const attributes: { [k: string]: string } = {};
-        // const pgfkeys = pgfkeysArgToObject((node.args as Ast.Argument[])[0]);
-
-        // if (
-        //     pgfkeys.label != undefined &&
-        //     pgfkeys.label.length > 1 &&
-        //     (pgfkeys.label[1] as Ast.Macro).content == "roman"
-        // ) {
-        //     attributes.marker = "i";
-        // }
 
         return htmlLike({
             tag: "p",
@@ -848,17 +750,6 @@ export const environmentReplacements: Record<
                 const cellIdx = cells.indexOf(cell);
                 const cellAttributes: { [k: string]: string } = {};
 
-                // for (const node of cells[cellIdx + 1]) {
-                //     if (match.macro(node, "hline")) {
-                //         if (rowIdx == 0) {
-                //             tabularAttributes.top = "medium";
-                //         } else {
-                //             rowAttributes.bottom = "medium";
-                //         }
-                //         cell.splice(cell.indexOf(node), 1);
-                //     }
-                // }
-
                 if (rowIdx == 0) {
                     for (const node of cell) {
                         if (match.macro(node, "hline")) {
@@ -1038,23 +929,7 @@ export const environmentReplacements: Record<
         });
     },
     center: (node) => {
-        // let tikzCount = 0;
-        // for (let i = 0; i < node.content.length; i++) {
-        //     if (match.environment(node.content[i], "tikzpicture")) {
-        //         tikzCount++;
-        //     }
-        // }
-        // if (tikzCount <= 1) {
-        //     return htmlLike({
-        //         tag: "",
-        //         content: node.content,
-        //     });
-        // } else {
-        //     return htmlLike({
-        //         tag: "sidebyside",
-        //         content: node.content,
-        //     });
-        // }
+        
         if (
             node._renderInfo?.hasTikzpictures !== undefined &&
             node._renderInfo.hasTikzpictures
