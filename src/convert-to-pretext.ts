@@ -18,6 +18,7 @@ import { replaceLabels } from "./plugin-replace-labels";
 import { replaceModules } from "./plugin-replace-modules";
 import { replaceIndecesInMathMode } from "./plugin-replace-indeces-in-math-mode";
 import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
+import { removeIgnoredTags } from "./plugin-remove-ignored-tags";
 import { macroInfo, macroReplacements } from "./subs/macro-subs";
 import {
     environmentInfo,
@@ -48,6 +49,7 @@ export function convert(value: string, definitionsFile?: string) {
 
     const output = afterReplacements
         .use(replaceMath)
+        .use(removeIgnoredTags)
         .use(rehypeStringify)
         .processSync(value).value as string;
 
@@ -76,6 +78,7 @@ export function convertTextbook(value: string, definitionsFile?: string) {
     });
     const output = afterReplacements
         .use(replaceMath)
+        .use(removeIgnoredTags)
         .use(rehypeStringify, { voids: [] })
         .processSync(value).value as string;
 
@@ -83,7 +86,7 @@ export function convertTextbook(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\emph{representation of $\\vec v$ in the $\\mathcal B$ basis}`;
+    const source = `\\label{PROBSET3-SETS}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
@@ -100,7 +103,7 @@ function testConvert() {
 async function testConvertFile() {
     let source = await readFile(
         // path.join(CWD, "../book/modules/module1.tex"),
-        path.join(CWD, "../src/small-tex.tex"),
+        path.join(CWD, "../src/textbook.tex"),
 
         "utf-8"
     );
@@ -110,16 +113,20 @@ async function testConvertFile() {
     //     if (err) throw err;
     // });
 
-    process.stdout.write(
-        chalk.green("Converted") +
-            "\n\n" +
-            source +
-            "\n\n" +
-            chalk.green("to") +
-            "\n\n" +
-            converted +
-            "\n"
-    );
+    writeFile("src/sample.xml", converted, (err) => {
+        if (err) throw err;
+    });
+
+    // process.stdout.write(
+    //     chalk.green("Converted") +
+    //         "\n\n" +
+    //         source +
+    //         "\n\n" +
+    //         chalk.green("to") +
+    //         "\n\n" +
+    //         converted +
+    //         "\n"
+    // );
 }
 
 function printHelp() {
