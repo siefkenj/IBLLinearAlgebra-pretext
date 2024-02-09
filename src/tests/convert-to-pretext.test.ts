@@ -320,7 +320,7 @@ describe("convert-to-pretext", () => {
             "\\begin{example}\\label{EXAMPLE}\nfoo\n\nbar1\n\nbar2\\end{example}"
         );
         expect(pretext).toEqual(
-            '<example xml:id="EXAMPLE"><statement><p> foo</p></statement><solution><p>bar1</p><p>bar2</p></solution></example>'
+            '<example xml:id="EXAMPLE"><statement><p>foo</p></statement><solution><p>bar1</p><p>bar2</p></solution></example>'
         );
 
         //enumerate (item macro)
