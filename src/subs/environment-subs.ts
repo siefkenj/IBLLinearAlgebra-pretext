@@ -929,7 +929,6 @@ export const environmentReplacements: Record<
         });
     },
     center: (node) => {
-        
         if (
             node._renderInfo?.hasTikzpictures !== undefined &&
             node._renderInfo.hasTikzpictures
