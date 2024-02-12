@@ -18,7 +18,6 @@
     },
     "homepage": "https://github.com/siefkenj/IBLLinearAlgebra-pretext#readme",
     "dependencies": {
-        "@rollup/rollup-darwin-arm64": "^4.9.6",
         "@unified-latex/unified-latex": "^1.5.0",
         "@unified-latex/unified-latex-builder": "^1.4.2",
         "@unified-latex/unified-latex-cli": "^1.5.0",
