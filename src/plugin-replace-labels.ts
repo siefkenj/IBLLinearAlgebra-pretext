@@ -5,6 +5,7 @@ import { match } from "@unified-latex/unified-latex-util-match";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { m } from "@unified-latex/unified-latex-builder";
+import { toString } from "@unified-latex/unified-latex-util-to-string";
 
 /**
  * This plugin replaces "\label{}" macros by attributing an id to the first most signifcant parent of the macro.
@@ -16,8 +17,7 @@ export const replaceLabels: Plugin<[], Ast.Root, Ast.Root> =
                 // Check if the current node is a label
                 if (match.macro(node, "label")) {
                     // Read the argument of the label macro which will be the id attribute
-                    const id = (getArgsContent(node) as Ast.String[][])[0][0]
-                        .content;
+                    const id = toString(getArgsContent(node)[0] as Ast.Node[]);
                     // If the first parent is of type argument, we want to get the next parent since argument is not significant
                     const idx = info.parents[0].type === "argument" ? 1 : 0;
 

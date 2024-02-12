@@ -5,6 +5,7 @@ import { splitOnMacro } from "@unified-latex/unified-latex-util-split";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
+import { s } from "@unified-latex/unified-latex-builder";
 
 export const macroInfo: Ast.MacroInfoRecord = {
     Heading: {
@@ -34,14 +35,17 @@ export const macroInfo: Ast.MacroInfoRecord = {
     hefferon: {
         signature: "o",
     },
+    Title: {
+        signature: "m",
+    },
+    url: {
+        signature: "m",
+    },
 };
 
 export const macroReplacements: Record<
     string,
-    (
-        node: Ast.Macro,
-        info: VisitInfo
-    ) => Ast.Macro | Ast.String | Ast.Environment | Ast.Root
+    (node: Ast.Macro, info: VisitInfo) => Ast.Node
 > = {
     footnote: (node) => {
         const args = getArgsContent(node);
@@ -82,13 +86,11 @@ export const macroReplacements: Record<
     },
     includegraphics: (node) => {
         const args = getArgsContent(node);
-        const path = printRaw(args[args.length - 1] || []).replace(
-            /\.pdf$/,
-            ".png"
-        );
+        const path = printRaw(args[args.length - 1] || []);
         return htmlLike({
-            tag: "img",
-            attributes: { src: path },
+            tag: "image",
+            content: s(" "),
+            attributes: { source: path },
         });
     },
     emph: (node) => {
@@ -196,28 +198,20 @@ export const macroReplacements: Record<
             content: annotation,
         };
     },
-    // label: (node, info) => {
-    //     const arg = (
-    //         getArgsContent(node as Ast.Macro) as Ast.String[][]
-    //     )[0][0].content;
-    //     console.log("hello");
-    //     replaceNode(info.parents[info.parents.length - 1], (node) => {
-    //         if (node === info.parents[1]) {
-    //             const htmlLikeInfo = extractFromHtmlLike(
-    //                 info.parents[1] as Ast.Macro
-    //             );
-    //             return htmlLike({
-    //                 tag: htmlLikeInfo.tag,
-    //                 content: htmlLikeInfo.content,
-    //                 attributes: {
-    //                     "xml:id": arg,
-    //                     ...htmlLikeInfo.attributes,
-    //                 },
-    //             });
-    //         } else if (match.macro(node, "label")) {
-    //             return null;
-    //         }
-    //     });
-    //     return node;
-    // },
+    Title: (node) => {
+        const args = getArgsContent(node);
+        return htmlLike({
+            tag: "title",
+            content: args[0] || [],
+        });
+    },
+    url: (node) => {
+        const args = getArgsContent(node);
+        return htmlLike({
+            tag: "url",
+            attributes: {
+                href: toString((args as Ast.Node[][])[0]),
+            },
+        });
+    },
 };

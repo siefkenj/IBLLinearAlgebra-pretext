@@ -38,6 +38,11 @@ export const environmentInfo: Ast.EnvInfoRecord = {
     "alignat*": {
         signature: "m",
     },
+    "dmath*": {
+        renderInfo: {
+            inMathMode: true,
+        },
+    },
 };
 
 export const environmentReplacements: Record<
@@ -45,7 +50,7 @@ export const environmentReplacements: Record<
     (
         node: Ast.Environment,
         info: VisitInfo
-    ) => Ast.Macro | Ast.String | Ast.Environment
+    ) => Ast.Macro | Ast.Environment | Ast.String
 > = {
     example: (node) => {
         let exampleContents: Ast.Node[] = [];
@@ -61,27 +66,27 @@ export const environmentReplacements: Record<
 
         for (let i = 0; i < segments.length; i++) {
             // wrap the first paragraph in statement tags
+            const segmentsSplit = splitOnCondition(segments[i], (node) => {
+                return isHtmlLike(node) || match.parbreak(node);
+            });
+            const formattedSegments = segmentsSplit.segments.flatMap(
+                (segment) => {
+                    return [wrapPars(segment)];
+                }
+            );
             if (i === 0) {
                 exampleContents.push(
                     htmlLike({
                         tag: "statement",
-                        content: htmlLike({
-                            tag: "p",
-                            content: segments[i],
+                        content: unsplitOnMacro({
+                            segments: formattedSegments,
+                            macros: segmentsSplit.separators,
                         }),
                     })
                 );
 
                 // put the rest in p tags for later
             } else {
-                const segmentsSplit = splitOnCondition(segments[i], (node) => {
-                    return isHtmlLike(node);
-                });
-                const formattedSegments = segmentsSplit.segments.flatMap(
-                    (segment) => {
-                        return [wrapPars(segment)];
-                    }
-                );
                 solutionContents.push(
                     ...unsplitOnMacro({
                         segments: formattedSegments,
@@ -402,6 +407,11 @@ export const environmentReplacements: Record<
                 return [arg];
             });
             const attributes: { [k: string]: string } = {};
+            if (args[0] == undefined) {
+                return htmlLike({
+                    tag: "li",
+                });
+            }
             const segmentsSplit = splitOnCondition(args[0], (node) => {
                 return isHtmlLike(node);
             });
@@ -442,6 +452,94 @@ export const environmentReplacements: Record<
                 tag: "ol",
                 content,
                 attributes,
+            }),
+        });
+    },
+    "enumerate*": (node) => {
+        const items = splitOnMacro(node.content, "item").macros;
+
+        if (getArgsContent(items[0])[1] != null) {
+            const content = items.flatMap((item) => {
+                const fourthArg = getArgsContent(item)[3] as Ast.Node[];
+                const args: Ast.Node[] = fourthArg.flatMap((arg) => {
+                    if (arg == null) {
+                        return [];
+                    }
+                    return [arg];
+                });
+                const segmentsSplit = splitOnCondition(args, (node) => {
+                    return isHtmlLike(node);
+                });
+                const formattedSegments = segmentsSplit.segments.flatMap(
+                    (segment) => {
+                        return [wrapPars(segment)];
+                    }
+                );
+                const liContent = unsplitOnMacro({
+                    segments: formattedSegments,
+                    macros: segmentsSplit.separators,
+                });
+                const title = htmlLike({
+                    tag: "title",
+                    content: getArgsContent(item)[1] || [],
+                });
+                liContent.unshift(title);
+                return htmlLike({
+                    tag: "li",
+                    content: liContent,
+                });
+            });
+
+            return htmlLike({
+                tag: "p",
+                content: htmlLike({
+                    tag: "dl",
+                    content,
+                }),
+            });
+        }
+
+        const content = items.flatMap((item) => {
+            const args: Ast.Node[][] = getArgsContent(item).flatMap((arg) => {
+                if (arg == null) {
+                    return [];
+                }
+                return [arg];
+            });
+            const attributes: { [k: string]: string } = {};
+            if (args[0] == undefined) {
+                return htmlLike({
+                    tag: "li",
+                });
+            }
+            const segmentsSplit = splitOnCondition(args[0], (node) => {
+                return isHtmlLike(node);
+            });
+            const formattedSegments = segmentsSplit.segments.flatMap(
+                (segment) => {
+                    return [wrapPars(segment)];
+                }
+            );
+
+            if (item._renderInfo?.id != undefined) {
+                attributes["xml:id"] = item._renderInfo?.id as string;
+            }
+
+            return htmlLike({
+                tag: "li",
+                content: unsplitOnMacro({
+                    segments: formattedSegments,
+                    macros: segmentsSplit.separators,
+                }),
+                attributes,
+            });
+        });
+
+        return htmlLike({
+            tag: "p",
+            content: htmlLike({
+                tag: "ol",
+                content,
             }),
         });
     },
@@ -537,9 +635,18 @@ export const environmentReplacements: Record<
     },
     definition: (node) => {
         const args = getArgsContent(node);
+        const segmentsSplit = splitOnCondition(node.content, (node) => {
+            return isHtmlLike(node) || match.parbreak(node);
+        });
+        const formattedSegments = segmentsSplit.segments.flatMap((segment) => {
+            return [wrapPars(segment)];
+        });
         const statement = htmlLike({
             tag: "statement",
-            content: wrapPars(node.content),
+            content: unsplitOnMacro({
+                segments: formattedSegments,
+                macros: segmentsSplit.separators,
+            }),
         });
         if (!(Array.isArray(args) && args.every((item) => item === null))) {
             const title = htmlLike({
@@ -643,17 +750,6 @@ export const environmentReplacements: Record<
                 const cellIdx = cells.indexOf(cell);
                 const cellAttributes: { [k: string]: string } = {};
 
-                // for (const node of cells[cellIdx + 1]) {
-                //     if (match.macro(node, "hline")) {
-                //         if (rowIdx == 0) {
-                //             tabularAttributes.top = "medium";
-                //         } else {
-                //             rowAttributes.bottom = "medium";
-                //         }
-                //         cell.splice(cell.indexOf(node), 1);
-                //     }
-                // }
-
                 if (rowIdx == 0) {
                     for (const node of cell) {
                         if (match.macro(node, "hline")) {
@@ -726,49 +822,156 @@ export const environmentReplacements: Record<
         });
     },
     module: (node) => {
+        const attributes: { [k: string]: string } = {};
+
+        if (node._renderInfo?.id !== undefined) {
+            attributes["xml:id"] = node._renderInfo.id as string;
+        }
+
+        let introduction = {};
+        const split = splitOnMacro(node.content, ["html-tag:section", "Title"]);
+        let introductionContent = split.segments[1];
+
+        const introductionSplit = splitOnCondition(
+            introductionContent,
+            isHtmlLike
+        );
+        const formattedSegments = introductionSplit.segments.flatMap((node) => {
+            return [wrapPars(node)];
+        });
+
+        if (introductionContent.length > 0) {
+            introduction = htmlLike({
+                tag: "introduction",
+                content: unsplitOnMacro({
+                    segments: formattedSegments,
+                    macros: introductionSplit.separators,
+                }),
+            });
+
+            split.segments[1] = [introduction as Ast.Node];
+        }
+
         return htmlLike({
             tag: "chapter",
-            content: node.content,
+            content: unsplitOnMacro({
+                segments: split.segments,
+                macros: split.macros,
+            }),
+            attributes,
+        });
+    },
+    appendix: (node) => {
+        const attributes: { [k: string]: string } = {};
+
+        if (node._renderInfo?.id !== undefined) {
+            attributes["xml:id"] = node._renderInfo.id as string;
+        }
+
+        let introduction = {};
+        const split = splitOnMacro(node.content, ["html-tag:section", "Title"]);
+        let introductionContent = split.segments[1];
+
+        const introductionSplit = splitOnCondition(
+            introductionContent,
+            isHtmlLike
+        );
+        const formattedSegments = introductionSplit.segments.flatMap((node) => {
+            return [wrapPars(node)];
+        });
+
+        if (introductionContent.length > 0) {
+            introduction = htmlLike({
+                tag: "introduction",
+                content: unsplitOnMacro({
+                    segments: formattedSegments,
+                    macros: introductionSplit.separators,
+                }),
+            });
+
+            split.segments[1] = [introduction as Ast.Node];
+        }
+
+        return htmlLike({
+            tag: "chapter",
+            content: unsplitOnMacro({
+                segments: split.segments,
+                macros: split.macros,
+            }),
+            attributes,
         });
     },
     tikzpicture: (node) => {
         const imageAttributes: { [k: string]: string } = {};
         imageAttributes.width = "50%";
 
+        const caption = htmlLike({
+            tag: "caption",
+        });
+
+        const image = htmlLike({
+            tag: "image",
+            content: htmlLike({
+                tag: "latex-image",
+                content: s(
+                    "\\begin{tikzpicture}" +
+                        toString(node.content) +
+                        "\\end{tikzpicture}"
+                ),
+            }),
+            attributes: imageAttributes,
+        });
+
         // note that skipHtmlValidation must be true or else image tags will be replaced by img
         return htmlLike({
             tag: "figure",
-            content: htmlLike({
-                tag: "image",
-                content: htmlLike({
-                    tag: "latex-image",
-                    content: s(
-                        "\\begin{tikzpicture}" +
-                            toString(node.content) +
-                            "\\end{tikzpicture}"
-                    ),
-                }),
-                attributes: imageAttributes,
-            }),
+            content: [caption, image],
         });
     },
     center: (node) => {
-        let tikzCount = 0;
-        for (let i = 0; i < node.content.length; i++) {
-            if ((match.environment(node.content[i]), "tikzpicture")) {
-                tikzCount++;
-            }
-        }
-        if (tikzCount <= 1) {
-            return htmlLike({
-                tag: "",
-                content: node.content,
-            });
-        } else {
+        if (
+            node._renderInfo?.hasTikzpictures !== undefined &&
+            node._renderInfo.hasTikzpictures
+        ) {
             return htmlLike({
                 tag: "sidebyside",
                 content: node.content,
             });
         }
+
+        for (let el of node.content) {
+            if (match.macro(el, "footnote")) {
+                node.content.splice(node.content.indexOf(el));
+                const caption = htmlLike({
+                    tag: "caption",
+                    content: (getArgsContent(el) as Ast.Node[][])[0],
+                });
+
+                return htmlLike({
+                    tag: "figure",
+                    content: [caption, ...node.content],
+                });
+            }
+        }
+
+        return node;
+    },
+    "dmath*": (node) => {
+        return htmlLike({
+            tag: "p",
+            content: htmlLike({
+                tag: "me",
+                content: s(toString(node.content)),
+            }),
+        });
+    },
+    quote: (node) => {
+        return htmlLike({
+            tag: "blockquote",
+            content: htmlLike({
+                tag: "p",
+                content: node.content,
+            }),
+        });
     },
 };

@@ -17,80 +17,28 @@ import { toString } from "@unified-latex/unified-latex-util-to-string";
 import { splitOnHeadings } from "./plugin-split-on-headings";
 import { replaceIndecesInMathMode } from "./plugin-replace-indeces-in-math-mode";
 import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
+import { macroInfo } from "./subs/macro-subs";
+import { environmentInfo } from "./subs/environment-subs";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
-// const linearalgebraFile = await readFile(
-//     path.join(CWD, "../book/linearalgebra.tex"),
-//     "utf-8"
-// );
+/**
+ * Plugin for replacing "\input{}" macros with the LaTeX AST of the corresponding module.
+ *
+ */
 
 export const replaceModules: Plugin<[], Ast.Root, Ast.Root> =
     function replaceModules() {
-        // const linearalgebra = unified()
-        //     .use(unifiedLatexFromString, {
-        //         macros: {
-        //             input: {
-        //                 signature: "m",
-        //             },
-        //         },
-        //     })
-        //     .use(unifiedLatexAstComplier)
-        //     .processSync(linearalgebraFile).result as Ast.Root;
-
+        // Create a map with the file as the key, and the AST tree of the corresponding modules as the value.
         let modules = new Map<string, Ast.Root>();
 
+        // Read every file in "book/modules" directory.
         readdirSync("book/modules").forEach((file) => {
+            // Parse module into LaTeX AST
             const module = unified()
                 .use(unifiedLatexFromString, {
-                    macros: {
-                        Heading: {
-                            signature: "m",
-                        },
-                        footnote: {
-                            signature: "m",
-                        },
-                        index: {
-                            signature: "o m",
-                        },
-                        SavedDefinitionRender: {
-                            signature: "m",
-                        },
-                        ref: {
-                            signature: "m",
-                        },
-                        eqref: {
-                            signature: "m",
-                        },
-                        label: {
-                            signature: "m",
-                        },
-                        prob: {
-                            signature: "o",
-                        },
-                        hefferon: {
-                            signature: "o",
-                        },
-                    },
-                    environments: {
-                        emphbox: {
-                            signature: "o m",
-                        },
-                        definition: {
-                            signature: "o",
-                        },
-                        theorem: {
-                            signature: "o",
-                        },
-                        tabular: {
-                            signature: "m",
-                        },
-                        equation: {
-                            renderInfo: {
-                                inMathMode: true,
-                            },
-                        },
-                    },
+                    macros: macroInfo,
+                    environments: environmentInfo,
                 })
                 .use(unifiedLatexAstComplier)
                 .use(splitOnHeadings)
@@ -102,18 +50,27 @@ export const replaceModules: Plugin<[], Ast.Root, Ast.Root> =
                 .processSync(
                     readFileSync("book/modules/" + file, { encoding: "utf8" })
                 ).result as Ast.Root;
-
+            // Set a key and value pair in the map
             modules.set("modules/" + file, module);
         });
 
         return function (ast: Ast.Root) {
             replaceNode(ast, (node) => {
+                // Check if the node is a "\input{}" macro.
                 if (match.macro(node, "input")) {
+                    // Get the argument of the node which is the name of the file.
                     const file = toString(
                         (getArgsContent(node) as Ast.Node[][])[0]
                     );
 
-                    return modules.get(file);
+                    // Check if the file is a module
+                    if (file.includes("modules")) {
+                        // Used the file name to replace the node with the corresponding LaTeX AST.
+                        return modules.get(file)?.content;
+                    }
+
+                    // Otherwise remove input
+                    return null;
                 }
             });
         };

@@ -63,6 +63,7 @@
         "rehype-format": "^5.0.0",
         "typescript": "^5.2.2",
         "unified-latex": "github:siefkenj/unified-latex#main",
+        "unist-util-remove": "^4.0.0",
         "vite-node": "^0.34.6",
         "vitest": "^0.34.6"
     },
