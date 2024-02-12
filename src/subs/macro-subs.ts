@@ -73,10 +73,13 @@ export const macroReplacements: Record<
             if (arg == null) {
                 return [];
             } else {
-                return htmlLike({
-                    tag: "h",
-                    content: arg,
-                });
+                const headings = toString(arg).split("!").flatMap((str) => {
+                    return htmlLike({
+                        tag: "h",
+                        content: s(str)
+                    })
+                })
+                return headings;
             }
         });
         return htmlLike({
