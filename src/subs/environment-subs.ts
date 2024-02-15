@@ -893,7 +893,7 @@ export const environmentReplacements: Record<
         }
 
         return htmlLike({
-            tag: "chapter",
+            tag: "appendix",
             content: unsplitOnMacro({
                 segments: split.segments,
                 macros: split.macros,
