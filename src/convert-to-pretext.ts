@@ -20,6 +20,7 @@ import { replaceIndecesInMathMode } from "./plugin-replace-indeces-in-math-mode"
 import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
 import { removeIgnoredTags } from "./plugin-remove-ignored-tags";
 import { replaceSetStar } from "./plugin-replace-set-star";
+import { parseLinearalgebra } from "./plugin-parse-linearalgebra";
 import { macroInfo, macroReplacements } from "./subs/macro-subs";
 import {
     environmentInfo,
@@ -65,6 +66,7 @@ export function convertTextbook(value: string, definitionsFile?: string) {
             environments: environmentInfo,
         })
         .use(unifiedLatexAstComplier)
+        .use(parseLinearalgebra)
         .use(replaceModules)
         .use(splitOnHeadings)
         .use(replaceDefinitions, definitionsFile || "")
@@ -89,7 +91,7 @@ export function convertTextbook(value: string, definitionsFile?: string) {
 }
 
 function testConvert() {
-    const source = `\\label{PROBSET3-SETS}`;
+    const source = `\\subsection*{About this Book}`;
     const converted = convert(source);
     process.stdout.write(
         chalk.green("Converted") +
@@ -108,18 +110,18 @@ async function testConvertFile() {
         // path.join(CWD, "../book/modules/module1.tex"),
         // path.join(CWD, "../src/textbook.tex"),
         // path.join(CWD, "../book/modules/module3.tex"),
-        path.join(CWD, "../sample-files/small-tex.tex"),
+        path.join(CWD, "../book/linearalgebra.tex"),
 
         "utf-8"
     );
     // const converted = convertTextbook(source);
-    const converted = convert(source);
+    const converted = convertTextbook(source);
 
-    writeFile("sample-files/converted.xml", converted, (err) => {
-        if (err) throw err;
-    });
+    // writeFile("sample-files/converted.xml", converted, (err) => {
+    //     if (err) throw err;
+    // });
 
-    writeFile("src/sample.xml", converted, (err) => {
+    writeFile("pretext-files/main.ptx", converted, (err) => {
         if (err) throw err;
     });
 

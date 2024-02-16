@@ -65,8 +65,6 @@ export const splitOnHeadings: Plugin<[], Ast.Root, Ast.Root> =
                             sectionContent.push(subsection);
                         }
                     } else {
-                        for (let j = 0; j < split.segments[i + 1].length; j++) {
-                        }
                         sectionContent.push(
                             ...wrapPars(split.segments[i + 1], {
                                 macrosThatBreakPars: ["SavedDefinitionRender"],

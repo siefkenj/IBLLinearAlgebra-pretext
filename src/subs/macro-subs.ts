@@ -35,11 +35,20 @@ export const macroInfo: Ast.MacroInfoRecord = {
     hefferon: {
         signature: "o",
     },
+    beezer: {
+        signature: "o",
+    },
     Title: {
         signature: "m",
     },
     url: {
         signature: "m",
+    },
+    href: {
+        signature: "m m",
+    },
+    sortitem: {
+        signature: "o m",
     },
 };
 
@@ -73,10 +82,15 @@ export const macroReplacements: Record<
             if (arg == null) {
                 return [];
             } else {
-                return htmlLike({
-                    tag: "h",
-                    content: arg,
-                });
+                const headings = toString(arg)
+                    .split("!")
+                    .flatMap((str) => {
+                        return htmlLike({
+                            tag: "h",
+                            content: s(str),
+                        });
+                    });
+                return headings;
             }
         });
         return htmlLike({
@@ -213,5 +227,44 @@ export const macroReplacements: Record<
                 href: toString((args as Ast.Node[][])[0]),
             },
         });
+    },
+    href: (node) => {
+        const args = getArgsContent(node);
+        return htmlLike({
+            tag: "url",
+            attributes: {
+                href: toString((args as Ast.Node[][])[0]),
+                visual: toString(
+                    getArgsContent((args[1] as Ast.Macro[])[0])[0] as Ast.Node[]
+                ),
+            },
+        });
+    },
+    section: (node) => {
+        const args = getArgsContent(node);
+        return htmlLike({
+            tag: "title",
+            content: args[3] || [],
+        });
+    },
+    subsection: (node) => {
+        const args = getArgsContent(node);
+        return htmlLike({
+            tag: "p",
+            content: htmlLike({
+                tag: "alert",
+                content: args[3] || [],
+            }),
+        });
+    },
+    beezer: (node) => {
+        const arg = getArgsContent(node)[0];
+        const annotation = `Beezer's A First Course in Linear Algebra ${
+            arg == null ? "" : `(${toString(arg)})`
+        }`;
+        return {
+            type: "string",
+            content: annotation,
+        };
     },
 };

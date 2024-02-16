@@ -18,10 +18,16 @@ export const replaceIgnoredElements: Plugin<[], Ast.Root, Ast.Root> =
                     match.macro(node, "emptybox") ||
                     match.macro(node, "noindent") ||
                     match.macro(node, "hspace") ||
-                    match.macro(node, "newpage")
+                    match.macro(node, "newpage") ||
+                    match.macro(node, "newcommand") ||
+                    match.macro(node, "newenvironment")
                 ) {
                     return null;
                 } else if (match.environment(node, "center")) {
+                    if (match.group(node.content[0])) {
+                        return null;
+                    }
+
                     let tikzCount = 0;
                     let includegraphicsCount = 0;
                     node.content.forEach((node) => {
