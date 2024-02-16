@@ -235,4 +235,21 @@ export const macroReplacements: Record<
             },
         });
     },
+    section: (node) => {
+        const args = getArgsContent(node);
+        return htmlLike({
+            tag: "title",
+            content: args[3] || [],
+        });
+    },
+    subsection: (node) => {
+        const args = getArgsContent(node);
+        return htmlLike({
+            tag: "p",
+            content: htmlLike({
+                tag: "alert",
+                content: args[3] || [],
+            }),
+        });
+    },
 };
