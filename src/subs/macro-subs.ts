@@ -45,6 +45,9 @@ export const macroInfo: Ast.MacroInfoRecord = {
     href: {
         signature: "m m",
     },
+    sortitem: {
+        signature: "o m",
+    },
 };
 
 export const macroReplacements: Record<
