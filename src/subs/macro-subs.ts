@@ -6,6 +6,7 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { s } from "@unified-latex/unified-latex-builder";
+import { match } from "@unified-latex/unified-latex-util-match";
 
 export const macroInfo: Ast.MacroInfoRecord = {
     Heading: {
@@ -41,6 +42,9 @@ export const macroInfo: Ast.MacroInfoRecord = {
     url: {
         signature: "m",
     },
+    href: {
+        signature: "m m",
+    },
 };
 
 export const macroReplacements: Record<
@@ -73,12 +77,14 @@ export const macroReplacements: Record<
             if (arg == null) {
                 return [];
             } else {
-                const headings = toString(arg).split("!").flatMap((str) => {
-                    return htmlLike({
-                        tag: "h",
-                        content: s(str)
-                    })
-                })
+                const headings = toString(arg)
+                    .split("!")
+                    .flatMap((str) => {
+                        return htmlLike({
+                            tag: "h",
+                            content: s(str),
+                        });
+                    });
                 return headings;
             }
         });
@@ -212,6 +218,18 @@ export const macroReplacements: Record<
         const args = getArgsContent(node);
         return htmlLike({
             tag: "url",
+            attributes: {
+                href: toString((args as Ast.Node[][])[0]),
+            },
+        });
+    },
+    href: (node) => {
+        const args = getArgsContent(node);
+        return htmlLike({
+            tag: "url",
+            content: getArgsContent(
+                (args[1] as Ast.Macro[])[0]
+            )[0] as Ast.Node[],
             attributes: {
                 href: toString((args as Ast.Node[][])[0]),
             },
