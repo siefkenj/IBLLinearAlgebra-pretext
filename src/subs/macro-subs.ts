@@ -36,6 +36,9 @@ export const macroInfo: Ast.MacroInfoRecord = {
     hefferon: {
         signature: "o",
     },
+    beezer: {
+        signature: "o",
+    },
     Title: {
         signature: "m",
     },
@@ -254,5 +257,15 @@ export const macroReplacements: Record<
                 content: args[3] || [],
             }),
         });
+    },
+    beezer: (node) => {
+        const arg = getArgsContent(node)[0];
+        const annotation = `Beezer's A First Course in Linear Algebra ${
+            arg == null ? "" : `(${toString(arg)})`
+        }`;
+        return {
+            type: "string",
+            content: annotation,
+        };
     },
 };
