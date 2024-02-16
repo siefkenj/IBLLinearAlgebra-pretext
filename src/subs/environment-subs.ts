@@ -974,4 +974,33 @@ export const environmentReplacements: Record<
             }),
         });
     },
+    sortedlist: (node) => {
+        const names = node.content
+            .filter((node) => match.macro(node, "sortitem"))
+            .sort((a, b) =>
+                toString(
+                    getArgsContent(a as Ast.Macro)[0] as Ast.Ast
+                ).localeCompare(
+                    toString(getArgsContent(b as Ast.Macro)[0] as Ast.Ast)
+                )
+            )
+            .flatMap((node) => {
+                const name = getArgsContent(node as Ast.Macro)[1];
+
+                return htmlLike({
+                    tag: "contributor",
+                    content: htmlLike({
+                        tag: "personname",
+                        content: name || [],
+                    }),
+                });
+            });
+
+        console.log(names);
+
+        return htmlLike({
+            tag: "contributors",
+            content: names,
+        });
+    },
 };
