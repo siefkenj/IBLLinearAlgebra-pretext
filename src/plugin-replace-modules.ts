@@ -6,6 +6,7 @@ import {
     unifiedLatexAstComplier,
     unifiedLatexFromString,
 } from "@unified-latex/unified-latex-util-parse";
+import { wrapPars } from "@unified-latex/unified-latex-to-hast";
 import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
 import { replaceLabels } from "./plugin-replace-labels";
@@ -51,8 +52,38 @@ export const replaceModules: Plugin<[], Ast.Root, Ast.Root> =
                     readFileSync("book/modules/" + file, { encoding: "utf8" })
                 ).result as Ast.Root;
             // Set a key and value pair in the map
+            if (file === "preface.tex") {
+                module.content = wrapPars(module.content);
+            }
             modules.set("modules/" + file, module);
         });
+
+        const contributors = unified()
+            .use(unifiedLatexFromString, {
+                macros: macroInfo,
+                environments: environmentInfo,
+            })
+            .use(unifiedLatexAstComplier)
+            .use(splitOnHeadings)
+            .use(replaceDefinitions)
+            .use(stringifyTikzContent)
+            .use(replaceIgnoredElements)
+            .use(replaceLabels)
+            .use(replaceIndecesInMathMode)
+            .processSync(
+                readFileSync("book/common/contributors.tex", {
+                    encoding: "utf8",
+                })
+            ).result as Ast.Root;
+
+        contributors.content.forEach((node) => {
+            if (match.environment(node, "quote")) {
+                node.env = "center";
+                node.content = wrapPars(node.content);
+            }
+        });
+        contributors.content = wrapPars(contributors.content);
+        modules.set("common/contributors.tex", contributors);
 
         return function (ast: Ast.Root) {
             replaceNode(ast, (node) => {
@@ -64,7 +95,10 @@ export const replaceModules: Plugin<[], Ast.Root, Ast.Root> =
                     );
 
                     // Check if the file is a module
-                    if (file.includes("modules")) {
+                    if (
+                        file.includes("modules") ||
+                        file == "common/contributors.tex"
+                    ) {
                         // Used the file name to replace the node with the corresponding LaTeX AST.
                         return modules.get(file)?.content;
                     }
