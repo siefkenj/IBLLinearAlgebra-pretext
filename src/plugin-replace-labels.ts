@@ -17,7 +17,9 @@ export const replaceLabels: Plugin<[], Ast.Root, Ast.Root> =
                 // Check if the current node is a label
                 if (match.macro(node, "label")) {
                     // Read the argument of the label macro which will be the id attribute
-                    const id = toString(getArgsContent(node)[0] as Ast.Node[]);
+                    const id = toString(getArgsContent(node)[0] as Ast.Node[])
+                        .replace(/:/g, "")
+                        .replace(/ /g, "");
                     // If the first parent is of type argument, we want to get the next parent since argument is not significant
                     const idx = info.parents[0].type === "argument" ? 1 : 0;
 

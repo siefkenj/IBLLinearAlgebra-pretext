@@ -22,6 +22,12 @@ const definitionsFile = await readFile(
     "utf-8"
 );
 
+interface Definition {
+    title: Ast.Node[];
+    definition: Ast.Node[];
+    attachID: boolean;
+}
+
 /**
  * This plugin visits every node in an AST tree and replaces each '\SavedDefinitionRender{}' macro with the corresponding defintion.
  */
@@ -51,7 +57,7 @@ export const replaceDefinitions: Plugin<string[], Ast.Root, Ast.Root> =
             .processSync(file || definitionsFile).result as Ast.Root;
 
         // Define the definitions map.
-        let definitions = new Map<string, Record<string, Ast.Node[]>>();
+        let definitions = new Map<string, Definition>();
         // Loop through every node in the LaTeX AST tree.
         for (let definition of definitionsAst.content) {
             // Check if the node is a "SaveDefinition" environment with arguments.
@@ -64,6 +70,7 @@ export const replaceDefinitions: Plugin<string[], Ast.Root, Ast.Root> =
                 definitions.set(toString(pgfkeysObject.key[0]), {
                     title: pgfkeysObject.title,
                     definition: definition.content,
+                    attachID: true,
                 });
             }
         }
@@ -90,13 +97,20 @@ export const replaceDefinitions: Plugin<string[], Ast.Root, Ast.Root> =
                             tag: "statement",
                             content: wrapPars(definition.definition),
                         });
+                        const attributes: { [k: string]: string } = {};
+                        console.log(definition.attachID);
+                        if (definition.attachID) {
+                            attributes["xml:id"] = toString(
+                                node.args[0].content[0]
+                            );
+                            definition.attachID = false;
+                        }
+
                         // Wrap everything in \html-tag:definition{...}' in macros and replace the node.
                         return htmlLike({
                             tag: "definition",
                             content: [title, statement],
-                            attributes: {
-                                "xml:id": toString(node.args[0].content[0]),
-                            },
+                            attributes,
                         });
                     }
                 }

@@ -131,7 +131,7 @@ export const macroReplacements: Record<
         return htmlLike({
             tag: "xref",
             attributes: {
-                ref: toString(args[0]),
+                ref: toString(args[0]).replace(/:/g, "").replace(/ /g, ""),
                 text: "global",
             },
         });
@@ -190,7 +190,7 @@ export const macroReplacements: Record<
         return htmlLike({
             tag: "xref",
             attributes: {
-                ref: toString(args[0]),
+                ref: toString(args[0]).replace(/:/g, "").replace(/ /g, ""),
                 text: "global",
             },
         });

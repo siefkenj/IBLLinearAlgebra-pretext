@@ -43,11 +43,11 @@ export const replaceModules: Plugin<[], Ast.Root, Ast.Root> =
                 })
                 .use(unifiedLatexAstComplier)
                 .use(splitOnHeadings)
-                .use(replaceDefinitions)
-                .use(stringifyTikzContent)
-                .use(replaceIgnoredElements)
-                .use(replaceLabels)
-                .use(replaceIndecesInMathMode)
+                // .use(replaceDefinitions)
+                // .use(stringifyTikzContent)
+                // .use(replaceIgnoredElements)
+                // .use(replaceLabels)
+                // .use(replaceIndecesInMathMode)
                 .processSync(
                     readFileSync("book/modules/" + file, { encoding: "utf8" })
                 ).result as Ast.Root;
@@ -65,11 +65,11 @@ export const replaceModules: Plugin<[], Ast.Root, Ast.Root> =
             })
             .use(unifiedLatexAstComplier)
             .use(splitOnHeadings)
-            .use(replaceDefinitions)
-            .use(stringifyTikzContent)
-            .use(replaceIgnoredElements)
-            .use(replaceLabels)
-            .use(replaceIndecesInMathMode)
+            // .use(replaceDefinitions)
+            // .use(stringifyTikzContent)
+            // .use(replaceIgnoredElements)
+            // .use(replaceLabels)
+            // .use(replaceIndecesInMathMode)
             .processSync(
                 readFileSync("book/common/contributors.tex", {
                     encoding: "utf8",

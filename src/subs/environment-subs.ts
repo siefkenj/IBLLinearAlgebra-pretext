@@ -996,8 +996,6 @@ export const environmentReplacements: Record<
                 });
             });
 
-        console.log(names);
-
         return htmlLike({
             tag: "contributors",
             content: names,
