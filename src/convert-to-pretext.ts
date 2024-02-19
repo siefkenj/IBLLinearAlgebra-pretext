@@ -121,7 +121,7 @@ async function testConvertFile() {
     //     if (err) throw err;
     // });
 
-    writeFile("pretext-files/main.ptx", converted, (err) => {
+    writeFile("src/sample.xml", converted, (err) => {
         if (err) throw err;
     });
 
