@@ -16,7 +16,7 @@ import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
 import { replaceLabels } from "./plugin-replace-labels";
 import { replaceModules } from "./plugin-replace-modules";
-import { replaceIndecesInMathMode } from "./plugin-replace-indeces-in-math-mode";
+import { replaceIndicesInMathMode } from "./plugin-replace-indices-in-math-mode";
 import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
 import { removeIgnoredTags } from "./plugin-remove-ignored-tags";
 import { replaceSetStar } from "./plugin-replace-set-star";
@@ -42,7 +42,7 @@ export function convert(value: string, definitionsFile?: string) {
         .use(replaceSetStar)
         .use(replaceIgnoredElements)
         .use(replaceLabels)
-        .use(replaceIndecesInMathMode);
+        .use(replaceIndicesInMathMode);
 
     const afterReplacements = addedMacros.use(unifiedLatexToHast, {
         skipHtmlValidation: true,
@@ -74,7 +74,7 @@ export function convertTextbook(value: string, definitionsFile?: string) {
         .use(replaceSetStar)
         .use(replaceIgnoredElements)
         .use(replaceLabels)
-        .use(replaceIndecesInMathMode);
+        .use(replaceIndicesInMathMode);
 
     const afterReplacements = addedMacros.use(unifiedLatexToHast, {
         skipHtmlValidation: true,

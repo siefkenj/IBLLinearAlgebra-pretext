@@ -9,8 +9,8 @@ import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 /**
  * This plugin replaces "\index{}" macros found in math environments before HTML conversion.
  */
-export const replaceIndecesInMathMode: Plugin<[], Ast.Root, Ast.Root> =
-    function replaceIndecesInMathMode() {
+export const replaceIndicesInMathMode: Plugin<[], Ast.Root, Ast.Root> =
+    function replaceIndicesInMathMode() {
         return function (tree: Ast.Root) {
             replaceNode(tree, (node, info) => {
                 // Check if the node is a index, and its parent is a math environment
