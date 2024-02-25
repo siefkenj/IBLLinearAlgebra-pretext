@@ -111,17 +111,18 @@ async function testConvertFile() {
         // path.join(CWD, "../src/textbook.tex"),
         // path.join(CWD, "../book/modules/module3.tex"),
         path.join(CWD, "../book/linearalgebra.tex"),
+        // path.join(CWD, "../src/small-tex.tex"),
 
         "utf-8"
     );
-    // const converted = convertTextbook(source);
     const converted = convertTextbook(source);
+    // const converted = convert(source);
 
     // writeFile("sample-files/converted.xml", converted, (err) => {
     //     if (err) throw err;
     // });
 
-    writeFile("src/sample.xml", converted, (err) => {
+    writeFile("pretext-files/main.ptx", converted, (err) => {
         if (err) throw err;
     });
 
