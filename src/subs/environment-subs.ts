@@ -831,7 +831,7 @@ export const environmentReplacements: Record<
 
         const title = split.macros[0];
 
-        const chapterIntroduction = htmlLike({
+        const objectivesIntroduction = htmlLike({
             tag: "introduction",
             content: wrapPars(split.segments[1]),
         });
@@ -839,35 +839,17 @@ export const environmentReplacements: Record<
         const objectives = htmlLike({
             tag: "objectives",
             content: [
-                chapterIntroduction,
+                objectivesIntroduction,
                 (getArgsContent(split.macros[1])[0] as Ast.Macro[])[0],
             ],
         });
 
         const introduction = splitOnMacro(node.content, "html-tag:introduction")
             .macros[0];
-        if (getArgsContent(introduction)[0]?.length === 0) {
-            return htmlLike({
-                tag: "chapter",
-                content: [
-                    title,
-                    objectives,
-                    ...splitOnMacro(node.content, "html-tag:introduction")
-                        .segments[1],
-                ],
-                attributes,
-            });
-        }
 
         return htmlLike({
             tag: "chapter",
-            content: [
-                title,
-                objectives,
-                introduction,
-                ...splitOnMacro(node.content, "html-tag:introduction")
-                    .segments[1],
-            ],
+            content: [title, objectives, ...split.segments[2]],
             attributes,
         });
     },
@@ -881,7 +863,7 @@ export const environmentReplacements: Record<
 
         const title = split.macros[0];
 
-        const chapterIntroduction = htmlLike({
+        const objectivesIntroduction = htmlLike({
             tag: "introduction",
             content: wrapPars(split.segments[1]),
         });
@@ -889,35 +871,17 @@ export const environmentReplacements: Record<
         const objectives = htmlLike({
             tag: "objectives",
             content: [
-                chapterIntroduction,
+                objectivesIntroduction,
                 (getArgsContent(split.macros[1])[0] as Ast.Macro[])[0],
             ],
         });
 
         const introduction = splitOnMacro(node.content, "html-tag:introduction")
             .macros[0];
-        if (getArgsContent(introduction)[0]?.length === 0) {
-            return htmlLike({
-                tag: "appendix",
-                content: [
-                    title,
-                    objectives,
-                    ...splitOnMacro(node.content, "html-tag:introduction")
-                        .segments[1],
-                ],
-                attributes,
-            });
-        }
 
         return htmlLike({
             tag: "appendix",
-            content: [
-                title,
-                objectives,
-                introduction,
-                ...splitOnMacro(node.content, "html-tag:introduction")
-                    .segments[1],
-            ],
+            content: [title, objectives, ...split.segments[2]],
             attributes,
         });
     },
