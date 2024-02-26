@@ -68,30 +68,7 @@ export function parserToConverter(
             .use(unifiedLatexToHast, {
                 skipHtmlValidation: true,
                 macroReplacements,
-                environmentReplacements: {
-                    ...environmentReplacements,
-                    align: environmentReplacements["align"],
-                    "align*": environmentReplacements["align*"],
-                    "alignat*": environmentReplacements["alignat*"],
-                    appendix: environmentReplacements["appendix"],
-                    center: environmentReplacements["center"],
-                    definition: environmentReplacements["definition"],
-                    "dmath*": environmentReplacements["dmath*"],
-                    emphbox: environmentReplacements["emphbox"],
-                    enumerate: environmentReplacements["enumerate"],
-                    "enumerate*": environmentReplacements["enumerate*"],
-                    equation: environmentReplacements["equation"],
-                    example: environmentReplacements["example"],
-                    exercises: environmentReplacements["exercises"],
-                    itemize: environmentReplacements["itemize"],
-                    module: environmentReplacements["module"],
-                    proof: environmentReplacements["proof"],
-                    quote: environmentReplacements["quote"],
-                    sortedlist: environmentReplacements["sortedlist"],
-                    tabular: environmentReplacements["tabular"],
-                    theorem: environmentReplacements["theorem"],
-                    tikzpicture: environmentReplacements["tikzpicture"],
-                },
+                environmentReplacements,
             })
             //
             // Conversion to string

@@ -1000,6 +1000,23 @@ export const environmentReplacements = {
             content: [SP, ...content, SP],
         });
     },
+    subsection: (node) => {
+        // If there is a first argument, it is the title.
+        const title = getArgsContent(node)[0];
+        const content = [...node.content];
+        if (title) {
+            content.unshift(
+                htmlLike({
+                    tag: "title",
+                    content: title,
+                })
+            );
+        }
+        return htmlLike({
+            tag: "subsection",
+            content: [SP, ...content, SP],
+        });
+    },
 } satisfies Record<
     string,
     (
