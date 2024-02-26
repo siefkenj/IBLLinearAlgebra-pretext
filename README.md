@@ -23,6 +23,7 @@ to see a sample run (there should be no errors).
 ## Converting the Book
 
 You can convert the whole book by pointing `convert-textbook.ts` to the location of the `linearalgebra.tex` file.
+
 ```
 npx vite src/convert-textbook.ts -i book/linearalgebra.tex
 ```

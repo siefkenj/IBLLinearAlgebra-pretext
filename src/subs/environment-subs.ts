@@ -997,7 +997,7 @@ export const environmentReplacements = {
         }
         return htmlLike({
             tag: "section",
-            content:[SP, ...content, SP],
+            content: [SP, ...content, SP],
         });
     },
 } satisfies Record<

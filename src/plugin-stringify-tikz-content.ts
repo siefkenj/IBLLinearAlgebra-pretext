@@ -6,7 +6,7 @@ import { env } from "@unified-latex/unified-latex-builder";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 
 /**
- * Plugin to be used before converting to Hast, which converts the content within 
+ * Plugin to be used before converting to Hast, which converts the content within
  * tikzpicture environments into strings, so they are not mangled by other conversions
  */
 export const stringifyTikzContent: Plugin<[], Ast.Root, Ast.Root> =
@@ -16,6 +16,6 @@ export const stringifyTikzContent: Plugin<[], Ast.Root, Ast.Root> =
                 if (match.environment(node, "tikzpicture")) {
                     return env("tikzpicture", toString(node.content));
                 }
-            })
-        }
-    }
+            });
+        };
+    };
