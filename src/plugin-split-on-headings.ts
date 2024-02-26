@@ -35,26 +35,29 @@ export const splitOnHeadings: Plugin<[], Ast.Root, Ast.Root> =
                 })
             );
 
+            let sections: Ast.Root["content"] = [];
             const introductionContent = pars[0];
-            const introductionSplit = splitOnCondition(
-                introductionContent,
-                isHtmlLike
-            );
-            const formattedSegments = introductionSplit.segments.flatMap(
-                (node) => [
-                    wrapPars(node, {
-                        macrosThatBreakPars: ["SavedDefinitionRender"],
+            if (introductionContent.length > 0) {
+                const introductionSplit = splitOnCondition(
+                    introductionContent,
+                    isHtmlLike
+                );
+                const formattedSegments = introductionSplit.segments.flatMap(
+                    (node) => [
+                        wrapPars(node, {
+                            macrosThatBreakPars: ["SavedDefinitionRender"],
+                        }),
+                    ]
+                );
+                const introduction = htmlLike({
+                    tag: "introduction",
+                    content: unsplitOnMacro({
+                        segments: formattedSegments,
+                        macros: introductionSplit.separators,
                     }),
-                ]
-            );
-            const introduction = htmlLike({
-                tag: "introduction",
-                content: unsplitOnMacro({
-                    segments: formattedSegments,
-                    macros: introductionSplit.separators,
-                }),
-            });
-            let sections: Ast.Root["content"] = [introduction];
+                });
+                sections.push(introduction);
+            }
             // Procced only if there are \Heading{}' macros in the original AST tree.
             if (newHeadings.length > 0) {
                 for (let i = 0; i < newHeadings.length; i++) {
