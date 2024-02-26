@@ -91,13 +91,6 @@ export const parseLinearalgebra: Plugin<[], Ast.Root, Ast.Root> =
                     content: [...appendices, index],
                 });
 
-                const docinfo = htmlLike({
-                    tag: "xi:include",
-                    attributes: {
-                        href: "./docinfo.ptx",
-                    },
-                });
-
                 const book = htmlLike({
                     tag: "book",
                     content: [
@@ -114,7 +107,7 @@ export const parseLinearalgebra: Plugin<[], Ast.Root, Ast.Root> =
                 tree.content = [
                     htmlLike({
                         tag: "pretext",
-                        content: [docinfo, book],
+                        content: book,
                         attributes: {
                             "xml:lang": "en-US",
                             "xmlns:xi": "http://www.w3.org/2001/XInclude",

@@ -827,29 +827,37 @@ export const environmentReplacements: Record<
         if (node._renderInfo?.id !== undefined) {
             attributes["xml:id"] = node._renderInfo.id as string;
         }
-        const split = splitOnMacro(node.content, ["Title", "html-tag:p"]);
 
-        const title = split.macros[0];
+        let introduction = {};
+        const split = splitOnMacro(node.content, ["html-tag:section", "Title"]);
+        let introductionContent = split.segments[1];
 
-        const objectivesIntroduction = htmlLike({
-            tag: "introduction",
-            content: wrapPars(split.segments[1]),
+        const introductionSplit = splitOnCondition(
+            introductionContent,
+            isHtmlLike
+        );
+        const formattedSegments = introductionSplit.segments.flatMap((node) => {
+            return [wrapPars(node)];
         });
 
-        const objectives = htmlLike({
-            tag: "objectives",
-            content: [
-                objectivesIntroduction,
-                (getArgsContent(split.macros[1])[0] as Ast.Macro[])[0],
-            ],
-        });
+        if (introductionContent.length > 0) {
+            introduction = htmlLike({
+                tag: "introduction",
+                content: unsplitOnMacro({
+                    segments: formattedSegments,
+                    macros: introductionSplit.separators,
+                }),
+            });
 
-        const introduction = splitOnMacro(node.content, "html-tag:introduction")
-            .macros[0];
+            split.segments[1] = [introduction as Ast.Node];
+        }
 
         return htmlLike({
             tag: "chapter",
-            content: [title, objectives, ...split.segments[2]],
+            content: unsplitOnMacro({
+                segments: split.segments,
+                macros: split.macros,
+            }),
             attributes,
         });
     },
@@ -859,29 +867,37 @@ export const environmentReplacements: Record<
         if (node._renderInfo?.id !== undefined) {
             attributes["xml:id"] = node._renderInfo.id as string;
         }
-        const split = splitOnMacro(node.content, ["Title", "html-tag:p"]);
 
-        const title = split.macros[0];
+        let introduction = {};
+        const split = splitOnMacro(node.content, ["html-tag:section", "Title"]);
+        let introductionContent = split.segments[1];
 
-        const objectivesIntroduction = htmlLike({
-            tag: "introduction",
-            content: wrapPars(split.segments[1]),
+        const introductionSplit = splitOnCondition(
+            introductionContent,
+            isHtmlLike
+        );
+        const formattedSegments = introductionSplit.segments.flatMap((node) => {
+            return [wrapPars(node)];
         });
 
-        const objectives = htmlLike({
-            tag: "objectives",
-            content: [
-                objectivesIntroduction,
-                (getArgsContent(split.macros[1])[0] as Ast.Macro[])[0],
-            ],
-        });
+        if (introductionContent.length > 0) {
+            introduction = htmlLike({
+                tag: "introduction",
+                content: unsplitOnMacro({
+                    segments: formattedSegments,
+                    macros: introductionSplit.separators,
+                }),
+            });
 
-        const introduction = splitOnMacro(node.content, "html-tag:introduction")
-            .macros[0];
+            split.segments[1] = [introduction as Ast.Node];
+        }
 
         return htmlLike({
             tag: "appendix",
-            content: [title, objectives, ...split.segments[2]],
+            content: unsplitOnMacro({
+                segments: split.segments,
+                macros: split.macros,
+            }),
             attributes,
         });
     },

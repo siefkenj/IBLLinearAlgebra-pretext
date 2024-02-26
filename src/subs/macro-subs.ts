@@ -82,22 +82,15 @@ export const macroReplacements: Record<
             if (arg == null) {
                 return [];
             } else {
-                if (toString(arg).includes("!")) {
-                    const headings = toString(arg)
-                        .split("!")
-                        .flatMap((str) => {
-                            return htmlLike({
-                                tag: "h",
-                                content: s(str),
-                            });
+                const headings = toString(arg)
+                    .split("!")
+                    .flatMap((str) => {
+                        return htmlLike({
+                            tag: "h",
+                            content: s(str),
                         });
-                    return headings;
-                }
-
-                return htmlLike({
-                    tag: "h",
-                    content: arg,
-                });
+                    });
+                return headings;
             }
         });
         return htmlLike({

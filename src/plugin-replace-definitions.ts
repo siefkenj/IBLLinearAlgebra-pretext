@@ -98,6 +98,7 @@ export const replaceDefinitions: Plugin<string[], Ast.Root, Ast.Root> =
                             content: wrapPars(definition.definition),
                         });
                         const attributes: { [k: string]: string } = {};
+                        console.log(definition.attachID);
                         if (definition.attachID) {
                             attributes["xml:id"] = toString(
                                 node.args[0].content[0]
