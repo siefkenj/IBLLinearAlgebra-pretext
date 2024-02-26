@@ -1,15 +1,9 @@
 import { Plugin } from "unified";
 import * as Ast from "@unified-latex/unified-latex-types";
-import {
-    htmlLike,
-    isHtmlLike,
-} from "@unified-latex/unified-latex-util-html-like";
+import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import { wrapPars } from "@unified-latex/unified-latex-to-hast";
-import {
-    splitOnCondition,
-    splitOnMacro,
-    unsplitOnMacro,
-} from "@unified-latex/unified-latex-util-split";
+import { splitOnMacro } from "@unified-latex/unified-latex-util-split";
+import { s } from "@unified-latex/unified-latex-builder";
 
 /**
  * This plugin splits a LaTeX AST on '\Heading{}' macros,
@@ -34,30 +28,7 @@ export const splitOnHeadings: Plugin<[], Ast.Root, Ast.Root> =
                     macrosThatBreakPars: ["SavedDefinitionRender"],
                 })
             );
-
-            let sections: Ast.Root["content"] = [];
-            const introductionContent = pars[0];
-            if (introductionContent.length > 0) {
-                const introductionSplit = splitOnCondition(
-                    introductionContent,
-                    isHtmlLike
-                );
-                const formattedSegments = introductionSplit.segments.flatMap(
-                    (node) => [
-                        wrapPars(node, {
-                            macrosThatBreakPars: ["SavedDefinitionRender"],
-                        }),
-                    ]
-                );
-                const introduction = htmlLike({
-                    tag: "introduction",
-                    content: unsplitOnMacro({
-                        segments: formattedSegments,
-                        macros: introductionSplit.separators,
-                    }),
-                });
-                sections.push(introduction);
-            }
+            let sections: Ast.Root["content"] = pars[0];
             // Procced only if there are \Heading{}' macros in the original AST tree.
             if (newHeadings.length > 0) {
                 for (let i = 0; i < newHeadings.length; i++) {
