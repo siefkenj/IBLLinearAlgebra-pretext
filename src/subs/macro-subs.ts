@@ -66,14 +66,14 @@ export const macroReplacements: Record<
             });
         }
 
-        const fn = htmlLike({
+        const footnote = htmlLike({
             tag: "fn",
             content: ([] as Ast.Node[]).concat(...split.segments),
         });
 
         return {
             type: "root",
-            content: [fn].concat(split.macros),
+            content: [footnote].concat(split.macros),
         };
     },
     index: (node) => {

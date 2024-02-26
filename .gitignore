@@ -7,3 +7,4 @@ module.1.ptx
 module.1.xml
 src/unified-latex-plugin-to-hast-without-validation.ts
 src/small-tex.tex
+tmp/

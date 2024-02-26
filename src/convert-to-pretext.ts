@@ -8,9 +8,9 @@ import { unifiedLatexToHast } from "@unified-latex/unified-latex-to-hast";
 import {
     unifiedLatexAstComplier,
     unifiedLatexFromString,
+    unifiedLatexFromStringMinimal,
 } from "@unified-latex/unified-latex-util-parse";
 import { replaceMath } from "./plugin-replace-math";
-import { splitOnHeadings } from "./plugin-split-on-headings";
 
 import { replaceDefinitions } from "./plugin-replace-definitions";
 import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
@@ -26,69 +26,20 @@ import {
     environmentInfo,
     environmentReplacements,
 } from "./subs/environment-subs";
+import { parserToConverter } from "./parser-to-converter";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
 export function convert(value: string, definitionsFile?: string) {
-    const addedMacros = unified()
-        .use(unifiedLatexFromString, {
-            macros: macroInfo,
-            environments: environmentInfo,
-        })
-        .use(unifiedLatexAstComplier)
-        .use(splitOnHeadings)
-        .use(replaceDefinitions, definitionsFile || "")
-        .use(stringifyTikzContent)
-        .use(replaceSetStar)
-        .use(replaceIgnoredElements)
-        .use(replaceLabels)
-        .use(replaceIndicesInMathMode);
-
-    const afterReplacements = addedMacros.use(unifiedLatexToHast, {
-        skipHtmlValidation: true,
-        macroReplacements,
-        environmentReplacements,
-    });
-
-    const output = afterReplacements
-        .use(replaceMath)
-        .use(removeIgnoredTags)
-        .use(rehypeStringify)
-        .processSync(value).value as string;
+    const output = parserToConverter(
+        unified().use(unifiedLatexFromStringMinimal),
+        { defFileContents: definitionsFile || "" }
+    ).processSync(value).value as string;
 
     return output;
 }
 
-export function convertTextbook(value: string, definitionsFile?: string) {
-    const addedMacros = unified()
-        .use(unifiedLatexFromString, {
-            macros: macroInfo,
-            environments: environmentInfo,
-        })
-        .use(unifiedLatexAstComplier)
-        .use(parseLinearalgebra)
-        .use(replaceModules)
-        .use(splitOnHeadings)
-        .use(replaceDefinitions, definitionsFile || "")
-        .use(stringifyTikzContent)
-        .use(replaceSetStar)
-        .use(replaceIgnoredElements)
-        .use(replaceLabels)
-        .use(replaceIndicesInMathMode);
-
-    const afterReplacements = addedMacros.use(unifiedLatexToHast, {
-        skipHtmlValidation: true,
-        macroReplacements,
-        environmentReplacements,
-    });
-    const output = afterReplacements
-        .use(replaceMath)
-        .use(removeIgnoredTags)
-        .use(rehypeStringify, { voids: [] })
-        .processSync(value).value as string;
-
-    return output;
-}
+export const convertTextbook = convert;
 
 function testConvert() {
     const source = `\\subsection*{About this Book}`;

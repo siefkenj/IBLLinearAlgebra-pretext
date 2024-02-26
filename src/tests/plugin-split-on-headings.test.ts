@@ -3,32 +3,32 @@ import { convert } from "../convert-to-pretext";
 
 describe("plugin-split-on-headings", () => {
     it("can replace latex heading macros with title tag inside section tag", () => {
-        expect(convert("\\Heading{Sets}")).toEqual(
-            "<section><title>Sets</title></section>"
+        expect(convert("\\begin{module}\\Heading{Sets}\\end{module}")).toEqual(
+            "<chapter><section> <title>Sets</title> </section></chapter>"
         );
     });
     it("can wrap any plain text after a heading in p tags", () => {
-        expect(convert("\\Heading{Sets} Hello World!")).toEqual(
-            "<section><title>Sets</title><p>Hello World!</p></section>"
+        expect(convert("\\begin{module}\\Heading{Sets} Hello World!\\end{module}")).toEqual(
+            "<chapter><section> <title>Sets</title><p>Hello World!</p> </section></chapter>"
         );
     });
     it("handle multiple heading macros", () => {
         expect(
-            convert("\\Heading{Title 1} \\Heading{Title 2} \\Heading{Title 3}")
+            convert("\\begin{module}\\Heading{Title 1} \\Heading{Title 2} \\Heading{Title 3}\\end{module}")
         ).toEqual(
-            "<section><title>Title 1</title></section><section><title>Title 2</title></section><section><title>Title 3</title></section>"
+            "<chapter><section> <title>Title 1</title> </section><section> <title>Title 2</title> </section><section> <title>Title 3</title> </section></chapter>"
         );
     });
-    it("can wrap any plain text in between two heading in p tags inside the coresponding section tag", () => {
+    it("can wrap any plain text in between two heading in p tags inside the corresponding section tag", () => {
         expect(
-            convert("\\Heading{Title 1} Text 1 \\Heading{Title 2} Text 2")
+            convert("\\begin{module}\\Heading{Title 1} Text 1 \\Heading{Title 2} Text 2\\end{module}")
         ).toEqual(
-            "<section><title>Title 1</title><p>Text 1</p></section><section><title>Title 2</title><p>Text 2</p></section>"
+            "<chapter><section> <title>Title 1</title><p>Text 1</p> </section><section> <title>Title 2</title><p>Text 2</p> </section></chapter>"
         );
     });
     it("can replace other macros after headings", () => {
-        expect(convert("\\Heading{Sets}  \n \\[\\Set{1,2,3}.\\]")).toEqual(
-            "<section><title>Sets</title><p><me>\\Set{1,2,3}.</me></p></section>"
+        expect(convert("\\begin{module}\\Heading{Sets}  \n \\[\\Set{1,2,3}.\\]\\end{module}")).toEqual(
+            "<chapter><section> <title>Sets</title><p><me>\\Set{1,2,3}.</me></p> </section></chapter>"
         );
     });
 });

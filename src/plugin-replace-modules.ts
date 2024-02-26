@@ -7,17 +7,12 @@ import {
     unifiedLatexFromString,
 } from "@unified-latex/unified-latex-util-parse";
 import { wrapPars } from "@unified-latex/unified-latex-to-hast";
-import { replaceDefinitions } from "./plugin-replace-definitions";
-import { replaceIgnoredElements } from "./plugin-replace-ignored-elements";
-import { replaceLabels } from "./plugin-replace-labels";
 import { unified, Plugin } from "unified";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
 import { splitOnHeadings } from "./plugin-split-on-headings";
-import { replaceIndecesInMathMode } from "./plugin-replace-indeces-in-math-mode";
-import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
 import { macroInfo } from "./subs/macro-subs";
 import { environmentInfo } from "./subs/environment-subs";
 

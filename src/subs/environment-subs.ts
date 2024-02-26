@@ -45,13 +45,7 @@ export const environmentInfo: Ast.EnvInfoRecord = {
     },
 };
 
-export const environmentReplacements: Record<
-    string,
-    (
-        node: Ast.Environment,
-        info: VisitInfo
-    ) => Ast.Macro | Ast.Environment | Ast.String
-> = {
+export const environmentReplacements = {
     example: (node) => {
         let exampleContents: Ast.Node[] = [];
         let solutionContents: Node[] = [];
@@ -61,7 +55,7 @@ export const environmentReplacements: Record<
             attributes["xml:id"] = node._renderInfo.id as string;
         }
 
-        // seperate by paragraphs
+        // separate by paragraphs
         let segments = splitOnCondition(node.content, match.parbreak).segments;
 
         for (let i = 0; i < segments.length; i++) {
@@ -318,7 +312,7 @@ export const environmentReplacements: Record<
         }
 
         const content = items.flatMap((item) => {
-            const args: Ast.Node[][] = getArgsContent(item).flatMap((arg) => {
+            const args = getArgsContent(item).flatMap((arg) => {
                 if (arg == null) {
                     return [];
                 }
@@ -350,12 +344,6 @@ export const environmentReplacements: Record<
         });
     },
     enumerate: (node) => {
-        // const items: Ast.Macro[] = node.content.flatMap((node) => {
-        //     if (match.macro(node, "item")) {
-        //         return node;
-        //     }
-        //     return [];
-        // });
         const items = splitOnMacro(node.content, "item").macros;
 
         if (getArgsContent(items[0])[1] != null) {
@@ -548,7 +536,7 @@ export const environmentReplacements: Record<
             return match.environment(node, "problist");
         }).separators[0] as Ast.Environment;
         const probSplit = splitOnMacro(problist.content, "prob");
-        const probs = probSplit.segments.flatMap((prob) => {
+        const problems = probSplit.segments.flatMap((prob) => {
             if (prob.length == 0) return [];
             const attributes: { [k: string]: string } = {};
             const args = getArgsContent(
@@ -630,7 +618,7 @@ export const environmentReplacements: Record<
 
         return htmlLike({
             tag: "exercises",
-            content: probs,
+            content: problems,
         });
     },
     definition: (node) => {
@@ -840,18 +828,6 @@ export const environmentReplacements: Record<
             return [wrapPars(node)];
         });
 
-        if (introductionContent.length > 0) {
-            introduction = htmlLike({
-                tag: "introduction",
-                content: unsplitOnMacro({
-                    segments: formattedSegments,
-                    macros: introductionSplit.separators,
-                }),
-            });
-
-            split.segments[1] = [introduction as Ast.Node];
-        }
-
         return htmlLike({
             tag: "chapter",
             content: unsplitOnMacro({
@@ -1001,4 +977,33 @@ export const environmentReplacements: Record<
             content: names,
         });
     },
-};
+    introduction: (node) => {
+        return htmlLike({
+            tag: "introduction",
+            content: node.content,
+        });
+    },
+    section: (node) => {
+        // If there is a first argument, it is the title.
+        const title = getArgsContent(node)[0];
+        const content = [...node.content];
+        if (title) {
+            content.unshift(
+                htmlLike({
+                    tag: "title",
+                    content: title,
+                })
+            );
+        }
+        return htmlLike({
+            tag: "section",
+            content:[SP, ...content, SP],
+        });
+    },
+} satisfies Record<
+    string,
+    (
+        node: Ast.Environment,
+        info: VisitInfo
+    ) => Ast.Macro | Ast.Environment | Ast.String
+>;
