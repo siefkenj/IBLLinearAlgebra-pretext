@@ -41,4 +41,13 @@ describe("plugin-split-on-headings", () => {
             "<chapter><section> <title>Sets</title><p><me>\\Set{1,2,3}.</me></p> </section></chapter>"
         );
     });
+    it("Keeps exercises at the same level as <sections>", () => {
+        expect(
+            convert(
+                "\\begin{module}\\Heading{Sets} hi \\begin{exercises} there \\end{exercises} \\end{module}"
+            )
+        ).toEqual(
+            "<chapter><section> <title>Sets</title><p>hi</p> </section><exercises>there</exercises></chapter>"
+        );
+    })
 });

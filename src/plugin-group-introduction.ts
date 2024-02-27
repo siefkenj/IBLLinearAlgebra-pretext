@@ -15,7 +15,7 @@ export const pluginGroupIntroductionAndSections: Plugin<
     [],
     Ast.Root,
     Ast.Root
-> = function pluginGroupIntroduction() {
+> = function pluginGroupIntroductionAndSections() {
     return function (ast: Ast.Root) {
         visit(
             ast,
@@ -49,6 +49,21 @@ export const pluginGroupIntroductionAndSections: Plugin<
                 let labelNode =
                     labelIdx !== -1 ? introContent.splice(labelIdx, 1) : [];
 
+                //
+                // Remove `\begin{exercises}...` environment
+                //
+
+                // Exercises should be at the same level as sections
+                // We remove them from the tree and stick them back at the end.
+                let exercises: Ast.Environment[] = [];
+                node.content = node.content.filter((node) => {
+                    if (match.environment(node, "exercises")) {
+                        exercises.push(node);
+                        return false;
+                    }
+                    return true;
+                });
+
                 // Put the contents between each `\Heading` in its own environment.
                 splitToEnv(node.content, "Heading", "section");
                 // There may be a `\subsubsection` somewhere in the content.
@@ -65,6 +80,9 @@ export const pluginGroupIntroductionAndSections: Plugin<
                 }
                 node.content.unshift(...titleNode);
                 node.content.unshift(...labelNode);
+
+                // Put the exercises back
+                node.content.push(...exercises);
             },
             {
                 test: (node) =>

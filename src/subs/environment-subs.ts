@@ -16,6 +16,7 @@ import { match } from "@unified-latex/unified-latex-util-match";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
 import { pgfkeysArgToObject } from "@unified-latex/unified-latex-util-pgfkeys";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
+import { onTestFailed } from "vitest";
 
 export const environmentInfo: Ast.EnvInfoRecord = {
     emphbox: {
@@ -42,6 +43,9 @@ export const environmentInfo: Ast.EnvInfoRecord = {
         renderInfo: {
             inMathMode: true,
         },
+    },
+    bmatrix: {
+        signature: "o",
     },
 };
 
@@ -535,6 +539,10 @@ export const environmentReplacements = {
         const problist = splitOnCondition(node.content, (node) => {
             return match.environment(node, "problist");
         }).separators[0] as Ast.Environment;
+        if (!problist) {
+            // If there is no `\begin{problist}...`, there's nothing special to process.
+            return htmlLike({ tag: "exercises", content: node.content });
+        }
         const probSplit = splitOnMacro(problist.content, "prob");
         const problems = probSplit.segments.flatMap((prob) => {
             if (prob.length == 0) return [];

@@ -12,6 +12,7 @@ import { Root } from "@unified-latex/unified-latex-types";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { pluginParseBookSource } from "./plugin-parse-book-source";
 import { parserToConverter } from "./parser-to-converter";
+import { pluginMakeBookIntroduction } from "./plugin-make-book-introduction";
 
 //const origLog = console.log;
 //console.log = (...args) => {
@@ -39,11 +40,13 @@ export function convertTextbook(
     moduleFiles: Record<string, string>
 ) {
     const output = parserToConverter(
-        unified().use(pluginParseBookSource, {
-            bookSource: source,
-            modulesSource: moduleFiles,
-            onlyProcess: ["module1.tex"],
-        }),
+        unified()
+            .use(pluginParseBookSource, {
+                bookSource: source,
+                modulesSource: moduleFiles,
+                onlyProcess: ["module1."],
+            })
+            .use(pluginMakeBookIntroduction, { modulesSource: moduleFiles }),
         { defFileContents }
     ).processSync(source).value as string;
 
@@ -102,6 +105,41 @@ async function startConversion(sourceLocation: string) {
         }
     });
 
+    // Find the files used in the introduction.
+    // `modules/preface.tex`
+    // `common/contributors.tex`
+
+    const prefaceLocation = path.join(
+        sourceLocation,
+        "..",
+        "modules",
+        "preface.tex"
+    );
+    const contributorsLocation = path.join(
+        sourceLocation,
+        "..",
+        "common",
+        "contributors.tex"
+    );
+    ensureExists(prefaceLocation);
+    ensureExists(contributorsLocation);
+    processLog(
+        "Found preface:",
+        chalk.green(path.relative(CWD, prefaceLocation))
+    );
+    processLog(
+        "Found contributors:",
+        chalk.green(path.relative(CWD, contributorsLocation))
+    );
+    moduleContents["modules/preface.tex"] = fs.readFileSync(
+        prefaceLocation,
+        "utf-8"
+    );
+    moduleContents["common/contributors.tex"] = fs.readFileSync(
+        contributorsLocation,
+        "utf-8"
+    );
+
     //const bookAst = unified()
     //    .use(pluginParseBookSource, {
     //        bookSource: sourceFileContents,
@@ -118,7 +156,11 @@ async function startConversion(sourceLocation: string) {
         defFileContents,
         moduleContents
     );
-    console.log(converted);
+
+    const outputPath = path.join(CWD, "tmp.out.ptx");
+    console.log();
+    processLog("Saving to", chalk.green(path.relative(CWD, outputPath)));
+    fs.writeFileSync(outputPath, converted, "utf-8");
 
     return;
 }

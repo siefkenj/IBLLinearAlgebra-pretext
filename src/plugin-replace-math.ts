@@ -29,7 +29,7 @@ function hasClass(elm: Hast.Element, className: string): boolean {
 export const replaceMath: Plugin<[], Hast.Root, Hast.Root> =
     function replaceMath() {
         return function (tree: Hast.Root & { data: undefined }) {
-            // Visity every node that is a HAST element
+            // Visit every node that is a HAST element
             visit(tree, isHastElement, function (node: Hast.Element) {
                 // Replace elements that have class name "inline-math" with '<m>...<\m>' tags.
                 if (node.tagName === "span" && hasClass(node, "inline-math")) {
