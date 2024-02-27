@@ -13,6 +13,7 @@ import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { pluginParseBookSource } from "./plugin-parse-book-source";
 import { parserToConverter } from "./parser-to-converter";
 import { pluginMakeBookIntroduction } from "./plugin-make-book-introduction";
+import { pluginMakeBookIndex } from "./plugin-make-book-index";
 
 //const origLog = console.log;
 //console.log = (...args) => {
@@ -44,9 +45,10 @@ export function convertTextbook(
             .use(pluginParseBookSource, {
                 bookSource: source,
                 modulesSource: moduleFiles,
-                onlyProcess: ["module1."],
+ //               onlyProcess: ["module1."],
             })
-            .use(pluginMakeBookIntroduction, { modulesSource: moduleFiles }),
+            .use(pluginMakeBookIntroduction, { modulesSource: moduleFiles })
+            .use(pluginMakeBookIndex),
         { defFileContents }
     ).processSync(source).value as string;
 
@@ -140,27 +142,30 @@ async function startConversion(sourceLocation: string) {
         "utf-8"
     );
 
-    //const bookAst = unified()
-    //    .use(pluginParseBookSource, {
-    //        bookSource: sourceFileContents,
-    //        modulesSource: moduleContents,
-    //        onlyProcess: ["module1.tex"],
-    //    })
-    //    .use(unifiedLatexAstComplier)
-    //    .processSync(sourceFileContents);
-
-    //    console.log(bookAst.result.content[0]);
-
     const converted = convertTextbook(
         sourceFileContents,
         defFileContents,
         moduleContents
     );
 
+    const templateFilePath = path.join(CWD, "pretext-files", "template.ptx");
+    let templateSource = "{{BOOK_CONTENT}}";
+    try {
+        ensureExists(templateFilePath, false);
+        templateSource = fs.readFileSync(templateFilePath, "utf-8");
+    } catch (e) {
+        console.log(
+            chalk.red("Template file not found"),
+            "using blank template file. Result will not be wrapped in <pretext>...</pretext> tags"
+        );
+    }
+
+    const bookContent = templateSource.replace("{{BOOK_CONTENT}}", converted);
+
     const outputPath = path.join(CWD, "tmp.out.ptx");
     console.log();
     processLog("Saving to", chalk.green(path.relative(CWD, outputPath)));
-    fs.writeFileSync(outputPath, converted, "utf-8");
+    fs.writeFileSync(outputPath, bookContent, "utf-8");
 
     return;
 }
@@ -172,10 +177,13 @@ function processLog(desc: string, value: string) {
     console.log("    ", desc, "\t", chalk.green(value));
 }
 
-function ensureExists(path: string) {
+function ensureExists(path: string, exitOnFail = true) {
     if (!fs.existsSync(path)) {
         console.error("Cannot find source file", path);
-        process.exit(1);
+        if (exitOnFail) {
+            process.exit(1);
+        }
+        throw new Error(`Cannot find source file ${path}`);
     }
 }
 

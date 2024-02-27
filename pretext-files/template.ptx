@@ -1,0 +1,104 @@
+<pretext xml:lang="en-US" xmlns:xi="http://www.w3.org/2001/XInclude">
+    <docinfo>
+        <macros>
+            \newcommand{\Rrefto}{\xrightarrow{\text{row reduces to}}}
+            \newcommand{\R}{\mathbb{R}}
+            \newcommand{\Z}{\mathbb{Z}}
+            \newcommand{\Q}{\mathbb{Q}}
+            \newcommand{\N}{\mathbb{N}}
+            \newcommand{\C}{\mathbb{C}}
+            \newcommand{\BasisChange}[2]{[#2\!\leftarrow\!#1]}
+            \newcommand{\proj}{\Proj}
+            \newcommand{\rref}{\Rref}
+            \newcommand{\xhat}{{\vec e_1}}
+            \newcommand{\yhat}{{\vec e_2}}
+            \newcommand{\zhat}{{\vec e_3}}
+            \newcommand{\sbasis}[1]{\vec { e}_{#1}}
+            \newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+            \newcommand{\matc}[1]{\begin{bmatrix}#1\end{bmatrix}}
+            \newcommand{\given}{\;:\;}
+            \newcommand{\declarecommand}[1]{\providecommand{#1}{}\renewcommand{#1}}
+            \DeclareMathOperator{\Span}{span}
+            \DeclareMathOperator{\Img}{img}
+            \DeclareMathOperator{\Id}{id}
+            \DeclareMathOperator{\Ident}{\Id}
+            \DeclareMathOperator{\Vol}{Vol}
+            \DeclareMathOperator{\VolChange}{Vol\hspace{1.5pt}Change}
+            \DeclareMathOperator{\Range}{range}
+            \DeclareMathOperator{\Rref}{rref}
+            \DeclareMathOperator{\Rank}{rank}
+            \DeclareMathOperator{\Comp}{\Vcomp}
+            \DeclareMathOperator{\Vcomp}{v\hspace{1pt}comp}
+            \DeclareMathOperator{\Null}{null}
+            \DeclareMathOperator{\Nullity}{nullity}
+            \DeclareMathOperator{\Char}{char}
+            \DeclareMathOperator{\Proj}{proj}
+            \DeclareMathOperator{\Flux}{Flux}
+            \DeclareMathOperator{\Circ}{Circ}
+            \DeclareMathOperator{\chr}{char}
+            \DeclareMathOperator{\Dim}{dim}
+            \DeclareMathOperator{\Perp}{perp}
+            \DeclareMathOperator{\Ker}{kernel}
+            \DeclareMathOperator{\Row}{row}
+            \DeclareMathOperator{\Col}{col}
+            \DeclareMathOperator{\Rep}{Rep}
+            \newcommand\SetSymbol[1][]{%
+            \nonscript\::%
+            \nonscript\:
+            \mathopen{}}
+            \newcommand{\norm}[1]{\lVert#1\rVert}
+            \newcommand{\Norm}[1]{\left\lVert#1\right\rVert}
+            \newcommand{\Abs}[1]{\left\lvert#1\right\rvert}
+            \DeclarePairedDelimiterX\CustomSet[1]\{\}{%
+            \renewcommand\given{\SetSymbol[\delimsize]}
+            #1
+            }
+            \DeclareDocumentCommand{\Set}{s}{\CustomSet}
+        </macros>
+        <!-- If you put any latex-image elements you can include preambles -->
+        <!-- for those in the next element. -->
+        <latex-image-preamble>
+            \newcommand{\currentbackgroundcolor}{solutionPink}
+            \usepackage{mathtools}
+            \usepackage{pgfplots}
+            \pgfplotsset{compat=1.16}
+            \usepgfplotslibrary{fillbetween}
+            \usepackage{tikz}
+            \usetikzlibrary{fit}
+            \usetikzlibrary{fadings}
+            \usetikzlibrary{calc}
+            \tikzset{>=latex}
+            \usetikzlibrary{cd}
+            \usetikzlibrary{spy}
+            \usetikzlibrary{patterns}
+            \usetikzlibrary{decorations, decorations.pathreplacing, decorations.markings}
+            \definecolor{myorange}{HTML}{F29B23}
+            \definecolor{PineGreen}{HTML}{008B72}
+            \definecolor{LimeGreen}{HTML}{8DC73E}
+            \definecolor{NavyBlue}{HTML}{006EB8}
+            \definecolor{BlueGreen}{HTML}{00B3B8}
+            \definecolor{WildStrawberry}{HTML}{EE2967}
+            \definecolor{Cerulean}{HTML}{00A2E3}
+            \definecolor{Green}{HTML}{00A64F}
+            \definecolor{Blue}{HTML}{2D2F92}
+            \definecolor{cyan}{HTML}{00AEEF}
+            \definecolor{Plum}{HTML}{92268F}
+            \definecolor{Turquoise}{HTML}{00B4CE}
+            \definecolor{myred}{HTML}{D13409}
+            \definecolor{mypink}{HTML}{B3094F}
+            \definecolor{mydark}{HTML}{23112A}
+            \definecolor{mygreen}{HTML}{34A320}
+            \definecolor{defcolor}{rgb}{.05,.4,.15}
+            \colorlet{defframecolor}{green!50!black}
+            \colorlet{thmcolor}{red!70!black}
+            \colorlet{thmframecolor}{red!90!black}
+        </latex-image-preamble>
+    </docinfo>
+
+    <book>
+        <title>Linear Algebra</title>
+
+{{BOOK_CONTENT}}
+
+    </book>
+</pretext>

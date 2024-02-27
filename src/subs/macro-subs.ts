@@ -6,6 +6,7 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { s } from "@unified-latex/unified-latex-builder";
+import { parse } from "@unified-latex/unified-latex-util-parse";
 
 export const macroInfo: Ast.MacroInfoRecord = {
     Heading: {
@@ -87,7 +88,8 @@ export const macroReplacements: Record<
                     .flatMap((str) => {
                         return htmlLike({
                             tag: "h",
-                            content: s(str),
+                            // The index might contain math, so it's safest to reparse.
+                            content: parse(str),
                         });
                     });
                 return headings;
