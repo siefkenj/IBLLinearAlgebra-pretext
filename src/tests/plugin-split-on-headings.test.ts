@@ -49,5 +49,5 @@ describe("plugin-split-on-headings", () => {
         ).toEqual(
             "<chapter><section> <title>Sets</title><p>hi</p> </section><exercises>there</exercises></chapter>"
         );
-    })
+    });
 });

@@ -38,10 +38,10 @@ export const pluginExpandSpecialMacros: Plugin<[], Ast.Root, Ast.Root> =
                         const retNode: Ast.Environment = {
                             type: "environment",
                             env: "array",
-                            args: [arg(augmentArg, {braces: "{}"})],
-                            content: node.content
-                        }
-                        return [s("\\left["),retNode, s("\\right]")];
+                            args: [arg(augmentArg, { braces: "{}" })],
+                            content: node.content,
+                        };
+                        return [s("\\left["), retNode, s("\\right]")];
                     }
                 }
             });

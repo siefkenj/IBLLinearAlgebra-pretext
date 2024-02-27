@@ -3,9 +3,7 @@ import chalk from "chalk";
 import { readFile } from "node:fs/promises";
 import path, { dirname } from "node:path";
 import { writeFile } from "fs";
-import {
-    unifiedLatexFromStringMinimal,
-} from "@unified-latex/unified-latex-util-parse";
+import { unifiedLatexFromStringMinimal } from "@unified-latex/unified-latex-util-parse";
 import { parserToConverter } from "./parser-to-converter";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
