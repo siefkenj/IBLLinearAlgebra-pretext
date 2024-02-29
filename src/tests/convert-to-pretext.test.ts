@@ -199,10 +199,9 @@ describe("convert-to-pretext", () => {
             "<p>foo</p><p><me>x+y</me></p><p>bar</p><p>extra words</p>"
         );
     });
-    // shouldn't need these replacements; remove test when verified.
-    it.skip("replaces special math characters", () => {
+    it("replaces special math characters", () => {
         pretext = convert("<>&");
-        expect(pretext).toEqual("\\lt\\gt&#x26;");
+        expect(pretext).toEqual("&#x3C;>&#x26;");
     });
     it("replaces itemize and enumerate environments where items have arguments", () => {
         pretext = convert(
@@ -302,7 +301,7 @@ describe("convert-to-pretext", () => {
         pretext = convert("\\begin{equation} \\somemathmacro \\end{equation}");
         expect(pretext).toEqual("<p><men>\\somemathmacro</men></p>");
     });
-    it("replaces label macro in various environemnts", () => {
+    it("replaces label macro in various environments", () => {
         // equation
         pretext = convert(
             "\\begin{equation}\\label{EQUATION} 1+1=2 \\end{equation}"

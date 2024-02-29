@@ -8,7 +8,7 @@ import { m } from "@unified-latex/unified-latex-builder";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
 
 /**
- * This plugin replaces "\label{}" macros by attributing an id to the first most signifcant parent of the macro.
+ * This plugin replaces `\label{}` macros by attributing an id to the first most significant parent of the macro.
  */
 export const replaceLabels: Plugin<[], Ast.Root, Ast.Root> =
     function replaceLabels() {
@@ -88,7 +88,7 @@ export const replaceLabels: Plugin<[], Ast.Root, Ast.Root> =
                                         align._renderInfo
                                             .extraMacro as Ast.Macro
                                     )._renderInfo = renderInfo;
-                                    // Otherwise, procees as normal
+                                    // Otherwise, proceeds as normal
                                 } else {
                                     const renderInfo =
                                         content[alignIdx]._renderInfo ?? {};
