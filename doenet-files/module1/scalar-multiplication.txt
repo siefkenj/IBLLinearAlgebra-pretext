@@ -1,0 +1,24 @@
+<setup>
+  <styleDefinitions>
+    <styleDefinition styleNumber="4" markerSize="0"/>
+    <styleDefinition styleNumber="1" markerColor="#B3094F" markerStyle="circle" markerSize="1" lineWidth="2" lineColor="#B3094F" textColor="#B3094F"/>
+  <styleDefinition styleNumber="2" markerColor="#e48a72"
+  markerStyle="circle" markerSize="0" lineColor="#e48a72" lineStyle="solid" lineWidth="2" textColor="#e48a72"/>
+    <styleDefinition styleNumber="3" markerColor="#e48a72"
+  markerStyle="circle" markerSize="0" lineColor="#008000" lineStyle="solid" lineWidth="2" textColor="#008000"/>
+  </styleDefinitions>
+</setup>
+
+<graph showNavigation="false" displayXAxis="false" displayYAxis="false">
+  <point name="v1" coords="(-0.2,-0.2)" styleNumber="4" />
+  <point name="v2" coords="(3.3,1.3)" styleNumber="4" />
+
+  <vector name="neg" head="-($v2) - (2,0)" tail="$v1 - (2,0)" styleNumber="1" applyStyleToLabel> </vector>
+  <m draggable="false" anchor=".5*(-($v2) - (2,0) + $v1 - (2,0))" positionFromAnchor="lowerright" styleNumber="1">-\frac{1}{2}\vec{v}</m>
+
+  <vector name="v" head="$v2" tail="$v1" styleNumber="2" />
+  <m draggable="false" anchor=".5*($v1 + $v2)" positionFromAnchor="lowerright" styleNumber="2">\vec{v}</m>
+  
+  <vector name="scaled" head="2($v2) + (3,0)" tail="$v1 + (3,0)" styleNumber="3"> </vector>
+  <m draggable="false" anchor=".5*(2($v2) + (3,0) + $v1 + (3,0))" positionFromAnchor="lowerright" styleNumber="3">\vec{2v}</m>
+</graph>

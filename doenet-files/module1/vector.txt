@@ -1,0 +1,20 @@
+<setup>
+  <styleDefinitions>
+  <styleDefinition styleNumber="1" markerColor="#B3094F" 
+  markerStyle="circle" markerSize="3" lineColor="#e48a72" lineStyle="solid" lineWidth="2" textColor="#B3094F"/>
+
+  <styleDefinition styleNumber="2" textColor="#e48a72"/>
+  </styleDefinitions>
+</setup>
+
+<graph showNavigation="false" xmin="-1.5" xmax="5.5" ymin="-1.5" ymax="3.5">
+  <point name="P" coords="(1, 1)" />
+  <m draggable="false" anchor="$P-(0,0.1)" positionFromAnchor="lowerright" styleNumber="1">P</m>
+  
+  <point name="Q" coords="(3, 2)" />
+  <m draggable="false" anchor="$Q-(0,0.1)" positionFromAnchor="lowerright" styleNumber="1">Q</m>
+  
+  <vector name="PQ" head="$Q" tail="$P" styleNumber="1" applyStyleToLabel/>
+  <m draggable="false" anchor=".5*($P + $Q)" positionFromAnchor="upperleft" styleNumber="2">	\overrightarrow{\rm PQ}</m>
+  
+</graph>
