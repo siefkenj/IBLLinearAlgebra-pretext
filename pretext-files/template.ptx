@@ -54,6 +54,7 @@
             #1
             }
             \DeclareDocumentCommand{\Set}{s}{\CustomSet}
+            \definecolor{solutionPink}{HTML}{ffeeff}
         </macros>
         <!-- If you put any latex-image elements you can include preambles -->
         <!-- for those in the next element. -->

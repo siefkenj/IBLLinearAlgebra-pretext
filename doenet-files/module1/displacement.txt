@@ -1,0 +1,26 @@
+<setup>
+  <styleDefinitions>
+    <styleDefinition styleNumber="1" markerColor="#B3094F" markerStyle="circle" markerSize="1" lineWidth="2" lineColor="#B3094F" textColor="#B3094F"/>
+  <styleDefinition styleNumber="2" markerColor="#e48a72"
+  markerStyle="circle" markerSize="0" lineColor="#e48a72" lineStyle="solid" lineWidth="2" textColor="#e48a72"/>
+    <styleDefinition styleNumber="3" markerColor="#e48a72"
+  markerStyle="circle" markerSize="0" lineColor="#008000" lineStyle="dashed" lineWidth="2" textColor="#008000"/>
+    <styleDefinition styleNumber="4" markerSize="0"/>
+  
+  </styleDefinitions>
+</setup>
+
+<graph showNavigation="false" displayXAxis="false" displayYAxis="false">
+  <point name="u1" coords="(0,0)" styleNumber="4"/>
+  <point name="u2" coords="(-3,2)" styleNumber="4" />
+  <point name="v2" coords="(4,4)" styleNumber="4" />
+  
+  <vector name="u" head="$u2" tail="$u1" styleNumber="2"/>
+  <m draggable="false" anchor=".5*($u2 + $u1)" positionFromAnchor="lowerleft" styleNumber="2">\vec{u}</m>
+  
+  <vector name="v" head="$v2" tail="$u2" labelIsName styleNumber="1" applyStyleToLabel/>
+  <m draggable="false" anchor=".5*($u2 + $v2)" positionFromAnchor="upperleft" styleNumber="1">\vec{v}</m>
+  
+  <vector name="w" head="$v2" tail="$u1" styleNumber="3" applyStyleToLabel/>
+  <m draggable="false" anchor=".5*($v2 + $u1)" positionFromAnchor="lowerright" styleNumber="3">\vec{w}=\vec{u}+\vec{v}</m>
+</graph>

@@ -1,0 +1,25 @@
+<setup>
+  <styleDefinitions>
+    <styleDefinition styleNumber="1" markerColor="#B3094F" markerStyle="circle" markerSize="1" lineWidth="3" lineColor="#B3094F" textColor="#B3094F"/>
+  <styleDefinition styleNumber="2" markerColor="#e48a72"
+  markerStyle="circle" markerSize="0" lineColor="#F29B23" lineStyle="solid" lineWidth="3" textColor="#F29B23"/>
+    <styleDefinition styleNumber="3" textColor="#a5691e"/>
+  
+  </styleDefinitions>
+</setup>
+
+<sideBySide>
+  
+<graph showNavigation="false" xmin="-1" xmax="3" ymin="-1" ymax="3">
+  <label anchor="(0.3, 1)" styleNumber="3" positionFromAnchor="right">Standard Coordinate System</label>
+</graph>
+  
+<graph showNavigation="false" xmin="-1" xmax="3" ymin="-1" ymax="3">
+  <vector name="e1" xs="1 0" tail="(0,0)" styleNumber="1"> </vector>
+  <m anchor="(0.5, -0.1)" positionFromAnchor="bottom" styleNumber="1">\vec{e_1}</m>
+  
+  <vector name="e2" xs="0 1" tail="(0,0)" styleNumber="2"></vector>
+  <m anchor="(-0.1, 0.5)" positionFromAnchor="left" styleNumber="2">\vec{e_2}</m>
+</graph>
+  
+</sideBySide>

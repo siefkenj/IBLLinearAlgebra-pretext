@@ -1,0 +1,43 @@
+<setup>
+  <styleDefinitions>
+  <styleDefinition styleNumber="1" markerColor="#e48a72"
+  markerStyle="circle" markerSize="0" lineColor="#e48a72" lineStyle="solid" lineWidth="2" textColor="#e48a72"/>
+  <styleDefinition styleNumber="2" markerColor="#B3094F" markerStyle="circle" markerSize="0" textColor="#B3094F"/>
+  <styleDefinition styleNumber="3" textColor="black"/>
+  </styleDefinitions>
+</setup>
+
+<p>
+  <m styleNumber="3">X = </m> 
+  <mathInput name="Xcoords" 
+             prefill="(1,0)" 
+             displayDigits="1" />
+
+  <m styleNumber="3">Y = </m> 
+  <mathInput name="Ycoords" 
+             prefill="(3,1)" 
+             displayDigits="1" />
+
+  <m styleNumber="3">A = </m> 
+  <mathInput name="Acoords" 
+             prefill="(1,1)" 
+             displayDigits="1" />
+
+  <m styleNumber="3">B = </m> 
+  <mathInput name="Bcoords" 
+             prefill="(3,2)" 
+             displayDigits="1" />
+</p>
+
+<graph showNavigation="false" xmin="-1.5" xmax="5.5" ymin="-1.5" ymax="3.5">
+  <point name="X" styleNumber="2" >$Xcoords</point>
+  <point name="Y" styleNumber="2" >$Ycoords</point>
+  <point name="A" >$Xcoords + (0, 1)</point>
+  <point name="B" >$Ycoords + (0, 1)</point>
+  
+  <vector name="XY" head="$Y" tail="$X" styleNumber="2" />
+  <m draggable="false" anchor=".5*($X + $Y)" positionFromAnchor="upperleft" styleNumber="2">\vec{x} = \overrightarrow{\rm XY}</m>
+  
+  <vector name="AB" head="$B" tail="$A" styleNumber="1"/>
+  <m draggable="false" anchor=".5*($A + $B)" positionFromAnchor="upperleft" styleNumber="1">\vec{a} = \overrightarrow{\rm AB}</m>
+</graph>
