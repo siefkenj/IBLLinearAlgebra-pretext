@@ -8,3 +8,12 @@ module.1.xml
 src/unified-latex-plugin-to-hast-without-validation.ts
 src/small-tex.tex
 tmp/
+
+pretext-output/source/main.ptx
+pretext-output/generated-assets
+pretext-output/logs
+pretext-output/output
+pretext-output/.gitignore
+pretext-output/.devcontainer.json
+pretext-output/.gitignore
+tmp.out.ptx

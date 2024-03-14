@@ -27,7 +27,7 @@ describe("plugin-replace-definitions", () => {
                 testFile
             )
         ).toEqual(
-            String.raw`<definition xml:id="MoreComplicatedDefinition"><title>Defintion With Macros, Environments etc.</title><statement><p>This is a more complicated definition with macros and environments. This is called <em>Russel’s Paradox</em><idx><h>Russel’s Paradox</h></idx>, <m>m=2(n-1)+1</m></p><p><me>\Set{1,2,a,\Set{-70,\infty}, x}</me></p><p></p><p><md><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></md></p></statement></definition>`
+            String.raw`<definition xml:id="MoreComplicatedDefinition"><title>Definition With Macros, Environments etc.</title><statement><p>This is a more complicated definition with macros and environments. This is called <em>Russel’s Paradox</em><idx><h>Russel’s Paradox</h></idx>, <m>m=2(n-1)+1</m></p><p><me>\Set{1,2,a,\Set{-70,\infty}, x}</me></p><p></p><p><md><mrow>x=m+1&#x26;=(2k+1)+1=2k+2</mrow><mrow>&#x26;=2(k+1)=2n,</mrow></md></p></statement></definition>`
         );
     });
 });

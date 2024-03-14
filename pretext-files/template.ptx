@@ -60,6 +60,8 @@
         <!-- for those in the next element. -->
         <latex-image-preamble>
             \newcommand{\currentbackgroundcolor}{solutionPink}
+            \usepackage[dvipsnames]{xcolor}
+            \usepackage[define-L-C-R]{nicematrix}
             \usepackage{mathtools}
             \usepackage{pgfplots}
             \pgfplotsset{compat=1.16}
