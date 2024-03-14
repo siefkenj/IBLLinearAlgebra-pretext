@@ -29,6 +29,7 @@ import { pluginGroupIntroductionAndSections } from "./plugin-group-introduction"
 import { Processor } from "unified";
 import { pluginSplitPars } from "./plugin-split-pars";
 import { pluginExpandSpecialMacros } from "./plugin-expand-special-macros";
+import { pluginWrapNiceMatrixInImage } from "./plugin-wrap-nicematrix-in-image";
 
 /**
  * Take a unified parser (e.g., one that has been initialized `unified().use(unifiedLatexFromString)`) and
@@ -59,6 +60,7 @@ export function parserToConverter(
             .use(pluginSplitPars)
             .use(replaceDefinitions, defFileContents)
             .use(replaceLabels)
+            .use(pluginWrapNiceMatrixInImage)
             .use(stringifyTikzContent)
             .use(pluginExpandSpecialMacros)
             .use(replaceSetStar)
