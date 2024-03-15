@@ -246,7 +246,7 @@ export const macroReplacements: Record<
         const args = getArgsContent(node);
         return htmlLike({
             tag: "title",
-            content: args[3] || [],
+            content: args[4] || [],
         });
     },
     subsection: (node) => {

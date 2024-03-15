@@ -846,44 +846,48 @@ export const environmentReplacements = {
         });
     },
     appendix: (node) => {
-        const attributes: { [k: string]: string } = {};
-
-        if (node._renderInfo?.id !== undefined) {
-            attributes["xml:id"] = node._renderInfo.id as string;
-        }
-
-        let introduction = {};
-        const split = splitOnMacro(node.content, ["html-tag:section", "Title"]);
-        let introductionContent = split.segments[1];
-
-        const introductionSplit = splitOnCondition(
-            introductionContent,
-            isHtmlLike
-        );
-        const formattedSegments = introductionSplit.segments.flatMap((node) => {
-            return [wrapPars(node)];
-        });
-
-        if (introductionContent.length > 0) {
-            introduction = htmlLike({
-                tag: "introduction",
-                content: unsplitOnMacro({
-                    segments: formattedSegments,
-                    macros: introductionSplit.separators,
-                }),
-            });
-
-            split.segments[1] = [introduction as Ast.Node];
-        }
-
         return htmlLike({
             tag: "appendix",
-            content: unsplitOnMacro({
-                segments: split.segments,
-                macros: split.macros,
-            }),
-            attributes,
+            content: node.content,
         });
+        // const attributes: { [k: string]: string } = {};
+
+        // if (node._renderInfo?.id !== undefined) {
+        //     attributes["xml:id"] = node._renderInfo.id as string;
+        // }
+
+        // let introduction = {};
+        // const split = splitOnMacro(node.content, ["html-tag:section", "Title"]);
+        // let introductionContent = split.segments[1];
+
+        // const introductionSplit = splitOnCondition(
+        //     introductionContent,
+        //     isHtmlLike
+        // );
+        // const formattedSegments = introductionSplit.segments.flatMap((node) => {
+        //     return [wrapPars(node)];
+        // });
+
+        // if (introductionContent.length > 0) {
+        //     introduction = htmlLike({
+        //         tag: "introduction",
+        //         content: unsplitOnMacro({
+        //             segments: formattedSegments,
+        //             macros: introductionSplit.separators,
+        //         }),
+        //     });
+
+        //     split.segments[1] = [introduction as Ast.Node];
+        // }
+
+        // return htmlLike({
+        //     tag: "appendix",
+        //     content: unsplitOnMacro({
+        //         segments: split.segments,
+        //         macros: split.macros,
+        //     }),
+        //     attributes,
+        // });
     },
     tikzpicture: (node) => {
         const imageAttributes: { [k: string]: string } = {};
@@ -995,6 +999,22 @@ export const environmentReplacements = {
         // If there is a first argument, it is the title.
         const title = getArgsContent(node)[0];
         const content = [...node.content];
+        const firstSubsectionIdx = node.content.findIndex((n) =>
+            match.macro(n, "html-tag:subsection")
+        );
+        if (firstSubsectionIdx != -1) {
+            let introContent: Ast.Node[] = [];
+            for (let i = 0; i < firstSubsectionIdx; i++) {
+                introContent.push(node.content[i]);
+            }
+            content.splice(0, firstSubsectionIdx);
+            content.unshift(
+                htmlLike({
+                    tag: "introduction",
+                    content: introContent,
+                })
+            );
+        }
         if (title) {
             content.unshift(
                 htmlLike({
@@ -1009,8 +1029,8 @@ export const environmentReplacements = {
         });
     },
     subsection: (node) => {
-        // If there is a first argument, it is the title.
-        const title = getArgsContent(node)[0];
+        // If there is a fourth argument, it is the title.
+        const title = getArgsContent(node)[3];
         const content = [...node.content];
         if (title) {
             content.unshift(

@@ -58,8 +58,9 @@ export const pluginMakeBookIntroduction: Plugin<Options[], Ast.Root, Ast.Root> =
 
             introContent.push(
                 htmlLike({
-                    tag: "dedication",
+                    tag: "preface",
                     content: [
+                        htmlLike({ tag: "title", content: s("Dedication") }),
                         htmlLike({
                             tag: "p",
                             content: [
@@ -79,10 +80,15 @@ export const pluginMakeBookIntroduction: Plugin<Options[], Ast.Root, Ast.Root> =
                             tag: "blockquote",
                             content: [
                                 htmlLike({
-                                    tag: "em",
-                                    content: s(
-                                        "“Sometimes you have to walk the mystical path with practical feet.”"
-                                    ),
+                                    tag: "p",
+                                    content: [
+                                        htmlLike({
+                                            tag: "em",
+                                            content: s(
+                                                "“Sometimes you have to walk the mystical path with practical feet.”"
+                                            ),
+                                        }),
+                                    ],
                                 }),
                             ],
                         }),
