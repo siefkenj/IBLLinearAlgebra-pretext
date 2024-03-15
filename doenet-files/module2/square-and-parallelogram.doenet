@@ -1,0 +1,41 @@
+<setup>
+  <styleDefinitions>
+    <styleDefinition styleNumber="1" markerColor="#B3094F" markerStyle="circle" markerSize="1" lineWidth="2" lineColor="" textColor="#B3094F" fillColor="#B3094F"/>
+  <styleDefinition styleNumber="2" markerColor="#B3094F"
+  markerStyle="circle" markerSize="0" lineColor="" lineStyle="solid" lineWidth="2" textColor="#34A320" fillColor="#34A320"/>
+  <styleDefinition styleNumber="3" markerColor="#e48a72"
+  markerStyle="circle" markerSize="0" lineColor="#4d4d4d" lineStyle="dashed" lineWidth="2" textColor="#4d4d4d"/>
+  <styleDefinition styleNumber="4" textColor="black"/>
+  </styleDefinitions>
+</setup>
+
+<sideBySide>
+<graph showNavigation="false" xmin="-1" xmax="3" ymin="-1" ymax="3">
+  <label anchor="(1, 2)" styleNumber="4" positionFromAnchor="top">The unit square U</label>
+  <point hide="true" name="P">(0, 1)</point>
+  <point hide="true" name="S">(0, 0)</point>
+  <vector head="$P" tail="$S" styleNumber="3"/>
+  <m draggable="false" anchor=".5*($P + $S)" positionFromAnchor="upperleft" styleNumber="3">\vec{a}</m>
+
+  <point hide="true" name="Q">(1, 0)</point>
+  <vector head="$Q" tail="$S" styleNumber="3"/>
+  <m draggable="false" anchor=".5*($Q + $S)" positionFromAnchor="lowerleft" styleNumber="3">\vec{b}</m>
+  <point hide="true" name="R">$P + $Q - $S</point>
+  <polygon filled stylenumber="1" vertices="$S $Q $R $P" />
+  
+</graph>
+
+<graph showNavigation="false" xmin="-1" xmax="3" ymin="-1" ymax="3">
+  <point hide="true" name="A">(2, 1)</point>
+  <vector head="$A" tail="(0, 0)" styleNumber="3"/>
+  <m draggable="false" anchor=".5*$A" positionFromAnchor="upperleft" styleNumber="3">\vec{a}</m>
+
+  <point hide="true" name="B">(-1, 1)</point>
+  <vector head="$B" tail="(0, 0)" styleNumber="3"/>
+  <m draggable="false" anchor=".5*$B" positionFromAnchor="lowerleft" styleNumber="3">\vec{b}</m>
+  <point hide="true" name="C">$B + $A</point>
+  <point hide="true" name="D">$A - $B</point>
+  <polygon filled stylenumber="2" vertices="$C $D -$B $B" />
+  <label anchor="(1, 2)" styleNumber="4" positionFromAnchor="top">The parallelogram P</label>
+</graph>
+</sideBySide>

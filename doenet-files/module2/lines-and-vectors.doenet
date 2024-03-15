@@ -1,0 +1,36 @@
+<!-- currently just a static image -->
+<setup>
+  <styleDefinitions>
+    <styleDefinition styleNumber="1" markerColor="#B3094F" markerStyle="circle" markerSize="2" lineWidth="2" lineColor="#B3094F" textColor="#B3094F"/>
+    <styleDefinition styleNumber="2" markerColor="#e48a72"
+  markerStyle="circle" markerSize="0" lineColor="#e48a72" lineStyle="solid" lineWidth="2" textColor="#e48a72"/>
+    <styleDefinition styleNumber="3" markerColor="#18aa5d"
+  markerStyle="circle" markerSize="2" textColor="#18aa5d"/>
+    <styleDefinition styleNumber="4" markerSize="0"/>
+     <styleDefinition styleNumber="5" markerSize="0" lineColor="#dcdbdb" lineWidth="2"/>
+  </styleDefinitions>
+
+</setup>
+
+<sideBySide>
+<!-- left graph  -->
+<graph showNavigation="false" xmin="-1.5" xmax="5.5" ymin="-1.5" ymax="3.5">
+  <line draggable="false" name="line1" through="(1,1) (3,2)" styleNumber="1" />
+</graph>
+
+<!--   right graph -->
+<graph showNavigation="false" xmin="-1.5" xmax="5.5" ymin="-1.5" ymax="3.5">
+  <point hide="true" name="P2" styleNumber="3">($px2, $py2)</point>
+  
+  <point hide="true" name="Q2" styleNumber="3">($qx2, $qy2)</point>
+  <map>
+    <template>
+        <vector styleNumber="1" head="(1, 1) + ($i, $i / 2)" tail="(0,0)"/>
+    </template>
+    
+    <sources alias="i">
+      <sequence from="-10" to="10" step="0.5"/>
+    </sources>
+  </map>
+</graph>
+</sideBySide>

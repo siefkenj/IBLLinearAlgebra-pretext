@@ -1,0 +1,117 @@
+<setup>
+  <styleDefinitions>
+    <styleDefinition styleNumber="1" markerColor="#B3094F" markerStyle="circle" markerSize="2" lineWidth="2" lineColor="#B3094F" textColor="#B3094F"/>
+    <styleDefinition styleNumber="2" markerColor="#e48a72"
+  markerStyle="circle" markerSize="0" lineColor="#e48a72" lineStyle="solid" lineWidth="2" textColor="#e48a72"/>
+    <styleDefinition styleNumber="3" markerColor="#18aa5d"
+  markerStyle="circle" markerSize="2" textColor="#18aa5d"/>
+    <styleDefinition styleNumber="4" markerSize="0"/>
+     <styleDefinition styleNumber="5" markerSize="0" lineColor="#dcdbdb" lineWidth="2"/>
+  </styleDefinitions>
+  
+  <number hide="true" name="px">1</number>
+  <number hide="true" name="py">1</number>
+  <number hide="true" name="qx">3</number>
+  <number hide="true" name="qy">2</number>
+
+  <number hide="true" name="px2">1</number>
+  <number hide="true" name="py2">1</number>
+  <number hide="true" name="qx2">3</number>
+  <number hide="true" name="qy2">2</number>
+</setup>
+
+<sideBySide>
+<!-- left graph  -->
+<graph showNavigation="false" xmin="-1.5" xmax="5.5" ymin="-1.5" ymax="3.5">
+  <point name="P" styleNumber="3">($px, $py)</point>
+  
+  <m draggable="false" anchor="$P-(0,0.1)" positionFromAnchor="lowerright" styleNumber="3">P</m>
+  <point name="Q" styleNumber="3">($qx, $qy)</point>
+  <m draggable="false" anchor="$Q-(0,0.1)" positionFromAnchor="lowerright" styleNumber="3">Q</m>
+
+  <vector name="PQ" head="$Q" tail="$P" styleNumber="2" />
+  <m draggable="false" anchor=".5*($P + $Q)" positionFromAnchor="bottom" styleNumber="2">\vec{d}</m>
+  <map>
+    <template>
+      <number hide="true" name="xd">($qx - $px) / 3</number>
+      <number hide="true" name="yd">($qy - $py) / 3</number>
+      <conditionalContent>
+        <!--    don't draw a point in these cases      -->
+        <case condition="$i=0">
+        </case>
+        <case condition="$i=1">
+        </case>
+        <case condition="$i=2">
+        </case>
+        <case condition="$i=3">
+        </case>
+        <else> 
+          <point styleNumber="1">$P + ($xd*$i, $yd*$i)</point>
+        </else>
+      </conditionalContent>
+
+      <!--  add labels to two points      -->
+      <conditionalContent>
+        <case condition="$i=-1">
+          <m draggable="false" anchor="$P + ($xd*$i, $yd*$i)-(0.1,0)" positionFromAnchor="upperleft" styleNumber="1">\frac{-1}{3}\vec{d} + P</m>
+        </case>
+        <case condition="$i=5">
+          <m draggable="false" anchor="$P + ($xd*$i, $yd*$i)-(0.1,0)" positionFromAnchor="upperleft" styleNumber="1">\frac{5}{3}\vec{d} + P</m>
+        </case>
+      </conditionalContent>
+    </template>
+    
+    <sources alias="i">
+      <sequence from="-10" to="10" step="1"/>
+    </sources>
+  </map>
+</graph>
+
+<!--   right graph -->
+<graph showNavigation="false" xmin="-1.5" xmax="5.5" ymin="-1.5" ymax="3.5">
+  <point name="P2" styleNumber="3">($px2, $py2)</point>
+  
+  <m draggable="false" anchor="$P2-(0,0.1)" positionFromAnchor="lowerright" styleNumber="3">P</m>
+  <point name="Q2" styleNumber="3">($qx2, $qy2)</point>
+  <m draggable="false" anchor="$Q2-(0,0.1)" positionFromAnchor="lowerright" styleNumber="3">Q</m>
+
+  <vector name="PQ2" head="$Q2" tail="$P2" styleNumber="2" />
+  <m draggable="false" anchor=".5*($P2 + $Q2)" positionFromAnchor="bottom" styleNumber="2">\vec{d}</m>
+  <map>
+    <template>
+      <number hide="true" name="xd2">($qx2 - $px2) / 3</number>
+      <number hide="true" name="yd2">($qy2 - $py2) / 3</number>
+      <conditionalContent>
+        <case condition="$i=0">
+          <vector styleNumber="5" head="$P2 + ($xd2*$i, $yd2*$i)" tail="(0,0)"/>
+        </case>
+        <case condition="$i=1">
+        </case>
+        <case condition="$i=2">
+        </case>
+        <case condition="$i=3">
+          <vector styleNumber="5" head="$P2 + ($xd2*$i, $yd2*$i)" tail="(0,0)"/>
+        </case>
+        <else> 
+          <point styleNumber="1">$P2 + ($xd2*$i, $yd2*$i)</point>
+          <vector styleNumber="5" head="$P2 + ($xd2*$i, $yd2*$i)" tail="(0,0)"/>
+        </else>
+      </conditionalContent>
+
+      <!--  add labels to two points      -->
+      <conditionalContent>
+        <case condition="$i=-1">
+          <m draggable="false" anchor="$P2 + ($xd2*$i, $yd2*$i)-(0.1,0)" positionFromAnchor="upperleft" styleNumber="1">\frac{-1}{3}\vec{d} + P</m>
+        </case>
+        <case condition="$i=5">
+          <m draggable="false" anchor="$P2 + ($xd2*$i, $yd2*$i)-(0.1,0)" positionFromAnchor="upperleft" styleNumber="1">\frac{5}{3}\vec{d} + P</m>
+        </case>
+      </conditionalContent>
+    </template>
+    
+    <sources alias="i">
+      <sequence from="-10" to="10" step="1"/>
+    </sources>
+  </map>
+</graph>
+</sideBySide>
