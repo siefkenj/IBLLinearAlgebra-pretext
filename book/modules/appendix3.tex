@@ -18,14 +18,13 @@ usage of ``dimension'' with the term ``dimension'' in the context of subspaces.}
 inside the matrix). Traditionally, matrices are labeled with capital letters and their entries are labeled with lower-case letters.
 
 Consider the matrix $A$ with $m$ rows and $n$ columns:
-
 \[
-	A = \ \ \begin{bNiceMatrix}[first-row,first-col]
+	A =\ \  {\text{\small\color{mygreen}$m$ rows}}\:\begin{bNiceMatrix}[first-row,first-col,nullify-dots]
 &
-		& \Ldots[line-style={solid,<->,color=mypink},shorten=0pt]^{\color{mypink}n \text{ columns}} \\
+		& \Ldots[line-style={solid,<->,color=mypink},shorten=0pt]^{\text{\small\color{mypink}$n$ columns}} \\
 		& a_{11} & a_{12} & a_{13} & \cdots & a_{1n} \\
 		& a_{21} & a_{22} & a_{23} & \cdots & a_{2n} \\
-		\Vdots[line-style={solid,<->,mygreen}]_{\color{mygreen}m \text{ rows}} & \vdots & \vdots & \vdots &\ddots & \vdots \\
+		\Vdots[line-style={solid,<->,mygreen}] & \vdots & \vdots & \vdots &\ddots & \vdots \\
 		& a_{m1} & a_{m2} & a_{m3} & \cdots & a_{mn}
 	\end{bNiceMatrix}
 \]
@@ -228,7 +227,6 @@ The column picture of matrix-vector multiplication hints that matrix-vector mult
 to encode sophisticated problems involving linear combinations (see Module \ref{moduleMatRep} for details).
 
 \subsubsection*{Row Picture}
-
 
 Alternatively, let
 \[
