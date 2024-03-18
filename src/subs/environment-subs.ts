@@ -9,7 +9,7 @@ import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
-import { SP, s } from "@unified-latex/unified-latex-builder";
+import { SP, env, s } from "@unified-latex/unified-latex-builder";
 import { Node } from "@unified-latex/unified-latex-types";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
@@ -817,8 +817,19 @@ export const environmentReplacements = {
             attributes: tabularAttributes,
         });
     },
-    module: (node) => {
-        const attributes: { [k: string]: string } = {};
+    module: (node, info) => {
+        // Generate a default label for the appendix
+        let index =
+            info.containingArray?.findIndex((module) => {
+                if (!match.anyEnvironment(module)) {
+                    return false;
+                }
+                return module === node;
+            }) ?? "UNKNOWN_INDEX";
+        const attributes: { [k: string]: string } = {
+            // Make sure we have a nice label for the HTML output
+            label: `module_${index}`,
+        };
 
         if (node._renderInfo?.id !== undefined) {
             attributes["xml:id"] = node._renderInfo.id as string;
@@ -845,10 +856,28 @@ export const environmentReplacements = {
             attributes,
         });
     },
-    appendix: (node) => {
+    appendix: (node, info) => {
+        // Generate a default label for the appendix
+        let index =
+            info.containingArray?.findIndex((appendix) => {
+                if (!match.anyEnvironment(appendix)) {
+                    return false;
+                }
+                return appendix === node;
+            }) ?? 0;
+        const attributes: { [k: string]: string } = {
+            // There are 16 modules before the appendices
+            // so if we want to start as `APPENDIX_1`, we need to adjust
+            label: `appendix_${index - 16}`,
+        };
+
+        if (node._renderInfo?.id !== undefined) {
+            attributes["xml:id"] = node._renderInfo.id as string;
+        }
         return htmlLike({
             tag: "appendix",
             content: node.content,
+            attributes,
         });
         // const attributes: { [k: string]: string } = {};
 
@@ -901,11 +930,7 @@ export const environmentReplacements = {
             tag: "image",
             content: htmlLike({
                 tag: "latex-image",
-                content: s(
-                    "\\begin{tikzpicture}" +
-                        toString(node.content) +
-                        "\\end{tikzpicture}"
-                ),
+                content: s(toString(node)),
             }),
             attributes: imageAttributes,
         });

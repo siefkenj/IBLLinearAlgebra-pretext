@@ -170,7 +170,11 @@ export const pluginMakeBookIntroduction: Plugin<Options[], Ast.Root, Ast.Root> =
             );
 
             ast.content.unshift(
-                htmlLike({ tag: "frontmatter", content: introContent })
+                htmlLike({
+                    tag: "frontmatter",
+                    content: introContent,
+                    attributes: { label: "frontmatter" },
+                })
             );
         };
     };

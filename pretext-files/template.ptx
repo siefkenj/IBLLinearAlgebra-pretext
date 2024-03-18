@@ -49,12 +49,15 @@
             \newcommand{\norm}[1]{\lVert#1\rVert}
             \newcommand{\Norm}[1]{\left\lVert#1\right\rVert}
             \newcommand{\Abs}[1]{\left\lvert#1\right\rvert}
-            \DeclarePairedDelimiterX\CustomSet[1]\{\}{%
-            \renewcommand\given{\SetSymbol[\delimsize]}
-            #1
-            }
-            \DeclareDocumentCommand{\Set}{s}{\CustomSet}
-            \definecolor{solutionPink}{HTML}{ffeeff}
+            \newcommand{\bigmathstrut}{}
+            % This DeclarePairedDelimiterX command doesn't work in MathJax
+            %\DeclarePairedDelimiterX\CustomSet[1]\{\}{%
+            %\renewcommand\given{\SetSymbol[\delimsize]}
+            %#1
+            %}
+            \DeclareDocumentCommand{\Set}{s m}{\left\{#2\right\}}
+            \definecolor{mygreen}{RGB}{0, 128, 0}
+            \definecolor{solutionPink}{HTML}{ffffff}
         </macros>
         <!-- If you put any latex-image elements you can include preambles -->
         <!-- for those in the next element. -->

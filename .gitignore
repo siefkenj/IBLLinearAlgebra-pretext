@@ -12,7 +12,7 @@ tmp/
 pretext-output/source/main.ptx
 pretext-output/generated-assets
 pretext-output/logs
-pretext-output/output
+pretext-output/output/*
 pretext-output/.gitignore
 pretext-output/.devcontainer.json
 pretext-output/.gitignore
