@@ -20,7 +20,8 @@ export const replaceIgnoredElements: Plugin<[], Ast.Root, Ast.Root> =
                     match.macro(node, "hspace") ||
                     match.macro(node, "newpage") ||
                     match.macro(node, "newcommand") ||
-                    match.macro(node, "newenvironment")
+                    match.macro(node, "newenvironment") ||
+                    match.macro(node, "displaybreak")
                 ) {
                     return null;
                 } else if (match.environment(node, "center")) {

@@ -51,6 +51,9 @@ export const macroInfo: Ast.MacroInfoRecord = {
     sortitem: {
         signature: "o m",
     },
+    displaybreak: {
+        signature: "o",
+    },
 };
 
 export const macroReplacements: Record<
