@@ -24,8 +24,14 @@ to see a sample run (there should be no errors).
 
 You can convert the whole book by pointing `convert-textbook.ts` to the location of the `linearalgebra.tex` file.
 
-```
+```bash
 npx vite src/convert-textbook.ts -i book/linearalgebra.tex
+```
+
+copy the resulting `tmp.out.ptx` to `pretext-out/source/main.ptx` and then compile with `pretext`. I.e., run
+```bash
+cd pretext-out
+pretext build web
 ```
 
 ## Contents
