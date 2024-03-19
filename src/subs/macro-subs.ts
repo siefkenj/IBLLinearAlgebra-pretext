@@ -53,7 +53,7 @@ export const macroInfo: Ast.MacroInfoRecord = {
     },
     displaybreak: {
         signature: "o",
-    }
+    },
 };
 
 export const macroReplacements: Record<

@@ -29,6 +29,7 @@ npx vite src/convert-textbook.ts -i book/linearalgebra.tex
 ```
 
 copy the resulting `tmp.out.ptx` to `pretext-out/source/main.ptx` and then compile with `pretext`. I.e., run
+
 ```bash
 cd pretext-out
 pretext build web
