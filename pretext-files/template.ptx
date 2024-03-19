@@ -1,5 +1,7 @@
 <pretext xml:lang="en-US" xmlns:xi="http://www.w3.org/2001/XInclude">
     <docinfo>
+        <rename element="chapter">Module</rename>
+        <rename element="remark">Takeaway</rename>
         <macros>
             \newcommand{\Rrefto}{\xrightarrow{\text{row reduces to}}}
             \newcommand{\R}{\mathbb{R}}

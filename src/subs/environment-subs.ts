@@ -20,7 +20,7 @@ import { onTestFailed } from "vitest";
 
 export const environmentInfo: Ast.EnvInfoRecord = {
     emphbox: {
-        signature: "o m",
+        signature: "o",
     },
     definition: {
         signature: "o",
@@ -113,39 +113,18 @@ export const environmentReplacements = {
     },
     emphbox: (node) => {
         const args: (Node[] | null)[] = getArgsContent(node);
+        let isTakeaway = toString(args[0] || []) === "Takeaway";
         let remarkContents: Ast.Node[] = [];
-
-        // check if there is the optional argument for title and wrap in title tags
-        if (args[0] !== null) {
-            remarkContents.push(
-                htmlLike({
-                    tag: "title",
-                    content: args[0],
-                })
-            );
-        }
-
-        // args[1] has the first word of the text
-        let text: Node[] = [];
-        if (args[1] != null) {
-            text = text.concat(args[1]);
-        }
-
-        // add white space between parts
-        text.push(SP);
-
-        // node.content has the rest of the text
-        text = text.concat(node.content);
 
         remarkContents.push(
             htmlLike({
                 tag: "p",
-                content: text,
+                content: node.content,
             })
         );
 
         return htmlLike({
-            tag: "remark",
+            tag: isTakeaway ? "remark" : "insight",
             content: remarkContents,
         });
     },
