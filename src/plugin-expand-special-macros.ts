@@ -9,6 +9,7 @@ import {
 } from "@unified-latex/unified-latex-to-hast";
 import { expandMacros } from "@unified-latex/unified-latex-util-macros";
 import { arg, args, s } from "@unified-latex/unified-latex-builder";
+import { toString } from "@unified-latex/unified-latex-util-to-string";
 
 /**
  * Expand macros before the HTML conversion. For example `\systeme` gets converted to array form, etc.
@@ -30,6 +31,7 @@ export const pluginExpandSpecialMacros: Plugin<[], Ast.Root, Ast.Root> =
             attachNeededRenderInfo(tree);
             replaceNode(tree, (node) => {
                 if (isKatexMacro(node)) {
+                    // console.log(node.content,katexSpecificMacroReplacements[node.content](node), toString(katexSpecificMacroReplacements[node.content](node)))
                     return katexSpecificMacroReplacements[node.content](node);
                 }
                 if (match.environment(node, "bmatrix")) {

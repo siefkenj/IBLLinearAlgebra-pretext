@@ -186,7 +186,7 @@ describe("convert-to-pretext", () => {
             "\\begin{emphbox}[Takeaway]\nA vector is not the same as a line segment.\n\\end{emphbox}"
         );
         expect(pretext).toEqual(
-            "<remark><title>Takeaway</title><p>A vector is not the same as a line segment.</p></remark>"
+            "<remark><p>A vector is not the same as a line segment.</p></remark>"
         );
     });
     it("replaces inline math", () => {
