@@ -36,6 +36,11 @@ export const environmentInfo: Ast.EnvInfoRecord = {
             inMathMode: true,
         },
     },
+    "align*": {
+        renderInfo: {
+            inMathMode: true,
+        },
+    },
     "alignat*": {
         signature: "m",
     },
