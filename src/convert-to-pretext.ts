@@ -39,20 +39,21 @@ async function testConvertFile() {
         // path.join(CWD, "../book/modules/module1.tex"),
         // path.join(CWD, "../src/textbook.tex"),
         // path.join(CWD, "../book/modules/module3.tex"),
-        path.join(CWD, "../book/linearalgebra.tex"),
+        // path.join(CWD, "../book/linearalgebra.tex"),
+        path.join(CWD, "../sample-files/small-tex.tex"),
 
         "utf-8"
     );
     // const converted = convertTextbook(source);
     const converted = convertTextbook(source);
 
-    // writeFile("sample-files/converted.xml", converted, (err) => {
-    //     if (err) throw err;
-    // });
-
-    writeFile("src/sample.xml", converted, (err) => {
+    writeFile("sample-files/converted.xml", converted, (err) => {
         if (err) throw err;
     });
+
+    // writeFile("src/sample.xml", converted, (err) => {
+    //     if (err) throw err;
+    // });
 
     // process.stdout.write(
     //     chalk.green("Converted") +

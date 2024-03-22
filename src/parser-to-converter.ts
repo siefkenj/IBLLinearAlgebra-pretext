@@ -1,6 +1,6 @@
 import rehypeStringify from "rehype-stringify";
 import { unifiedLatexToHast } from "@unified-latex/unified-latex-to-hast";
-import { unifiedLatexProcessMacrosAndEnvironmentsWithMathReparse } from "@unified-latex/unified-latex-util-parse";
+import { unifiedLatexProcessAtLetterAndExplMacros, unifiedLatexProcessMacrosAndEnvironmentsWithMathReparse } from "@unified-latex/unified-latex-util-parse";
 import { unifiedLatexTrimEnvironmentContents } from "@unified-latex/unified-latex-util-trim";
 import { replaceMath } from "./plugin-replace-math";
 
@@ -51,6 +51,9 @@ export function parserToConverter(
     );
     return (
         processor
+            .use(unifiedLatexProcessAtLetterAndExplMacros, {
+                atLetter:true,
+            })
             .use(unifiedLatexProcessMacrosAndEnvironmentsWithMathReparse, {
                 macros: allMacroInfo,
                 environments: allEnvInfo,

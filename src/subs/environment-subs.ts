@@ -897,11 +897,7 @@ export const environmentReplacements = {
             tag: "image",
             content: htmlLike({
                 tag: "latex-image",
-                content: s(
-                    "\\begin{tikzpicture}" +
-                        toString(node.content) +
-                        "\\end{tikzpicture}"
-                ),
+                content: s(toString(node)),
             }),
             attributes: imageAttributes,
         });

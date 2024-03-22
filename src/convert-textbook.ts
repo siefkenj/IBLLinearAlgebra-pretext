@@ -45,7 +45,7 @@ export function convertTextbook(
             .use(pluginParseBookSource, {
                 bookSource: source,
                 modulesSource: moduleFiles,
-                //               onlyProcess: ["appendix4."],
+                              onlyProcess: ["appendix3."],
             })
             .use(pluginMakeBookIntroduction, { modulesSource: moduleFiles })
             .use(pluginMakeBookIndex),
