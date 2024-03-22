@@ -9,7 +9,7 @@ import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
-import { SP, s } from "@unified-latex/unified-latex-builder";
+import { SP, env, s } from "@unified-latex/unified-latex-builder";
 import { Node } from "@unified-latex/unified-latex-types";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
@@ -20,7 +20,7 @@ import { onTestFailed } from "vitest";
 
 export const environmentInfo: Ast.EnvInfoRecord = {
     emphbox: {
-        signature: "o m",
+        signature: "o",
     },
     definition: {
         signature: "o",
@@ -32,6 +32,11 @@ export const environmentInfo: Ast.EnvInfoRecord = {
         signature: "m",
     },
     equation: {
+        renderInfo: {
+            inMathMode: true,
+        },
+    },
+    "align*": {
         renderInfo: {
             inMathMode: true,
         },
@@ -113,39 +118,18 @@ export const environmentReplacements = {
     },
     emphbox: (node) => {
         const args: (Node[] | null)[] = getArgsContent(node);
+        let isTakeaway = toString(args[0] || []) === "Takeaway";
         let remarkContents: Ast.Node[] = [];
-
-        // check if there is the optional argument for title and wrap in title tags
-        if (args[0] !== null) {
-            remarkContents.push(
-                htmlLike({
-                    tag: "title",
-                    content: args[0],
-                })
-            );
-        }
-
-        // args[1] has the first word of the text
-        let text: Node[] = [];
-        if (args[1] != null) {
-            text = text.concat(args[1]);
-        }
-
-        // add white space between parts
-        text.push(SP);
-
-        // node.content has the rest of the text
-        text = text.concat(node.content);
 
         remarkContents.push(
             htmlLike({
                 tag: "p",
-                content: text,
+                content: node.content,
             })
         );
 
         return htmlLike({
-            tag: "remark",
+            tag: isTakeaway ? "remark" : "insight",
             content: remarkContents,
         });
     },
@@ -817,8 +801,19 @@ export const environmentReplacements = {
             attributes: tabularAttributes,
         });
     },
-    module: (node) => {
-        const attributes: { [k: string]: string } = {};
+    module: (node, info) => {
+        // Generate a default label for the appendix
+        let index =
+            info.containingArray?.findIndex((module) => {
+                if (!match.anyEnvironment(module)) {
+                    return false;
+                }
+                return module === node;
+            }) ?? "UNKNOWN_INDEX";
+        const attributes: { [k: string]: string } = {
+            // Make sure we have a nice label for the HTML output
+            label: `module_${index}`,
+        };
 
         if (node._renderInfo?.id !== undefined) {
             attributes["xml:id"] = node._renderInfo.id as string;
@@ -845,45 +840,67 @@ export const environmentReplacements = {
             attributes,
         });
     },
-    appendix: (node) => {
-        const attributes: { [k: string]: string } = {};
+    appendix: (node, info) => {
+        // Generate a default label for the appendix
+        let index =
+            info.containingArray?.findIndex((appendix) => {
+                if (!match.anyEnvironment(appendix)) {
+                    return false;
+                }
+                return appendix === node;
+            }) ?? 0;
+        const attributes: { [k: string]: string } = {
+            // There are 16 modules before the appendices
+            // so if we want to start as `APPENDIX_1`, we need to adjust
+            label: `appendix_${index - 16}`,
+        };
 
         if (node._renderInfo?.id !== undefined) {
             attributes["xml:id"] = node._renderInfo.id as string;
         }
-
-        let introduction = {};
-        const split = splitOnMacro(node.content, ["html-tag:section", "Title"]);
-        let introductionContent = split.segments[1];
-
-        const introductionSplit = splitOnCondition(
-            introductionContent,
-            isHtmlLike
-        );
-        const formattedSegments = introductionSplit.segments.flatMap((node) => {
-            return [wrapPars(node)];
-        });
-
-        if (introductionContent.length > 0) {
-            introduction = htmlLike({
-                tag: "introduction",
-                content: unsplitOnMacro({
-                    segments: formattedSegments,
-                    macros: introductionSplit.separators,
-                }),
-            });
-
-            split.segments[1] = [introduction as Ast.Node];
-        }
-
         return htmlLike({
             tag: "appendix",
-            content: unsplitOnMacro({
-                segments: split.segments,
-                macros: split.macros,
-            }),
+            content: node.content,
             attributes,
         });
+        // const attributes: { [k: string]: string } = {};
+
+        // if (node._renderInfo?.id !== undefined) {
+        //     attributes["xml:id"] = node._renderInfo.id as string;
+        // }
+
+        // let introduction = {};
+        // const split = splitOnMacro(node.content, ["html-tag:section", "Title"]);
+        // let introductionContent = split.segments[1];
+
+        // const introductionSplit = splitOnCondition(
+        //     introductionContent,
+        //     isHtmlLike
+        // );
+        // const formattedSegments = introductionSplit.segments.flatMap((node) => {
+        //     return [wrapPars(node)];
+        // });
+
+        // if (introductionContent.length > 0) {
+        //     introduction = htmlLike({
+        //         tag: "introduction",
+        //         content: unsplitOnMacro({
+        //             segments: formattedSegments,
+        //             macros: introductionSplit.separators,
+        //         }),
+        //     });
+
+        //     split.segments[1] = [introduction as Ast.Node];
+        // }
+
+        // return htmlLike({
+        //     tag: "appendix",
+        //     content: unsplitOnMacro({
+        //         segments: split.segments,
+        //         macros: split.macros,
+        //     }),
+        //     attributes,
+        // });
     },
     tikzpicture: (node) => {
         const imageAttributes: { [k: string]: string } = {};
@@ -991,6 +1008,22 @@ export const environmentReplacements = {
         // If there is a first argument, it is the title.
         const title = getArgsContent(node)[0];
         const content = [...node.content];
+        const firstSubsectionIdx = node.content.findIndex((n) =>
+            match.macro(n, "html-tag:subsection")
+        );
+        if (firstSubsectionIdx != -1) {
+            let introContent: Ast.Node[] = [];
+            for (let i = 0; i < firstSubsectionIdx; i++) {
+                introContent.push(node.content[i]);
+            }
+            content.splice(0, firstSubsectionIdx);
+            content.unshift(
+                htmlLike({
+                    tag: "introduction",
+                    content: introContent,
+                })
+            );
+        }
         if (title) {
             content.unshift(
                 htmlLike({
@@ -1005,8 +1038,8 @@ export const environmentReplacements = {
         });
     },
     subsection: (node) => {
-        // If there is a first argument, it is the title.
-        const title = getArgsContent(node)[0];
+        // If there is a fourth argument, it is the title.
+        const title = getArgsContent(node)[3];
         const content = [...node.content];
         if (title) {
             content.unshift(

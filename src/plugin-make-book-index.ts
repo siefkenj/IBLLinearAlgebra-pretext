@@ -15,6 +15,7 @@ export const pluginMakeBookIndex: Plugin<void[], Ast.Root, Ast.Root> =
                         tag: "index",
                         content: htmlLike({ tag: "index-list" }),
                     }),
+                    attributes: { label: "backmatter" },
                 })
             );
         };

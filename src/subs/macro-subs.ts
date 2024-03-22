@@ -51,6 +51,9 @@ export const macroInfo: Ast.MacroInfoRecord = {
     sortitem: {
         signature: "o m",
     },
+    displaybreak: {
+        signature: "o",
+    },
 };
 
 export const macroReplacements: Record<
@@ -246,7 +249,7 @@ export const macroReplacements: Record<
         const args = getArgsContent(node);
         return htmlLike({
             tag: "title",
-            content: args[3] || [],
+            content: args[4] || [],
         });
     },
     subsection: (node) => {
