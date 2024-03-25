@@ -141,20 +141,26 @@ export const environmentReplacements = {
             } else {
                 const rowRoot = { type: "root", content: row };
 
-                const content = rowRoot.content
-                    .filter((node) => isHtmlLike(node))
-                    .concat(rowRoot.content.filter((node) => !isHtmlLike(node)))
-                    .flatMap((node) => {
-                        if (isHtmlLike(node)) {
-                            return node;
-                        }
+                const content = splitOnCondition(
+                    rowRoot.content
+                        .filter((node) => isHtmlLike(node))
+                        .concat(
+                            rowRoot.content.filter((node) => !isHtmlLike(node))
+                        ),
+                    isHtmlLike
+                );
 
-                        return s(toString(node));
-                    });
+                const formattedSegments: Ast.Node[][] = [];
 
+                for (let segment of content.segments) {
+                    formattedSegments.push([s(toString(segment))]);
+                }
                 return htmlLike({
                     tag: "mrow",
-                    content,
+                    content: unsplitOnMacro({
+                        segments: formattedSegments,
+                        macros: content.separators,
+                    }),
                 });
             }
         });
