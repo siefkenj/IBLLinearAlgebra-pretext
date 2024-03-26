@@ -24,6 +24,12 @@ export const replaceIgnoredElements: Plugin<[], Ast.Root, Ast.Root> =
                     match.macro(node, "displaybreak")
                 ) {
                     return null;
+                } else if (match.macro(node, "color")) {
+                    for (let parent of info.parents) {
+                        if (match.math(parent)) {
+                            return null;
+                        }
+                    }
                 } else if (match.environment(node, "center")) {
                     if (match.group(node.content[0])) {
                         return null;
