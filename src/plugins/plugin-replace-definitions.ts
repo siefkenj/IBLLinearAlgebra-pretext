@@ -15,7 +15,6 @@ import { match } from "@unified-latex/unified-latex-util-match";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
-
 interface Definition {
     title: Ast.Node[];
     definition: Ast.Node[];
