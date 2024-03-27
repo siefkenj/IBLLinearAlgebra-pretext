@@ -1,5 +1,4 @@
-import { readFile } from "node:fs/promises";
-import path, { dirname } from "node:path";
+import { dirname } from "node:path";
 
 import { unified, Plugin } from "unified";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
@@ -16,11 +15,6 @@ import { match } from "@unified-latex/unified-latex-util-match";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
-// Read the LaTeX file that contains definitions.
-const definitionsFile = await readFile(
-    path.join(CWD, "../book/common/definitions.tex"),
-    "utf-8"
-);
 
 interface Definition {
     title: Ast.Node[];
@@ -29,7 +23,7 @@ interface Definition {
 }
 
 /**
- * This plugin visits every node in an AST tree and replaces each '\SavedDefinitionRender{}' macro with the corresponding defintion.
+ * This plugin visits every node in an AST tree and replaces each '\SavedDefinitionRender{}' macro with the corresponding definition.
  */
 export const replaceDefinitions: Plugin<string[], Ast.Root, Ast.Root> =
     function replaceDefinitions(file) {
@@ -54,7 +48,7 @@ export const replaceDefinitions: Plugin<string[], Ast.Root, Ast.Root> =
                 },
             })
             .use(unifiedLatexAstComplier)
-            .processSync(file || definitionsFile).result as Ast.Root;
+            .processSync(file).result as Ast.Root;
 
         // Define the definitions map.
         let definitions = new Map<string, Definition>();

@@ -1,10 +1,14 @@
+/**
+ * This file provides a basic convert function that can be used for unit tests
+ */
+
 import { unified } from "unified";
 import chalk from "chalk";
 import { readFile } from "node:fs/promises";
 import path, { dirname } from "node:path";
 import { writeFile } from "fs";
 import { unifiedLatexFromStringMinimal } from "@unified-latex/unified-latex-util-parse";
-import { parserToConverter } from "./parser-to-converter";
+import { parserToConverter } from "../plugins/parser-to-converter";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 
@@ -87,7 +91,7 @@ if (command === "-f") {
     testConvertFile();
 }
 
-if (command === "-h" || command === "--help" || !hasExecuted) {
+if (command === "-h" || command === "--help") {
     printHelp();
 }
 
