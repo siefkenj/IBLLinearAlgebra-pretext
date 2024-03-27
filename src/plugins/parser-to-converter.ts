@@ -14,11 +14,11 @@ import { replaceIndicesInMathMode } from "./plugin-replace-indices-in-math-mode"
 import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
 import { removeIgnoredTags } from "./plugin-remove-ignored-tags";
 import { replaceSetStar } from "./plugin-replace-set-star";
-import { macroInfo, macroReplacements } from "./subs/macro-subs";
+import { macroInfo, macroReplacements } from "../subs/macro-subs";
 import {
     environmentInfo,
     environmentReplacements,
-} from "./subs/environment-subs";
+} from "../subs/environment-subs";
 import {
     EnvInfoRecord,
     MacroInfoRecord,
