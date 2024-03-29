@@ -233,9 +233,16 @@ describe("convert-to-pretext", () => {
             "<p><ul><li><p>item 1 content.</p></li><li><p>item 2 content.</p></li></ul></p>"
         );
     });
-    it("replaces enumerate environment", () => {
+    it("replaces enumerate and enumerate* environment", () => {
         pretext = convert(
             "\\begin{enumerate}\\item item 1 content.\\item item 2 content.\\end{enumerate}"
+        );
+        expect(pretext).toEqual(
+            "<p><ol><li><p>item 1 content.</p></li><li><p>item 2 content.</p></li></ol></p>"
+        );
+
+        pretext = convert(
+            "\\begin{enumerate*}\\item item 1 content.\\item item 2 content.\\end{enumerate*}"
         );
         expect(pretext).toEqual(
             "<p><ol><li><p>item 1 content.</p></li><li><p>item 2 content.</p></li></ol></p>"
