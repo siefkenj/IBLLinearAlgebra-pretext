@@ -9,7 +9,7 @@ import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
-import { SP, env, s } from "@unified-latex/unified-latex-builder";
+import { SP, arg, env, s } from "@unified-latex/unified-latex-builder";
 import { Node } from "@unified-latex/unified-latex-types";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
@@ -703,7 +703,7 @@ export const environmentReplacements = {
         });
     },
     tabular: (node) => {
-        const args = toString(
+        let args = toString(
             ([] as Ast.Node[]).concat(...(getArgsContent(node) as Ast.Node[][]))
         ).split(/(?=[| ])|(?<=[| ])/g);
         if (args[0] != "|") {
@@ -711,6 +711,21 @@ export const environmentReplacements = {
         }
         if (args[args.length - 1] != "|") {
             args.push(" ");
+        }
+        for (let i = 0; i < args.length; i++) {
+            if (args[i].length > 1 && !args[i].includes("p")) {
+                let formattedString = args[i][0];
+                for (let char of args[i].substring(1, args[i].length)) {
+                    formattedString = `${formattedString} ${char}`;
+                }
+                args = [
+                    ...args.slice(0, i),
+                    ...formattedString,
+                    ...args.slice(i + 1, args.length),
+                ];
+
+                i = 0;
+            }
         }
         const borderArgs: string[] = [];
         const alignArgs: string[] = [];
@@ -721,7 +736,6 @@ export const environmentReplacements = {
                 alignArgs.push(args[i]);
             }
         }
-
         const tabularAttributes: { [k: string]: string } = {};
         const rows = splitOnMacro(node.content, "\\").segments;
 
