@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { convert } from "../convert-to-pretext";
+import { convert } from "./sample-converter";
 
 describe("bmatrix-expand", () => {
     it("bmatrix environment expands to array environment if optional argument provided", () => {

@@ -1,4 +1,4 @@
-/**x
+/**
  * Convert IBLLinearAlgebra textbook to PreTeXt
  */
 import { unified } from "unified";
@@ -10,10 +10,10 @@ import { visit } from "@unified-latex/unified-latex-util-visit";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { Root } from "@unified-latex/unified-latex-types";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
-import { pluginParseBookSource } from "./plugin-parse-book-source";
-import { parserToConverter } from "./parser-to-converter";
-import { pluginMakeBookIntroduction } from "./plugin-make-book-introduction";
-import { pluginMakeBookIndex } from "./plugin-make-book-index";
+import { pluginParseBookSource } from "./plugins/plugin-parse-book-source";
+import { parserToConverter } from "./plugins/parser-to-converter";
+import { pluginMakeBookIntroduction } from "./plugins/plugin-make-book-introduction";
+import { pluginMakeBookIndex } from "./plugins/plugin-make-book-index";
 
 //const origLog = console.log;
 //console.log = (...args) => {
@@ -209,5 +209,3 @@ if (command === "-i") {
 if (command === "-h" || command === "--help" || !hasExecuted) {
     printHelp();
 }
-
-// npx vite-node src/convert-to-pretext.ts -f

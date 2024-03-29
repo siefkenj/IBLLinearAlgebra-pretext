@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path, { dirname } from "node:path";
 
 import { describe, it, expect } from "vitest";
-import { convert } from "../convert-to-pretext";
+import { convert } from "./sample-converter";
 
 const CWD = dirname(new URL(import.meta.url).pathname);
 

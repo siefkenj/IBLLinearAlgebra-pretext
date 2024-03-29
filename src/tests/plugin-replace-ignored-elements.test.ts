@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { convert } from "../convert-to-pretext";
+import { convert } from "./sample-converter";
 
 describe("plugin-replace-ignored-elements", () => {
     it("wraps math that contains NiceMatrix in tikz pictures", () => {
