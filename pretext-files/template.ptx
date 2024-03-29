@@ -53,6 +53,7 @@
             \newcommand{\Abs}[1]{\left\lvert#1\right\rvert}
             \newcommand{\abs}[1]{\left\lvert#1\right\rvert}
             \newcommand{\bigmathstrut}{}
+            \newcommand{\footnotesize}{\small}
             \renewcommand{\allowbreak}{}
             % This DeclarePairedDelimiterX command doesn't work in MathJax
             %\DeclarePairedDelimiterX\CustomSet[1]\{\}{%

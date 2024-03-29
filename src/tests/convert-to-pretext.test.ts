@@ -180,6 +180,14 @@ describe("convert-to-pretext", () => {
         expect(pretext).toEqual(
             '<tabular><row bottom="medium"><cell>r1c1 </cell><cell> r1c2 </cell></row><row><cell>  r2c1 </cell><cell> r2c2</cell></row></tabular>'
         );
+
+        //argument with no space in between
+        pretext = convert(
+            "\\begin{tabular}{crl}  r1c1 & r1c2 & r1c3 \\\\ r2c1 & r2c2 & r1c3 \\\\ r3c1 & r3c2 & r3c3  \\end{tabular}"
+        );
+        expect(pretext).toEqual(
+            '<tabular><row><cell halign="center">r1c1 </cell><cell halign="right"> r1c2 </cell><cell halign="left"> r1c3 </cell></row><row><cell halign="center"> r2c1 </cell><cell halign="right"> r2c2 </cell><cell halign="left"> r1c3 </cell></row><row><cell halign="center"> r3c1 </cell><cell halign="right"> r3c2 </cell><cell halign="left"> r3c3</cell></row></tabular>'
+        );
     });
     it("replaces the emph box environment", () => {
         pretext = convert(
