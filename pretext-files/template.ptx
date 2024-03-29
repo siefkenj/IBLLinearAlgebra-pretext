@@ -55,6 +55,7 @@
             \newcommand{\bigmathstrut}{}
             \newcommand{\footnotesize}{\small}
             \renewcommand{\allowbreak}{}
+            \renewcommand{\protect}{}
             % This DeclarePairedDelimiterX command doesn't work in MathJax
             %\DeclarePairedDelimiterX\CustomSet[1]\{\}{%
             %\renewcommand\given{\SetSymbol[\delimsize]}

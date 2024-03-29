@@ -438,84 +438,18 @@ export const environmentReplacements = {
         });
     },
     "enumerate*": (node) => {
-        const items = splitOnMacro(node.content, "item").macros;
+        const split = splitOnMacro(node.content, "item");
 
-        if (getArgsContent(items[0])[1] != null) {
-            const content = items.flatMap((item) => {
-                const fourthArg = getArgsContent(item)[3] as Ast.Node[];
-                const args: Ast.Node[] = fourthArg.flatMap((arg) => {
-                    if (arg == null) {
-                        return [];
-                    }
-                    return [arg];
-                });
-                const segmentsSplit = splitOnCondition(args, (node) => {
-                    return isHtmlLike(node);
-                });
-                const formattedSegments = segmentsSplit.segments.flatMap(
-                    (segment) => {
-                        return [wrapPars(segment)];
-                    }
-                );
-                const liContent = unsplitOnMacro({
-                    segments: formattedSegments,
-                    macros: segmentsSplit.separators,
-                });
-                const title = htmlLike({
-                    tag: "title",
-                    content: getArgsContent(item)[1] || [],
-                });
-                liContent.unshift(title);
-                return htmlLike({
+        let content: Ast.Node[] = [];
+
+        for (let i = 0; i < split.macros.length; i++) {
+            content.push(
+                htmlLike({
                     tag: "li",
-                    content: liContent,
-                });
-            });
-
-            return htmlLike({
-                tag: "p",
-                content: htmlLike({
-                    tag: "dl",
-                    content,
-                }),
-            });
-        }
-
-        const content = items.flatMap((item) => {
-            const args: Ast.Node[][] = getArgsContent(item).flatMap((arg) => {
-                if (arg == null) {
-                    return [];
-                }
-                return [arg];
-            });
-            const attributes: { [k: string]: string } = {};
-            if (args[0] == undefined) {
-                return htmlLike({
-                    tag: "li",
-                });
-            }
-            const segmentsSplit = splitOnCondition(args[0], (node) => {
-                return isHtmlLike(node);
-            });
-            const formattedSegments = segmentsSplit.segments.flatMap(
-                (segment) => {
-                    return [wrapPars(segment)];
-                }
+                    content: wrapPars(split.segments[i + 1]),
+                })
             );
-
-            if (item._renderInfo?.id != undefined) {
-                attributes["xml:id"] = item._renderInfo?.id as string;
-            }
-
-            return htmlLike({
-                tag: "li",
-                content: unsplitOnMacro({
-                    segments: formattedSegments,
-                    macros: segmentsSplit.separators,
-                }),
-                attributes,
-            });
-        });
+        }
 
         return htmlLike({
             tag: "p",
