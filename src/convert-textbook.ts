@@ -45,7 +45,7 @@ export function convertTextbook(
             .use(pluginParseBookSource, {
                 bookSource: source,
                 modulesSource: moduleFiles,
-                              onlyProcess: ["module5."],
+                // onlyProcess: ["module5."],
             })
             .use(pluginMakeBookIntroduction, { modulesSource: moduleFiles })
             .use(pluginMakeBookIndex),

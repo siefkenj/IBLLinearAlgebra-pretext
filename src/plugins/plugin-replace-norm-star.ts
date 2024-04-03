@@ -11,7 +11,11 @@ export const replaceNormStar: Plugin<[], Ast.Root, Ast.Root> =
     function replaceNormStar() {
         return function (tree: Ast.Root) {
             replaceNode(tree, (node, info) => {
-                if (!(match.macro(node, "norm") || match.string(node, "*")) || !info.context.inMathMode) {
+                // only continue if node is norm or * in math mode
+                if (
+                    !(match.macro(node, "norm") || match.string(node, "*")) ||
+                    !info.context.inMathMode
+                ) {
                     return;
                 }
                 // check if the node after is a * then replace norm with Norm
@@ -25,7 +29,7 @@ export const replaceNormStar: Plugin<[], Ast.Root, Ast.Root> =
                     return m("Norm");
                 }
 
-                // // check if the node before is a Norm macro then remove the star
+                // check if the node before is a Norm macro then remove the star
                 if (
                     info.index !== undefined &&
                     info.index > 0 &&
