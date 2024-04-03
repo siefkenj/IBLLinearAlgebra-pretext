@@ -14,6 +14,7 @@ import { replaceIndicesInMathMode } from "./plugin-replace-indices-in-math-mode"
 import { stringifyTikzContent } from "./plugin-stringify-tikz-content";
 import { removeIgnoredTags } from "./plugin-remove-ignored-tags";
 import { replaceSetStar } from "./plugin-replace-set-star";
+import { replaceNormStar } from "./plugin-replace-norm-star";
 import { macroInfo, macroReplacements } from "../subs/macro-subs";
 import {
     environmentInfo,
@@ -68,6 +69,7 @@ export function parserToConverter(
             .use(stringifyTikzContent)
             .use(pluginExpandSpecialMacros)
             .use(replaceSetStar)
+            .use(replaceNormStar)
             .use(replaceIgnoredElements)
             .use(replaceIndicesInMathMode)
             //

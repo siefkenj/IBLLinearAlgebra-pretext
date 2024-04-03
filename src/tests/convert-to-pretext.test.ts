@@ -370,4 +370,13 @@ describe("convert-to-pretext", () => {
             "<m>1+2\\Set{1, 2, 3}+ \\Set{4, 5, 6}- \\Set{99, 25, 6}\\Set{1, 2}</m><p><me>\\Span\\Set{1}.</me></p>"
         );
     });
+
+    it("replaces \\norm* with \\Norm", () => {
+        pretext = convert(
+            "replace this$\\norm*{123}$ but not this$\\Norm{123}$ or this $\\norm{123}$."
+        );
+        expect(pretext).toEqual(
+            "replace this<m>\\Norm{123}</m> but not this<m>\\Norm{123}</m> or this <m>\\norm{123}</m>."
+        );
+    });
 });
