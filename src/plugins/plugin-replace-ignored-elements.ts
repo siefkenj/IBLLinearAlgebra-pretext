@@ -22,7 +22,9 @@ export const replaceIgnoredElements: Plugin<[], Ast.Root, Ast.Root> =
                     match.macro(node, "newpage") ||
                     match.macro(node, "newcommand") ||
                     match.macro(node, "newenvironment") ||
-                    match.macro(node, "displaybreak")
+                    match.macro(node, "displaybreak") ||
+                    match.macro(node, "protect") ||
+                    match.macro(node, "allowbreak")
                 ) {
                     return null;
                 } else if (match.macro(node, "color")) {
