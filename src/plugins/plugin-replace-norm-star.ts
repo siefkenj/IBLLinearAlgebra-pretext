@@ -25,7 +25,6 @@ export const replaceNormStar: Plugin<[], Ast.Root, Ast.Root> =
                     info.index < info.containingArray.length &&
                     match.string(info.containingArray[info.index + 1], "*")
                 ) {
-                    console.log("replacing norm");
                     return m("Norm");
                 }
 
@@ -36,7 +35,6 @@ export const replaceNormStar: Plugin<[], Ast.Root, Ast.Root> =
                     info.containingArray !== undefined &&
                     match.macro(info.containingArray[info.index - 1], "Norm")
                 ) {
-                    console.log("replacing star");
                     return null;
                 }
             });
