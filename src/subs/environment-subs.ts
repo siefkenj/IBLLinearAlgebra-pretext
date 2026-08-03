@@ -1,4 +1,5 @@
 import {
+    extractFromHtmlLike,
     htmlLike,
     isHtmlLike,
 } from "@unified-latex/unified-latex-util-html-like";
@@ -17,6 +18,14 @@ import { toString } from "@unified-latex/unified-latex-util-to-string";
 import { pgfkeysArgToObject } from "@unified-latex/unified-latex-util-pgfkeys";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { onTestFailed } from "vitest";
+
+/**
+ * Whether the node is an <idx> element (an index entry produced from an
+ * `\index{...}` macro).
+ */
+function isIndexElement(node: Ast.Node): boolean {
+    return isHtmlLike(node) && extractFromHtmlLike(node).tag === "idx";
+}
 
 export const environmentInfo: Ast.EnvInfoRecord = {
     emphbox: {
@@ -135,11 +144,20 @@ export const environmentReplacements = {
     },
     "align*": (node) => {
         const rows = splitOnMacro(node.content, "\\").segments;
+        // `\index{...}` written inside the math has already become an <idx> by
+        // way of `replaceIndicesInMathMode`. PreTeXt cannot number an <idx>
+        // that sits inside an <mrow> of an (unnumbered) <md>, so lift them out
+        // into the surrounding <p>.
+        const hoistedIndices: Ast.Node[] = [];
         const formattedRows = rows.flatMap((row) => {
             if (row == null) {
                 return [];
             } else {
-                const rowRoot = { type: "root", content: row };
+                hoistedIndices.push(...row.filter(isIndexElement));
+                const rowRoot = {
+                    type: "root",
+                    content: row.filter((node) => !isIndexElement(node)),
+                };
 
                 const content = splitOnCondition(
                     rowRoot.content
@@ -166,10 +184,13 @@ export const environmentReplacements = {
         });
         return htmlLike({
             tag: "p",
-            content: htmlLike({
-                tag: "md",
-                content: formattedRows,
-            }),
+            content: [
+                ...hoistedIndices,
+                htmlLike({
+                    tag: "md",
+                    content: formattedRows,
+                }),
+            ],
         });
     },
     "alignat*": (node) => {

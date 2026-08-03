@@ -10,4 +10,13 @@ describe("plugin-replace-ignored-elements", () => {
 \\end{bNiceMatrix}$};
 \\end{tikzpicture}</latex-image></image></figure>`);
     });
+
+    it("keeps '\\#' escaped inside math but not in text", () => {
+        // Math is passed through to MathJax as LaTeX, and PreTeXt rejects a
+        // bare "#" inside \text{}.
+        expect(convert(String.raw`$l(\text{\# nickels})=25$`)).toEqual(
+            String.raw`<m>l(\text{\# nickels})=25</m>`
+        );
+        expect(convert(String.raw`a \# b`)).toEqual(`a # b`);
+    });
 });
