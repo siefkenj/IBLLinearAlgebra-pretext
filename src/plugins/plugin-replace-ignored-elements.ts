@@ -34,6 +34,14 @@ export const replaceIgnoredElements: Plugin<[], Ast.Root, Ast.Root> =
                         }
                     }
                 } else if (match.macro(node, "#")) {
+                    // Math is handed to MathJax as LaTeX, so the escape has to
+                    // survive: PreTeXt rejects a bare "#" inside \text{}.
+                    // Outside of math a literal "#" is what we want.
+                    for (let parent of info.parents) {
+                        if (match.math(parent)) {
+                            return;
+                        }
+                    }
                     return s("#");
                 } else if (match.environment(node, "center")) {
                     if (match.group(node.content[0])) {
