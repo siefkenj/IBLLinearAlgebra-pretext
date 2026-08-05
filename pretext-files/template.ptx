@@ -103,6 +103,7 @@
             \colorlet{defframecolor}{green!50!black}
             \colorlet{thmcolor}{red!70!black}
             \colorlet{thmframecolor}{red!90!black}
+{{LATEX_IMAGE_PREAMBLE}}
         </latex-image-preamble>
     </docinfo>
 

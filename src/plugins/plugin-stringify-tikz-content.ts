@@ -14,7 +14,14 @@ export const stringifyTikzContent: Plugin<[], Ast.Root, Ast.Root> =
         return function (ast: Ast.Root) {
             replaceNode(ast, (node) => {
                 if (match.environment(node, "tikzpicture")) {
-                    return env("tikzpicture", toString(node.content));
+                    // The environment's own arguments have to be carried
+                    // across: `\begin{tikzpicture}[x=1pt,y=-13pt]` draws a
+                    // different picture from `\begin{tikzpicture}`.
+                    return env(
+                        "tikzpicture",
+                        toString(node.content),
+                        node.args
+                    );
                 }
             });
         };

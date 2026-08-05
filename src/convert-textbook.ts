@@ -24,6 +24,52 @@ import { pluginMakeBookIndex } from "./plugins/plugin-make-book-index";
 const CWD = path.join(dirname(new URL(import.meta.url).pathname), "..");
 
 /**
+ * A module may carry a block of tikz definitions that its figures are drawn
+ * with. Pretext compiles every `latex-image` on its own, so those definitions
+ * have to travel to the `latex-image-preamble` in the template rather than
+ * stay in the body, where they would only be rendered as stray text.
+ *
+ * The block is delimited in the LaTeX source by
+ *
+ *     %%% BEGIN LATEX-IMAGE PREAMBLE
+ *     ...
+ *     %%% END LATEX-IMAGE PREAMBLE
+ */
+const LATEX_IMAGE_PREAMBLE_BLOCK =
+    /^[ \t]*%%%[ \t]*BEGIN LATEX-IMAGE PREAMBLE[ \t]*$([\s\S]*?)^[ \t]*%%%[ \t]*END LATEX-IMAGE PREAMBLE[ \t]*$/m;
+
+/**
+ * Cut any latex-image preamble block out of `source`, returning the remaining
+ * source along with the blocks that were removed.
+ */
+export function extractLatexImagePreamble(source: string): {
+    source: string;
+    preamble: string;
+} {
+    let preamble = "";
+    let remaining = source;
+    let matched = remaining.match(LATEX_IMAGE_PREAMBLE_BLOCK);
+    while (matched) {
+        preamble += matched[1];
+        remaining = remaining.replace(LATEX_IMAGE_PREAMBLE_BLOCK, "");
+        matched = remaining.match(LATEX_IMAGE_PREAMBLE_BLOCK);
+    }
+    return { source: remaining, preamble };
+}
+
+/**
+ * The preamble is dropped into an XML document, so the characters XML reserves
+ * have to be escaped. `->` in a tikz option list makes this more than a
+ * theoretical concern.
+ */
+function escapeXml(str: string): string {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+/**
  * Convert the book to PreTeXt.
  *
  *  - `source` is the contents of `linearalgebra.tex`
@@ -81,6 +127,7 @@ async function startConversion(sourceLocation: string) {
 
     // Find all the modules listed in the source file
     const moduleContents: Record<string, string> = {};
+    let latexImagePreamble = "";
     let ast = unified().use(unifiedLatexFromString).parse(sourceFileContents);
     const modulesOnlyAst: Root = { type: "root", content: [] };
     visit(ast, (node) => {
@@ -102,7 +149,17 @@ async function startConversion(sourceLocation: string) {
                     "Found module:",
                     chalk.green(path.relative(CWD, file))
                 );
-                moduleContents[file] = fs.readFileSync(moduleLocation, "utf-8");
+                const extracted = extractLatexImagePreamble(
+                    fs.readFileSync(moduleLocation, "utf-8")
+                );
+                if (extracted.preamble) {
+                    processLog(
+                        "  latex-image preamble from:",
+                        chalk.green(path.relative(CWD, file))
+                    );
+                    latexImagePreamble += extracted.preamble;
+                }
+                moduleContents[file] = extracted.source;
             }
         }
     });
@@ -160,7 +217,12 @@ async function startConversion(sourceLocation: string) {
         );
     }
 
-    const bookContent = templateSource.replace("{{BOOK_CONTENT}}", converted);
+    const bookContent = templateSource
+        .replace("{{BOOK_CONTENT}}", converted)
+        .replace(
+            "{{LATEX_IMAGE_PREAMBLE}}",
+            escapeXml(latexImagePreamble)
+        );
 
     const outputPath = path.join(CWD, "tmp.out.ptx");
     console.log();

@@ -54,6 +54,35 @@ export const macroInfo: Ast.MacroInfoRecord = {
     displaybreak: {
         signature: "o",
     },
+    // Figure macros from `module15-eigenvector-visuals.tex`. Each one expands
+    // to one or more tikzpictures, so the call is handed to pretext verbatim
+    // and compiled against the latex-image preamble lifted out of that file.
+    // The signatures have to match the LaTeX definitions or the arguments are
+    // left behind in the text.
+    EVTransformPair: {
+        signature: "o m m m m",
+    },
+    EVcircle: {
+        signature: "o o m m m m m m",
+    },
+    EVgrid: {
+        signature: "m m m m",
+    },
+    EVFigures: {
+        signature: "o o m m m m m m",
+    },
+};
+
+/**
+ * Figure macros that are passed through to pretext as `latex-image`, with the
+ * width each one is given in the rendered book. The pair figure is six panels
+ * wide and needs the whole measure; the overlays are single squares.
+ */
+const latexImageMacroWidths: Record<string, string> = {
+    EVTransformPair: "100%",
+    EVcircle: "60%",
+    EVgrid: "60%",
+    EVFigures: "60%",
 };
 
 export const macroReplacements: Record<
@@ -272,4 +301,27 @@ export const macroReplacements: Record<
             content: annotation,
         };
     },
+    ...Object.fromEntries(
+        Object.entries(latexImageMacroWidths).map(([name, width]) => [
+            name,
+            (node: Ast.Macro) =>
+                htmlLike({
+                    tag: "figure",
+                    content: [
+                        htmlLike({ tag: "caption" }),
+                        htmlLike({
+                            tag: "image",
+                            content: htmlLike({
+                                tag: "latex-image",
+                                // The call itself, arguments and all. The macro
+                                // is defined in the latex-image preamble, so
+                                // pretext expands it the way lualatex does.
+                                content: s(printRaw(node)),
+                            }),
+                            attributes: { width },
+                        }),
+                    ],
+                }),
+        ])
+    ),
 };
