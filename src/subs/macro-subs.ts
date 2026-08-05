@@ -286,14 +286,16 @@ export const macroReplacements: Record<
             content: args[4] || [],
         });
     },
+    // A `\subsection` in a module body is a run-in heading rather than a
+    // structural division -- use `\subsubsection` for one of those. It is left
+    // unwrapped: everything inside a section is put through
+    // `pluginSplitPars`, which supplies the surrounding `<p>`. Wrapping it
+    // here too would nest one `<p>` inside another, which pretext rejects.
     subsection: (node) => {
         const args = getArgsContent(node);
         return htmlLike({
-            tag: "p",
-            content: htmlLike({
-                tag: "alert",
-                content: args[3] || [],
-            }),
+            tag: "alert",
+            content: args[3] || [],
         });
     },
     beezer: (node) => {
