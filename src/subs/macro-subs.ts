@@ -77,6 +77,11 @@ export const macroInfo: Ast.MacroInfoRecord = {
  * Figure macros that are passed through to pretext as `latex-image`, with the
  * width each one is given in the rendered book. The pair figure is six panels
  * wide and needs the whole measure; the overlays are single squares.
+ *
+ * Only `\EVTransformPair` and `\EVcircle` are called from the book at the
+ * moment. `\EVgrid` and `\EVFigures` are listed so that they render if they are
+ * ever called directly -- today they are only reached from inside the other
+ * two, which pretext expands itself from the latex-image preamble.
  */
 const latexImageMacroWidths: Record<string, string> = {
     EVTransformPair: "100%",

@@ -2,7 +2,7 @@ import { Plugin } from "unified";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { toString } from "@unified-latex/unified-latex-util-to-string";
-import { env } from "@unified-latex/unified-latex-builder";
+import { env, s } from "@unified-latex/unified-latex-builder";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 
 /**
@@ -16,12 +16,18 @@ export const stringifyTikzContent: Plugin<[], Ast.Root, Ast.Root> =
                 if (match.environment(node, "tikzpicture")) {
                     // The environment's own arguments have to be carried
                     // across: `\begin{tikzpicture}[x=1pt,y=-13pt]` draws a
-                    // different picture from `\begin{tikzpicture}`.
-                    return env(
-                        "tikzpicture",
-                        toString(node.content),
-                        node.args
-                    );
+                    // different picture from `\begin{tikzpicture}`. They are
+                    // stringified for the same reason the body is -- an option
+                    // list is tikz source, not something later plugins should
+                    // be rewriting.
+                    const args = node.args?.map((arg) => ({
+                        ...arg,
+                        content:
+                            arg.content.length > 0
+                                ? [s(toString(arg.content))]
+                                : [],
+                    }));
+                    return env("tikzpicture", toString(node.content), args);
                 }
             });
         };

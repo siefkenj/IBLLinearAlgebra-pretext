@@ -35,24 +35,44 @@ const CWD = path.join(dirname(new URL(import.meta.url).pathname), "..");
  *     ...
  *     %%% END LATEX-IMAGE PREAMBLE
  */
-const LATEX_IMAGE_PREAMBLE_BLOCK =
-    /^[ \t]*%%%[ \t]*BEGIN LATEX-IMAGE PREAMBLE[ \t]*$([\s\S]*?)^[ \t]*%%%[ \t]*END LATEX-IMAGE PREAMBLE[ \t]*$/m;
+const LATEX_IMAGE_PREAMBLE_BEGIN =
+    /^[ \t]*%%%[ \t]*BEGIN LATEX-IMAGE PREAMBLE[ \t]*$/m;
+const LATEX_IMAGE_PREAMBLE_END =
+    /^[ \t]*%%%[ \t]*END LATEX-IMAGE PREAMBLE[ \t]*$/m;
+const LATEX_IMAGE_PREAMBLE_BLOCK = new RegExp(
+    `${LATEX_IMAGE_PREAMBLE_BEGIN.source}([\\s\\S]*?)${LATEX_IMAGE_PREAMBLE_END.source}`,
+    "gm"
+);
 
 /**
  * Cut any latex-image preamble block out of `source`, returning the remaining
  * source along with the blocks that were removed.
+ *
+ * An unpaired marker is an error rather than something to skip past: a block
+ * that is not lifted out stays in the body, where its definitions are rendered
+ * as stray text instead of being available to the figures that need them.
  */
 export function extractLatexImagePreamble(source: string): {
     source: string;
     preamble: string;
 } {
     let preamble = "";
-    let remaining = source;
-    let matched = remaining.match(LATEX_IMAGE_PREAMBLE_BLOCK);
-    while (matched) {
-        preamble += matched[1];
-        remaining = remaining.replace(LATEX_IMAGE_PREAMBLE_BLOCK, "");
-        matched = remaining.match(LATEX_IMAGE_PREAMBLE_BLOCK);
+    // The replacement is a function so that `$&`, `$'` and the rest are not
+    // read as references to the match; see `substitute` below.
+    const remaining = source.replace(
+        LATEX_IMAGE_PREAMBLE_BLOCK,
+        (_match, body: string) => {
+            preamble += body;
+            return "";
+        }
+    );
+    if (
+        LATEX_IMAGE_PREAMBLE_BEGIN.test(remaining) ||
+        LATEX_IMAGE_PREAMBLE_END.test(remaining)
+    ) {
+        throw new Error(
+            "Unpaired latex-image preamble marker. Every `%%% BEGIN LATEX-IMAGE PREAMBLE` needs a matching `%%% END LATEX-IMAGE PREAMBLE` after it."
+        );
     }
     return { source: remaining, preamble };
 }
@@ -67,6 +87,31 @@ function escapeXml(str: string): string {
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
+}
+
+/**
+ * Put `value` where `placeholder` is in `template`.
+ *
+ * The substitution is done with a function rather than a replacement string:
+ * `String.prototype.replace` reads `$&`, `$'`, `` $` `` and `$1` in a
+ * replacement string as references to the match, and both the book content and
+ * a latex preamble are full of `$`.
+ *
+ * A missing placeholder is an error when there is something to put there. The
+ * template is edited by hand, and dropping a placeholder from it would
+ * otherwise discard the content silently.
+ */
+function substitute(
+    template: string,
+    placeholder: string,
+    value: string
+): string {
+    if (value !== "" && !template.includes(placeholder)) {
+        throw new Error(
+            `The template has no ${placeholder} placeholder, so there is nowhere to put the content that belongs there.`
+        );
+    }
+    return template.replace(placeholder, () => value);
 }
 
 /**
@@ -217,12 +262,11 @@ async function startConversion(sourceLocation: string) {
         );
     }
 
-    const bookContent = templateSource
-        .replace("{{BOOK_CONTENT}}", converted)
-        .replace(
-            "{{LATEX_IMAGE_PREAMBLE}}",
-            escapeXml(latexImagePreamble)
-        );
+    const bookContent = substitute(
+        substitute(templateSource, "{{BOOK_CONTENT}}", converted),
+        "{{LATEX_IMAGE_PREAMBLE}}",
+        escapeXml(latexImagePreamble)
+    );
 
     const outputPath = path.join(CWD, "tmp.out.ptx");
     console.log();
