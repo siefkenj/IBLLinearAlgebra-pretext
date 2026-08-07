@@ -45,6 +45,39 @@ describe("plugin-stringify-tikz-content", () => {
         expect(image).not.toContain("[");
     });
 
+    it("drops baseline, which has nothing to align to and breaks scaling", () => {
+        // pretext scales each latex-image with `\resizebox{\width}{\height}`.
+        // `baseline=(current bounding box.north)` leaves the picture with zero
+        // height, so that scale factor is a division by zero.
+        const image = latexImage(
+            convert(
+                "\\begin{tikzpicture}[baseline = (current bounding box.north)]\\draw (0,0) -- (1,1);\\end{tikzpicture}"
+            )
+        );
+        expect(image).not.toContain("baseline");
+        expect(image).toContain("\\begin{tikzpicture}");
+    });
+
+    it("keeps the other options when dropping baseline", () => {
+        const image = latexImage(
+            convert(
+                "\\begin{tikzpicture}[scale=2, baseline=(a.north), x=1pt]\\draw (0,0) -- (1,1);\\end{tikzpicture}"
+            )
+        );
+        expect(image).not.toContain("baseline");
+        expect(image).toContain("scale=2");
+        expect(image).toContain("x=1pt");
+    });
+
+    it("does not mistake another key for baseline", () => {
+        const image = latexImage(
+            convert(
+                "\\begin{tikzpicture}[baselineshift=2pt]\\draw (0,0) -- (1,1);\\end{tikzpicture}"
+            )
+        );
+        expect(image).toContain("baselineshift=2pt");
+    });
+
     it("keeps the body verbatim", () => {
         const image = latexImage(
             convert(
